@@ -58,7 +58,9 @@ Playwright UI tests:
 - Create tests under tests/ui and a playwright.config.ts that runs a preview server on port 5545 so tests can run parallel to dev on 5544.
 - Scripts added: preview:test, test:ui, test:ui:headed, test:ui:debug
 
-When adding tests, prefer data-testid attributes for selectors and use test.step to describe test phases.
+When adding tests, prefer data-testid attributes for selectors and use test.step to describe test phases. try to structure tests as best as possible. try to reuse helper instead of code duplication. 
+
+test the changes by using headless test run (npm run test:ui:headless) and analyze the errors of the test run.
 
 Docker dev:
 

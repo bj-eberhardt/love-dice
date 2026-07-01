@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
+    "dev:ui": "vite --host 0.0.0.0 --port 5545 --strictPort",
     "build": "tsc -p tsconfig.app.json && vite build",
     "start": "vite preview --host 0.0.0.0",
     "preview:test": "vite preview --port 5545 --strictPort",
@@ -14,6 +15,7 @@
     "typecheck": "tsc -p tsconfig.app.json",
     "test": "vitest run",
     "test:ui": "playwright test --ui",
+    "test:ui:headless": "playwright test",
     "test:ui:headed": "playwright test --headed",
     "test:ui:debug": "playwright test --debug"
   },

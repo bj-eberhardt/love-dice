@@ -184,6 +184,7 @@ export function App() {
     window.setTimeout(updateScrollHints, 0);
   };
 
+
   const copyMix = (mix: DiceConfiguration) => {
     const copiedMix = configurationSchema.parse({
       ...JSON.parse(JSON.stringify(mix)),
@@ -308,31 +309,33 @@ export function App() {
               return (
                 <span key={mix.id} className={isActiveMix ? "mix-split active" : "mix-split"}>
                   <button
-                    className="mix-main"
-                    onClick={() => openExistingMix(mix)}
-                    onDoubleClick={() => openMixEditor(mix)}
-                    onPointerDown={() => startLongPress(mix)}
-                    onPointerUp={clearLongPress}
-                    onPointerLeave={clearLongPress}
-                    onPointerCancel={clearLongPress}
-                  >
-                    {mix.name}
-                  </button>
+                                      data-testid={`mix-chip-${mix.id}`}
+                                      className="mix-main"
+                                      onClick={() => openExistingMix(mix)}
+                                      onDoubleClick={() => openMixEditor(mix)}
+                                      onPointerDown={() => startLongPress(mix)}
+                                      onPointerUp={clearLongPress}
+                                      onPointerLeave={clearLongPress}
+                                      onPointerCancel={clearLongPress}
+                                    >
+                                      {mix.name}
+                                    </button>
                   {isActiveMix ? (
                     <span className="mix-menu-wrap">
                       <button
-                        className="mix-more"
-                        aria-label={`${mix.name} Aktionen öffnen`}
-                        aria-expanded={openMixMenuId === mix.id}
-                        onClick={() => setOpenMixMenuId((id) => (id === mix.id ? null : mix.id))}
-                      >
-                        <MoreHorizontal size={17} />
-                      </button>
+                                              data-testid={`mix-more-${mix.id}`}
+                                              className="mix-more"
+                                              aria-label={`${mix.name} Aktionen öffnen`}
+                                              aria-expanded={openMixMenuId === mix.id}
+                                              onClick={() => setOpenMixMenuId((id) => (id === mix.id ? null : mix.id))}
+                                            >
+                                              <MoreHorizontal size={17} />
+                                            </button>
                       {openMixMenuId === mix.id ? (
                         <div className="mix-menu" role="menu">
-                          <button role="menuitem" onClick={() => openMixEditor(mix)}>Bearbeiten</button>
-                          <button role="menuitem" onClick={() => copyMix(mix)}>Kopieren</button>
-                          <button role="menuitem" className="menu-danger" onClick={() => requestDeleteMix(mix)}>Löschen</button>
+                                                <button data-testid={`mix-edit-${mix.id}`} role="menuitem" onClick={() => openMixEditor(mix)}>Bearbeiten</button>
+                                                <button data-testid={`mix-copy-${mix.id}`} role="menuitem" onClick={() => copyMix(mix)}>Kopieren</button>
+                                                <button data-testid={`mix-request-delete-${mix.id}`} role="menuitem" className="menu-danger" onClick={() => requestDeleteMix(mix)}>Löschen</button>
                         </div>
                       ) : null}
                     </span>
@@ -343,7 +346,7 @@ export function App() {
           </div>
           {scrollHints.right ? <span className="scroll-hint right" aria-hidden="true">›</span> : null}
         </div>
-        <button className="primary sticky-add" onClick={openNewMix}>
+        <button data-testid="open-mix-modal" className="primary sticky-add" onClick={openNewMix}>
           <Plus size={18} /> Eigene Mischung
         </button>
       </section>
@@ -482,7 +485,7 @@ function MixModal({
     onChange({
       ...draft,
       zones: draft.zones.map((item) =>
-        item.id === id ? { ...item, label: value, forms: { nominative: value, accusative: value } } : item
+        item.id === id ? { ...item, forms: { nominative: value, accusative: value } } : item
       )
     });
   };
@@ -512,7 +515,7 @@ function MixModal({
 
   return (
     <div className="modal-backdrop" role="presentation">
-      <section className="modal" role="dialog" aria-modal="true" aria-labelledby="mix-title" aria-describedby="mix-description">
+      <section data-testid="mix-modal" className="modal" role="dialog" aria-modal="true" aria-labelledby="mix-title" aria-describedby="mix-description">
         <div className="modal-head">
           <div>
             <p className="eyebrow">Eigene Mischung</p>
@@ -520,15 +523,15 @@ function MixModal({
             <p id="mix-description" className="modal-description">Wähle Aktionen und Orte aus. Klappe Karten auf, wenn du Texte ändern möchtest.</p>
           </div>
           <div className="modal-head-actions">
-            <button className="secondary" onClick={() => fileRef.current?.click()}><Upload size={17} /> JSON importieren</button>
-            <button className="ghost" onClick={onClose}>Schließen</button>
+            <button data-testid="mix-import" className="secondary" onClick={() => fileRef.current?.click()}><Upload size={17} /> JSON importieren</button>
+                        <button data-testid="mix-close" className="ghost" onClick={onClose}>Schließen</button>
           </div>
-          <input ref={fileRef} hidden type="file" accept="application/json" onChange={importDraft} />
+          <input data-testid="mix-import-input" ref={fileRef} hidden type="file" accept="application/json" onChange={importDraft} />
         </div>
 
         <label className="field full-field">
           <span>Name</span>
-          <input value={draft.name} onChange={(event) => updateName(event.target.value)} />
+          <input data-testid="mix-name" value={draft.name} onChange={(event) => updateName(event.target.value)} />
         </label>
 
         <div className="config-grid modal-grid">
@@ -565,10 +568,10 @@ function MixModal({
 
         <div className="modal-footer">
           <p>{draft.actions.filter((item) => item.enabled).length} Aktionen, {draft.zones.filter((item) => item.enabled).length} Orte aktiv. Für Würfe braucht es jeweils mindestens sechs.</p>
-          <button className="danger" onClick={onDelete}><Trash2 size={17} /> Mischung löschen</button>
+          <button data-testid="mix-delete" className="danger" onClick={onDelete}><Trash2 size={17} /> Mischung löschen</button>
           <div className="modal-footer-actions">
-            <button className="secondary" onClick={exportDraft}><Download size={17} /> JSON exportieren</button>
-            <button className="primary" onClick={onSave}><Save size={18} /> Mischung speichern</button>
+                      <button data-testid="mix-export" className="secondary" onClick={exportDraft}><Download size={17} /> JSON exportieren</button>
+                      <button data-testid="mix-save" className="primary" onClick={onSave}><Save size={18} /> Mischung speichern</button>
           </div>
         </div>
       </section>
@@ -607,7 +610,7 @@ function EditableList({
     <div className="config-list editable-list">
       <div className="list-head">
         <h3>{title}</h3>
-        <button className="ghost" onClick={onAdd}><Plus size={16} /> Hinzufügen</button>
+        <button data-testid={`add-${kind}`} className="ghost" onClick={onAdd}><Plus size={16} /> Hinzufügen</button>
       </div>
       {items.map((item) => {
         const isExpanded = expandedIds.has(item.id);
@@ -621,40 +624,41 @@ function EditableList({
         };
 
         return (
-          <div key={item.id} ref={(element) => { cardRefs.current[item.id] = element; }} className={isExpanded ? "editable-item expanded" : "editable-item"}>
+                  <div key={item.id} data-testid={`card-${kind}-${item.id}`} ref={(element) => { cardRefs.current[item.id] = element; }} className={isExpanded ? "editable-item expanded" : "editable-item"}>
             <div className="card-header">
               <input
-                type="checkbox"
-                checked={item.enabled}
-                onChange={() => onToggle(item.id)}
-                aria-label={`${item.label} aktivieren`}
-              />
-              <button className="card-summary" type="button" aria-expanded={isExpanded} onClick={toggleExpanded}>
-                <span className="collapsed-name">{item.label}</span>
-              </button>
-              <button className="trash-icon" type="button" aria-label={`${item.label} entfernen`} onClick={() => onRemove(item.id)}>
-                <Trash2 size={17} />
-              </button>
-            </div>
+                        data-testid={`toggle-${kind}-${item.id}`}
+                        type="checkbox"
+                        checked={item.enabled}
+                        onChange={() => onToggle(item.id)}
+                        aria-label={`${item.label} aktivieren`}
+                      />
+                      <button data-testid={`card-summary-${kind}-${item.id}`} className="card-summary" type="button" aria-expanded={isExpanded} onClick={toggleExpanded}>
+                        <span data-testid={`item-${kind}-title`} className="collapsed-name">{item.label}</span>
+                      </button>
+                      <button data-testid={`remove-${kind}-${item.id}`} className="trash-icon" type="button" aria-label={`${item.label} entfernen`} onClick={() => onRemove(item.id)}>
+                        <Trash2 size={17} />
+                      </button>
+                    </div>
 
             {isExpanded ? (
               <div className="card-details">
                 <div className="card-icon">{iconFor(item.iconKey, "card-icon-svg")}</div>
                 <label className="field">
                   <span>{kind === "actions" ? "Name auf dem Würfel" : "Ort auf dem Würfel"}</span>
-                  <input value={item.label} onChange={(event) => onLabel(item.id, event.target.value)} />
+                  <input data-testid={`input-label-${kind}-${item.id}`} value={item.label} onChange={(event) => onLabel(item.id, event.target.value)} />
                 </label>
                 {"instructionTemplate" in item && onActionText ? (
                   <label className="field full-field">
                     <span>Aufgabe</span>
-                    <input value={actionTextFromTemplate(item.instructionTemplate)} onChange={(event) => onActionText(item.id, event.target.value)} />
+                    <input data-testid={`input-action-${item.id}`} value={actionTextFromTemplate(item.instructionTemplate)} onChange={(event) => onActionText(item.id, event.target.value)} />
                     <small>Der gewürfelte Ort wird automatisch ergänzt. Schreibe optional <code>{"{ort}"}</code> an die gewünschte Stelle im Satz.</small>
                   </label>
                 ) : null}
                 {"forms" in item && onZoneText ? (
                   <label className="field full-field">
                     <span>Ort im Ergebnistext</span>
-                    <input value={item.forms.accusative} onChange={(event) => onZoneText(item.id, event.target.value)} />
+                    <input data-testid={`input-zone-${item.id}`} value={item.forms.accusative} onChange={(event) => onZoneText(item.id, event.target.value)} />
                     <small>So erscheint der Ort im Satz, z. B. „den Nacken“ oder „die Hände“.</small>
                   </label>
                 ) : null}
@@ -695,8 +699,8 @@ function ConfirmDialog({
         <h2 id="confirm-title">{title}</h2>
         <p id="confirm-message">{message}</p>
         <div className="confirm-actions">
-          <button className="secondary" onClick={onCancel}>Abbrechen</button>
-          <button className="danger" onClick={onConfirm}><Trash2 size={17} /> {confirmLabel}</button>
+          <button data-testid="confirm-cancel" className="secondary" onClick={onCancel}>Abbrechen</button>
+          <button data-testid="confirm-confirm" className="danger" onClick={onConfirm}><Trash2 size={17} /> {confirmLabel}</button>
         </div>
       </section>
     </div>

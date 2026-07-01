@@ -86,6 +86,7 @@ npm ci
 npm run build
 npx playwright install --with-deps
 npm run test:ui        # run Playwright headless
+npm run test:ui:headless
 npm run test:ui:headed # run Playwright headed for debugging
 npm run test:ui:debug  # run Playwright in debug mode
 ```

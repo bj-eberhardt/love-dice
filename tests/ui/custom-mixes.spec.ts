@@ -1,0 +1,344 @@
+import { test, expect } from '@playwright/test';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+import { acceptConsent, createCustomMix, openMixModal } from './helpers';
+
+test.describe('custom mixes', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+    await page.evaluate(() => localStorage.removeItem('love-dice-custom-mixes'));
+    await acceptConsent(page);
+  });
+
+  test('open mix modal', async ({ page }) => {
+    await test.step('Open mix modal via button', async () => {
+      const openBtn = page.getByTestId('open-mix-modal');
+      await openBtn.waitFor({ state: 'visible', timeout: 10000 });
+      await openBtn.scrollIntoViewIfNeeded();
+      await openBtn.click();
+      await expect(page.getByTestId('mix-modal')).toBeVisible();
+    });
+  });
+
+  test('create mix via helper and open it', async ({ page }) => {
+    const name = `E2E Mix ${Date.now()}-${Math.random().toString(36).slice(2,6)}`;
+    const id = await createCustomMix(page, name);
+    // reload to let app read new localStorage
+    await page.reload();
+    await acceptConsent(page);
+
+    await test.step('Open created mix via UI', async () => {
+      // open the created mix via UI (click its chip)
+      await page.waitForSelector(`[data-testid="mix-chip-${id}"]`, { state: 'visible', timeout: 10000 });
+      await page.getByTestId(`mix-chip-${id}`).dblclick();
+      await expect(page.getByTestId('mix-modal')).toBeVisible();
+
+      // verify the mix data is loaded
+      await test.step("Verify name", async () => {
+        await expect(page.getByTestId('mix-name')).toHaveValue(name);
+      });
+
+
+      // Actions: ensure 6 cards exist and expand each to reveal its input
+      const actionCards = page.locator('[data-testid^="card-actions-"]');
+      await expect(actionCards).toHaveCount(6);
+      for (let i = 0; i < 6; i++) {
+        await test.step(`Expand action ${i}`, async () => {
+          const card = actionCards.nth(i);
+          // click the summary to reveal the input field
+          await card.locator('button.card-summary').click();
+          // prefer the text input (exclude the checkbox toggle)
+          const name = card.getByTestId(`input-label-actions-action-${i}`);
+          await expect(name).toHaveValue(`Action ${i + 1}`);
+
+          const description =  card.getByTestId(`input-action-action-${i}`);
+          await expect(description).toHaveValue("Probiert {ort} nach Absprache aus");
+        });
+      }
+
+      // Zones: same approach
+      const zoneCards = page.locator('[data-testid^="card-zones-"]');
+      await expect(zoneCards).toHaveCount(6);
+      for (let i = 0; i < 6; i++) {
+        await test.step(`Expand zone ${i}`, async () => {
+          const card = zoneCards.nth(i);
+          await card.locator('button.card-summary').click();
+          const name = card.getByTestId(`input-label-zones-zone-${i}`);
+          await expect(name).toHaveValue(`Zone ${i + 1}`);
+
+          const description = card.getByTestId(`input-zone-zone-${i}`);
+          await expect(description).toHaveValue(`die Zone ${i+1}`);
+        });
+      }
+    });
+  });
+
+  test('validation: requires at least 6 enabled actions and zones', async ({ page }) => {
+    await openMixModal(page);
+
+    await test.step('Disable items until less than 6 and attempt save', async () => {
+      const actionToggles = page.locator('[data-testid^="toggle-actions-"]');
+      const zoneToggles = page.locator('[data-testid^="toggle-zones-"]');
+
+      // disable actions until only 5 enabled remain
+      for (let i = (await actionToggles.count()) - 1; i >= 0; i--) {
+        const toggle = actionToggles.nth(i);
+        if (await toggle.isChecked()) {
+          const enabledCount = await page.evaluate(() => {
+            return Array.from(document.querySelectorAll('[data-testid^="toggle-actions-"]')).filter((el: any) => el.checked).length;
+          });
+          if (enabledCount <= 5) break;
+          await toggle.click();
+        }
+      }
+
+      // disable zones until only 5 enabled remain
+      for (let i = (await zoneToggles.count()) - 1; i >= 0; i--) {
+        const toggle = zoneToggles.nth(i);
+        if (await toggle.isChecked()) {
+          const enabledCount = await page.evaluate(() => {
+            return Array.from(document.querySelectorAll('[data-testid^="toggle-zones-"]')).filter((el: any) => el.checked).length;
+          });
+          if (enabledCount <= 5) break;
+          await toggle.click();
+        }
+      }
+
+      await page.getByTestId('mix-save').click();
+      await expect(page.locator('.form-warning')).toContainText(/mindestens 6/);
+    });
+  });
+
+  test('edit tiles: rename, add, remove and persist', async ({ page }) => {
+    // create a dedicated mix so item ids are predictable
+    const name = `E2E Mix ${Date.now()}-${Math.random().toString(36).slice(2,6)}`;
+    const id = await createCustomMix(page, name);
+    await page.reload();
+    await acceptConsent(page);
+
+    // open the saved mix via UI
+    await test.step("Open custom mix", async () => {
+      await page.waitForSelector(`[data-testid="mix-chip-${id}"]`, { state: 'visible', timeout: 10000 });
+      await page.getByTestId(`mix-chip-${id}`).dblclick();
+      await expect(page.getByTestId('mix-modal')).toBeVisible();
+
+    });
+
+    const renamedTest = name + "_rename";
+    await test.step("Rename mix", async () => {
+      await page.getByTestId('mix-name').fill(renamedTest);
+    });
+
+    await test.step('Add a new action and zone', async () => {
+      await page.getByTestId('add-actions').click();
+      await page.getByTestId('add-zones').click();
+      const newAction = page.locator('[data-testid^="card-actions-"]').last();
+      await expect(newAction).toBeVisible();
+    });
+
+    await test.step('Rename first action', async () => {
+      await page.getByTestId('card-summary-actions-action-0').click();
+      await page.getByTestId("input-label-actions-action-0").fill('E2E Action Name');
+      await page.getByTestId(`input-action-action-0`).fill('E2E Action Description');
+    });
+
+    await test.step('Rename first zone', async () => {
+      await page.getByTestId('card-summary-zones-zone-0').click();
+      await page.getByTestId("input-label-zones-zone-0").fill('E2E Zone Name');
+      await page.getByTestId(`input-zone-zone-0`).fill('die E2E Zone');
+    });
+
+    await test.step('Remove second action', async () => {
+       await page.getByTestId(`remove-actions-action-1`).click();
+    });
+
+    await test.step('Disable second zone', async () => {
+      await page.getByTestId(`toggle-zones-zone-1`).click();
+    });
+
+    await test.step('Save the mix', async () => {
+      await page.getByTestId('mix-save').click();
+      await expect(page.getByTestId('mix-modal')).toHaveCount(0);
+    });
+
+    await test.step('Reload mix and verify changes persisted', async () => {
+      // reopen the mix from chip to verify changes were saved
+      await page.waitForSelector(`[data-testid="mix-chip-${id}"]`, { state: 'visible', timeout: 10000 });
+      await page.getByTestId(`mix-chip-${id}`).dblclick();
+      await expect(page.getByTestId('mix-modal')).toBeVisible();
+
+      await test.step("Verify new mix name", async () => {
+        await expect(page.getByTestId('mix-name')).toHaveValue(renamedTest);
+      });
+
+      await test.step("Expand and verify first action", async () => {
+        await page.getByTestId('card-summary-actions-action-0').click();
+        await expect(page.getByTestId(`input-label-actions-action-0`)).toHaveValue('E2E Action Name');
+        await expect(page.getByTestId(`input-action-action-0`)).toHaveValue('E2E Action Description {ort}');
+      });
+
+      await test.step("Expand and verify first zone", async () => {
+        await page.getByTestId('card-summary-zones-zone-0').click();
+        await expect(page.getByTestId(`input-label-zones-zone-0`)).toHaveValue('E2E Zone Name');
+        await expect(page.getByTestId(`input-zone-zone-0`)).toHaveValue('die E2E Zone');
+      });
+
+      await test.step("Verify disabled zone", async () => {
+        await expect(page.getByTestId(`toggle-zones-zone-1`)).not.toBeChecked()
+      });
+
+      await test.step("Verify actions items count", async () => {
+        const actionItems = page.locator('[data-testid^="toggle-actions-"]');
+        expect(await actionItems.all()).toHaveLength(6); // 6 total, but one was removed
+      });
+
+     const exportedJsonContent = await test.step("Export JSON", async () => {
+        const [download] = await Promise.all([
+          page.waitForEvent('download'),
+          page.getByTestId('mix-export').click()
+        ]);
+        const savePath = path.join(os.tmpdir(), `e2e-verify-${Date.now()}.json`);
+        await download.saveAs(savePath);
+        expect(fs.existsSync(savePath)).toBeTruthy();
+
+        // parse and verify JSON contains the edited values
+        const jsonContent = fs.readFileSync(savePath, 'utf-8');
+        fs.unlinkSync(savePath);
+        return JSON.parse(jsonContent);
+      });
+      // export to JSON and verify structure
+
+      await test.step("Verify exported JSON", async () => {
+        expect(exportedJsonContent.actions).toEqual(
+            expect.arrayContaining([
+              expect.objectContaining({
+                id: 'action-0',
+                label: 'E2E Action Name'
+              })
+            ])
+        );
+
+        expect(exportedJsonContent.zones).toEqual(
+            expect.arrayContaining([
+              expect.objectContaining({
+                id: 'zone-0',
+                label: 'E2E Zone Name'
+              }),
+              expect.objectContaining({
+                id: 'zone-1',
+                enabled: false
+              })
+            ])
+        );
+
+      })
+
+    });
+  });
+
+  test('export and import mix', async ({ page }) => {
+    const name = `E2E Mix ${Date.now()}-${Math.random().toString(36).slice(2,6)}`;
+    const id = await createCustomMix(page, name);
+    await page.reload();
+    await acceptConsent(page);
+
+    await test.step('Open saved mix via UI', async () => {
+      await page.waitForSelector(`[data-testid="mix-chip-${id}"]`, { state: 'visible', timeout: 10000 });
+      await page.getByTestId(`mix-chip-${id}`).dblclick();
+      await expect(page.getByTestId('mix-modal')).toBeVisible();
+    });
+
+    const savePath = await test.step('Export mix to file', async () => {
+      const [download] = await Promise.all([
+          page.waitForEvent('download'),
+          page.getByTestId('mix-export').click()
+        ]);
+        const savePath = path.join(os.tmpdir(), `e2e-mix-${Date.now()}.json`);
+        await download.saveAs(savePath);
+        expect(fs.existsSync(savePath)).toBeTruthy();
+        await page.getByTestId('mix-close').click();
+        await expect(page.getByTestId('mix-modal')).toHaveCount(0);
+        return savePath;
+      });
+
+    await test.step("Import mix from file", async () => {
+      await openMixModal(page);
+      await page.setInputFiles('[data-testid="mix-import-input"]', savePath);
+    });
+
+    await test.step("Verify correct data imported", async () => {
+      await page.waitForSelector('[data-testid^="card-summary-actions-"]', { state: 'visible', timeout: 5000 });
+      const actionSummaries = page.locator('[data-testid^="card-summary-actions-"]');
+      await expect(actionSummaries).toHaveCount(6);
+      const actionTexts = await actionSummaries.allTextContents();
+      for (let i = 0; i < 6; i++) {
+        expect(actionTexts.some(t => t.includes(`Action ${i + 1}`))).toBeTruthy();
+      }
+
+      await page.waitForSelector('[data-testid^="card-summary-zones-"]', { state: 'visible', timeout: 5000 });
+      const zoneSummaries = page.locator('[data-testid^="card-summary-zones-"]');
+      await expect(zoneSummaries).toHaveCount(6);
+      const zoneTexts = await zoneSummaries.allTextContents();
+      for (let i = 0; i < 6; i++) {
+        expect(zoneTexts.some(t => t.includes(`Zone ${i + 1}`))).toBeTruthy();
+      }
+
+      await expect(page.getByTestId('mix-name')).toHaveValue(new RegExp(name));
+      await page.getByTestId('mix-name').fill(name + ' Imported');
+      await page.getByTestId('mix-save').click();
+      await expect(page.getByTestId('mix-modal')).toHaveCount(0);
+    });
+  });
+
+  test('delete mix', async ({ page }) => {
+    const name = `E2E Mix ${Date.now()}-${Math.random().toString(36).slice(2,6)}`;
+    const id = await createCustomMix(page, name);
+    await page.reload();
+    await acceptConsent(page);
+
+    await test.step('Open original mix via UI and delete', async () => {
+      await page.waitForSelector(`[data-testid="mix-chip-${id}"]`, { state: 'visible', timeout: 10000 });
+      await page.getByTestId(`mix-chip-${id}`).dblclick();
+      await expect(page.getByTestId('mix-modal')).toBeVisible();
+      await page.getByTestId('mix-delete').click();
+    });
+
+    await test.step("Confirm deletion", async () => {
+      await page.getByTestId('confirm-confirm').click();
+      await expect(page.getByTestId('mix-modal')).toHaveCount(0);
+
+    });
+
+    await test.step("Verify the custom mix is removed", async () => {
+      await page.waitForSelector(`[data-testid="mix-chip-${id}"]`, { state: 'detached', timeout: 10000 });
+
+    });
+  });
+
+  test('delete mix but cancel dialog', async ({ page }) => {
+    const name = `E2E Mix ${Date.now()}-${Math.random().toString(36).slice(2,6)}`;
+    const id = await createCustomMix(page, name);
+    await page.reload();
+    await acceptConsent(page);
+
+    await test.step('Open original mix via UI and delete', async () => {
+      await page.waitForSelector(`[data-testid="mix-chip-${id}"]`, { state: 'visible', timeout: 10000 });
+      await page.getByTestId(`mix-chip-${id}`).dblclick();
+      await expect(page.getByTestId('mix-modal')).toBeVisible();
+      await page.getByTestId('mix-delete').click();
+    });
+
+    await test.step("Do not confirm deletion", async () => {
+      await page.getByTestId('confirm-cancel').click();
+    });
+
+    await test.step("Close dialog and check if mix still there", async () => {
+      await page.getByTestId("mix-close").click();
+
+      await expect(page.getByTestId('mix-modal')).toHaveCount(0);
+      await page.waitForSelector(`[data-testid="mix-chip-${id}"]`, { state: 'visible', timeout: 10000 });
+
+    });
+  });
+});

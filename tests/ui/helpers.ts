@@ -13,3 +13,48 @@ export async function acceptConsent(page: Page) {
   // Wait until the main UI (mode bar) is visible as signal consent was applied
   await page.waitForSelector('[data-testid="mode-bar"]', { state: 'visible', timeout: 10000 });
 }
+
+export async function createCustomMix(page: Page, name: string) {
+  const rand = Math.random().toString(36).slice(2, 8);
+  const mix = {
+    id: `mix-${rand}`,
+    name,
+    updatedAt: new Date().toISOString(),
+    actions: Array.from({ length: 6 }).map((_, i) => ({
+      id: `action-${i}`,
+      label: `Action ${i + 1}`,
+      instructionTemplate: 'Probiert {zone.accusative} nach Absprache aus.',
+      zoneMode: 'optional',
+      iconKey: 'sparkle',
+      enabled: true,
+      moods: ['custom']
+    })),
+    zones: Array.from({ length: 6 }).map((_, i) => ({
+      id: `zone-${i}`,
+      label: `Zone ${i + 1}`,
+      forms: { nominative: `die Zone ${i + 1}`, accusative: `die Zone ${i + 1}` },
+      iconKey: 'consent',
+      enabled: true,
+      moods: ['custom']
+    }))
+  };
+
+  await page.evaluate((m) => {
+    const key = 'love-dice-custom-mixes';
+    const existing = JSON.parse(localStorage.getItem(key) || '[]');
+    existing.push(m);
+    localStorage.setItem(key, JSON.stringify(existing));
+  }, mix);
+
+  return mix.id;
+}
+
+export async function openMixModal(page: Page) {
+  // Try DOM click directly to avoid visibility/overlay flakiness
+  await page.evaluate(() => {
+    const btn = document.querySelector('button.primary.sticky-add') as HTMLButtonElement | null;
+    if (btn) btn.click();
+  });
+  await page.waitForSelector('[data-testid="mix-modal"]', { state: 'visible', timeout: 10000 });
+}
+
