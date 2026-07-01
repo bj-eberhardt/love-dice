@@ -75,6 +75,28 @@ npm run build          # Produktionsbuild nach dist/client
 npm run start          # Vite Preview auf Port 5544
 ```
 
+## UI tests (Playwright)
+
+The project includes Playwright-based end-to-end UI tests. They run a preview server on port 5545 so they can execute in parallel to the dev server on 5544.
+
+Install and run:
+
+```bash
+npm ci
+npm run build
+npx playwright install --with-deps
+npm run test:ui        # run Playwright headless
+npm run test:ui:headed # run Playwright headed for debugging
+npm run test:ui:debug  # run Playwright in debug mode
+```
+
+Guidance for tests:
+- Tests use data-testid attributes for stable selectors (e.g. data-testid="consent-accept", data-testid="roll-button", data-testid="result-text").
+- Tests are in tests/ui and use descriptive test.step blocks to document test phases.
+- Avoid relying on translations; use data-ids or configuration ids where possible.
+
+Add test-related scripts to package.json and add data-testid attributes to key interactive elements to make tests stable.
+
 Docker-Dev-Modus:
 
 ```bash

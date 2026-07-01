@@ -270,7 +270,7 @@ export function App() {
               Wählt gemeinsam Stimmung und Grenzen. Jede Runde kann neu gewürfelt werden.
             </p>
           </div>
-          <button className="primary" onClick={() => setConsent(true)}>
+          <button data-testid="consent-accept" className="primary" onClick={() => setConsent(true)}>
             <ShieldCheck size={20} /> Volljährigkeit und Zustimmung bestätigen
           </button>
         </section>
@@ -287,7 +287,7 @@ export function App() {
         </div>
       </header>
 
-      <section className="mode-bar" aria-label="Modus wählen">
+      <section data-testid="mode-bar" className="mode-bar" aria-label="Modus wählen">
         <div className="mode-scroll-wrap">
           {scrollHints.left ? <span className="scroll-hint left" aria-hidden="true">‹</span> : null}
           <div className="mode-scroll" ref={modeScrollRef} onScroll={updateScrollHints}>
@@ -362,10 +362,10 @@ export function App() {
             <ResultToken title="Aktion" value={roll?.action.label ?? "Bereit"} iconKey={roll?.action.iconKey ?? "sparkle"} tone="pink" />
             <ResultToken title="Zone" value={roll?.zone.label ?? "Bereit"} iconKey={roll?.zone.iconKey ?? "consent"} tone="teal" />
           </div>
-          <p className="instruction">{rolling ? "Die Würfel rollen..." : roll?.instruction ?? "Tippe auf Würfeln, um eine neue Runde zu starten."}</p>
+          <p data-testid="result-text" className="instruction">{rolling ? "Die Würfel rollen..." : roll?.instruction ?? "Tippe auf Würfeln, um eine neue Runde zu starten."}</p>
           {error ? <p className="error">{error}</p> : null}
           <div className="controls">
-            <button className="primary" onClick={startRoll} disabled={rolling}>
+            <button data-testid="roll-button" className="primary" onClick={startRoll} disabled={rolling}>
               <Shuffle size={19} /> {roll ? "Neu würfeln" : "Würfeln"}
             </button>
           </div>

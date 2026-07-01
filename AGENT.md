@@ -52,6 +52,14 @@ npm run format:check
 npm run build
 ```
 
+Playwright UI tests:
+
+- Add devDependency: @playwright/test
+- Create tests under tests/ui and a playwright.config.ts that runs a preview server on port 5545 so tests can run parallel to dev on 5544.
+- Scripts added: preview:test, test:ui, test:ui:headed, test:ui:debug
+
+When adding tests, prefer data-testid attributes for selectors and use test.step to describe test phases.
+
 Docker dev:
 
 ```bash
