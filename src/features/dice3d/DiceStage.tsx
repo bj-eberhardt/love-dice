@@ -321,18 +321,72 @@ const drawLegs = (ctx: CanvasRenderingContext2D) => {
 const assertNever = (value: never): never => {
   throw new Error(`Unhandled icon key: ${value}`);
 };
+
+const drawRoundedRect = (
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number
+) => {
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+};
+
+const drawFaceBackground = (ctx: CanvasRenderingContext2D, color: string) => {
+  const baseGradient = ctx.createLinearGradient(0, 0, 512, 512);
+  baseGradient.addColorStop(0, "#242838");
+  baseGradient.addColorStop(0.46, "#181c2a");
+  baseGradient.addColorStop(1, "#10141f");
+  ctx.fillStyle = baseGradient;
+  ctx.fillRect(0, 0, 512, 512);
+
+  const focusGradient = ctx.createRadialGradient(222, 156, 24, 222, 156, 330);
+  focusGradient.addColorStop(0, `${color}26`);
+  focusGradient.addColorStop(0.46, "rgba(255, 255, 255, 0.035)");
+  focusGradient.addColorStop(1, "rgba(8, 10, 16, 0)");
+  ctx.fillStyle = focusGradient;
+  ctx.fillRect(0, 0, 512, 512);
+
+  ctx.save();
+  drawRoundedRect(ctx, 28, 28, 456, 456, 42);
+  ctx.strokeStyle = `${color}a8`;
+  ctx.lineWidth = 14;
+  ctx.shadowColor = color;
+  ctx.shadowBlur = 10;
+  ctx.stroke();
+  ctx.restore();
+
+  ctx.save();
+  drawRoundedRect(ctx, 48, 48, 416, 416, 30);
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.075)";
+  ctx.lineWidth = 3;
+  ctx.stroke();
+  ctx.restore();
+};
+
 const makeTexture = (label: string, iconKey: IconKey, color: string) => {
   const canvas = document.createElement("canvas");
   canvas.width = 512;
   canvas.height = 512;
   const ctx = canvas.getContext("2d")!;
-  ctx.fillStyle = "#10131d";
-  ctx.fillRect(0, 0, 512, 512);
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 18;
-  ctx.strokeRect(26, 26, 460, 460);
+  drawFaceBackground(ctx, color);
+  ctx.save();
+  ctx.shadowColor = color;
+  ctx.shadowBlur = 8;
   drawIcon(ctx, iconKey, color);
   drawLabel(ctx, label, color);
+  ctx.restore();
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   return texture;
@@ -360,7 +414,7 @@ function Die({
           new THREE.MeshStandardMaterial({
             map: makeTexture(face.label, face.iconKey, color),
             roughness: 0.38,
-            metalness: 0.18
+            metalness: 0.06
           })
       ),
     [color, faces]
@@ -430,8 +484,20 @@ export function DiceStage({
     <div className="dice-stage" aria-label="3D-Würfelbereich">
       <Canvas shadows camera={{ position: [0, 2.2, 6], fov: 44 }}>
         <Suspense fallback={null}>
-          <ambientLight intensity={0.8} />
-          <spotLight position={[0, 6, 4]} angle={0.6} penumbra={0.8} intensity={3} castShadow />
+          <ambientLight intensity={0.66} />
+          <pointLight position={[-3.2, 1.6, 2.8]} color="#ff7bb7" intensity={0.42} />
+          <pointLight position={[3.2, 1.6, 2.8]} color="#66e0d1" intensity={0.38} />
+          <spotLight
+            position={[0, 6.4, 4.4]}
+            angle={0.58}
+            penumbra={0.92}
+            intensity={3.7}
+            castShadow
+            shadow-mapSize-width={1024}
+            shadow-mapSize-height={1024}
+            shadow-bias={-0.0008}
+            shadow-radius={6}
+          />
           <Die
             faces={actionFaces}
             resultFace={actionResult}
@@ -446,10 +512,22 @@ export function DiceStage({
             position={[1.45, 0.25, 0]}
             rollingKey={rollingKey}
           />
-          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.78, 0]} receiveShadow>
-            <circleGeometry args={[3.8, 72]} />
-            <meshStandardMaterial color="#171b27" roughness={0.55} metalness={0.1} />
-          </mesh>
+          <group rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.8, 0]} scale={[1.42, 0.62, 1]}>
+            <mesh receiveShadow>
+              <circleGeometry args={[2.72, 96]} />
+              <meshStandardMaterial
+                color="#242a3b"
+                roughness={0.78}
+                metalness={0.03}
+                transparent
+                opacity={0.74}
+              />
+            </mesh>
+            <mesh position={[0, 0, -0.012]}>
+              <circleGeometry args={[3.15, 96]} />
+              <meshBasicMaterial color="#090b12" transparent opacity={0.34} depthWrite={false} />
+            </mesh>
+          </group>
         </Suspense>
       </Canvas>
     </div>
