@@ -275,3 +275,48 @@ describe("createRoll built-in mood combinations", () => {
     });
   }
 });
+
+const rollKey = (roll: { action: DiceAction; zone: Zone }) => `${roll.action.id}::${roll.zone.id}`;
+
+describe("createRoll history weighting", () => {
+  test("does not repeat a combination while unseen valid combinations exist", () => {
+    const config = builtInConfigurations.romantic;
+    const history: ReturnType<typeof createRoll>[] = [];
+    const seen = new Set<string>();
+
+    for (let index = 0; index < 12; index += 1) {
+      const roll = createRoll(config, "romantic", () => 0, { history });
+      const key = rollKey(roll);
+
+      expect(seen.has(key)).toBe(false);
+      expect(roll.actionFaces.some((face) => face.id === roll.action.id)).toBe(true);
+      expect(roll.zoneFaces.some((face) => face.id === roll.zone.id)).toBe(true);
+
+      seen.add(key);
+      history.push(roll);
+    }
+  });
+
+  test("falls back after all combinations were seen and prefers less frequent actions and zones", () => {
+    const config = builtInConfigurations.romantic;
+    const validPairs = config.actions.flatMap((action) =>
+      config.zones.filter((zone) => isPairAllowed(action, zone)).map((zone) => ({ action, zone }))
+    );
+    const overloadedPair = validPairs[0];
+    const history = [
+      ...validPairs,
+      ...Array.from({ length: 8 }, () => overloadedPair)
+    ].map(({ action, zone }) => ({
+      action: { ...action, faceIndex: 0 },
+      zone: { ...zone, faceIndex: 0 },
+      actionFaces: [],
+      zoneFaces: [],
+      instruction: fillTemplate(action, zone)
+    }));
+
+    const roll = createRoll(config, "romantic", () => 0, { history });
+
+    expect(roll.action.id).not.toBe(overloadedPair.action.id);
+    expect(roll.zone.id).not.toBe(overloadedPair.zone.id);
+  });
+});
