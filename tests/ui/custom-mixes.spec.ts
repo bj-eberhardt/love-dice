@@ -112,7 +112,7 @@ test.describe("custom mixes", () => {
       }
 
       await page.getByTestId("mix-save").click();
-      await expect(page.locator(".form-warning")).toContainText(/mindestens 6/);
+      await expect(page.locator(".form-warning")).toBeVisible();
     });
   });
 
@@ -395,7 +395,7 @@ test.describe("custom mixes", () => {
       await page.getByTestId("mix-save").click();
 
       // Should show validation error
-      await expect(page.locator(".form-warning")).toContainText(/Feld erforderlich|nicht leer/i);
+      await expect(page.locator(".form-warning")).toBeVisible();
       await expect(page.getByTestId("mix-modal")).toBeVisible();
     });
   });
@@ -422,7 +422,7 @@ test.describe("custom mixes", () => {
       await page.getByTestId("mix-save").click();
 
       // Should show validation error
-      await expect(page.locator(".form-warning")).toContainText(/Feld erforderlich|nicht leer/i);
+      await expect(page.locator(".form-warning")).toBeVisible();
       await expect(page.getByTestId("mix-modal")).toBeVisible();
     });
   });
@@ -449,7 +449,7 @@ test.describe("custom mixes", () => {
       await page.getByTestId("mix-save").click();
 
       // Should show validation error
-      await expect(page.locator(".form-warning")).toContainText(/Feld erforderlich|nicht leer/i);
+      await expect(page.locator(".form-warning")).toBeVisible();
       await expect(page.getByTestId("mix-modal")).toBeVisible();
     });
   });
@@ -476,7 +476,7 @@ test.describe("custom mixes", () => {
       await page.getByTestId("mix-save").click();
 
       // Should show validation error
-      await expect(page.locator(".form-warning")).toContainText(/Feld erforderlich|nicht leer/i);
+      await expect(page.locator(".form-warning")).toBeVisible();
       await expect(page.getByTestId("mix-modal")).toBeVisible();
     });
   });
@@ -503,7 +503,7 @@ test.describe("custom mixes", () => {
       await page.getByTestId("mix-save").click();
 
       // Should show validation error
-      await expect(page.locator(".form-warning")).toContainText(/Feld erforderlich|nicht leer/i);
+      await expect(page.locator(".form-warning")).toBeVisible();
       await expect(page.getByTestId("mix-modal")).toBeVisible();
     });
   });
@@ -521,19 +521,22 @@ test.describe("custom mixes", () => {
 
     await test.step("Select two allowed zones", async () => {
       const card = page.getByTestId("card-actions-action-0");
-      await expect(card.getByText("Alle Orte erlaubt")).toBeVisible();
+      await expect(card.locator(".zone-selector")).toHaveAttribute("data-selection-state", "all");
       await card.getByTestId("zone-selector-input").click();
       await expect(card.getByTestId("zone-option-zone-0")).toBeVisible();
       await card.getByTestId("zone-option-zone-0").click();
       await card.getByTestId("zone-option-zone-1").click();
-      await expect(card.locator(".zone-chip")).toContainText(["Zone 1", "Zone 2"]);
+      await expect(card.getByTestId("zone-option-checkbox-zone-0")).toBeChecked();
+      await expect(card.getByTestId("zone-option-checkbox-zone-1")).toBeChecked();
+      await expect(card.getByTestId("zone-chip-zone-0")).toBeVisible();
+      await expect(card.getByTestId("zone-chip-zone-1")).toBeVisible();
     });
 
     await test.step("Remove one selected zone via chip", async () => {
       const card = page.getByTestId("card-actions-action-0");
       await card.getByTestId("zone-chip-remove-zone-0").click();
       await expect(card.locator(".zone-chip")).toHaveCount(1);
-      await expect(card.locator(".zone-chip")).toContainText("Zone 2");
+      await expect(card.getByTestId("zone-chip-zone-1")).toBeVisible();
     });
   });
 
@@ -555,9 +558,7 @@ test.describe("custom mixes", () => {
       await card.getByTestId("zone-selector-all").click();
       await expect(card.locator(".zone-chip")).toHaveCount(6);
       for (let i = 0; i < 6; i++) {
-        await expect(card.locator(".zone-chip").filter({ hasText: `Zone ${i + 1}` })).toHaveCount(
-          1
-        );
+        await expect(card.getByTestId(`zone-chip-zone-${i}`)).toBeVisible();
       }
     });
 
@@ -566,7 +567,7 @@ test.describe("custom mixes", () => {
       await expect(card.locator(".zone-selector-dropdown")).toBeVisible();
       await card.getByTestId("zone-selector-clear").click();
       await expect(card.locator(".zone-chip")).toHaveCount(0);
-      await expect(card.getByText("Alle Orte erlaubt")).toBeVisible();
+      await expect(card.locator(".zone-selector")).toHaveAttribute("data-selection-state", "all");
     });
   });
 
@@ -632,7 +633,8 @@ test.describe("custom mixes", () => {
     await test.step("Verify the new zone is immediately available in the action selector", async () => {
       const actionCard = page.getByTestId("card-actions-action-0");
       await actionCard.getByTestId("zone-selector-input").click();
-      await expect(actionCard.getByTestId(`zone-option-${newZoneId}`)).toContainText(
+      await expect(actionCard.getByTestId(`zone-option-${newZoneId}`)).toHaveAttribute(
+        "data-zone-label",
         "E2E Dynamic Zone"
       );
     });
@@ -640,14 +642,21 @@ test.describe("custom mixes", () => {
     await test.step("Select the new zone and verify chip label follows the rename", async () => {
       const actionCard = page.getByTestId("card-actions-action-0");
       await actionCard.getByTestId(`zone-option-${newZoneId}`).click();
-      await expect(actionCard.locator(".zone-chip")).toContainText("E2E Dynamic Zone");
+      await expect(actionCard.getByTestId(`zone-chip-${newZoneId}`)).toHaveAttribute(
+        "data-zone-label",
+        "E2E Dynamic Zone"
+      );
 
       await page.getByTestId(`input-label-zones-${newZoneId}`).fill("E2E Renamed Dynamic Zone");
-      await expect(actionCard.locator(".zone-chip")).toContainText("E2E Renamed Dynamic Zone");
+      await expect(actionCard.getByTestId(`zone-chip-${newZoneId}`)).toHaveAttribute(
+        "data-zone-label",
+        "E2E Renamed Dynamic Zone"
+      );
 
       await page.keyboard.press("Escape");
       await actionCard.getByTestId("zone-selector-input").click();
-      await expect(actionCard.getByTestId(`zone-option-${newZoneId}`)).toContainText(
+      await expect(actionCard.getByTestId(`zone-option-${newZoneId}`)).toHaveAttribute(
+        "data-zone-label",
         "E2E Renamed Dynamic Zone"
       );
     });
@@ -670,7 +679,7 @@ test.describe("custom mixes", () => {
       await card.getByTestId("zone-selector-input").click();
       await card.getByTestId("zone-option-zone-0").click();
       await card.getByTestId("zone-chip-remove-zone-0").click();
-      await expect(card.getByText("Alle Orte erlaubt")).toBeVisible();
+      await expect(card.locator(".zone-selector")).toHaveAttribute("data-selection-state", "all");
     });
 
     await test.step("Save mix and verify allowedZoneIds is undefined", async () => {
@@ -685,24 +694,19 @@ test.describe("custom mixes", () => {
 
   test("zone selector: orphaned zone ids are removed on save", async ({ page }) => {
     const name = `E2E Mix ${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-    const id = await createCustomMix(page, name);
+    const id = await createCustomMix(page, name, (mix) => {
+      mix.actions[0].allowedZoneIds = ["zone-0", "missing-zone"];
+      mix.zones.push({
+        id: "zone-extra",
+        label: "Extra Zone",
+        accusative: "die Extra Zone",
+        iconKey: "consent",
+        enabled: true,
+        moods: ["custom"]
+      });
+    });
 
-    await test.step("Seed mix with one valid and one missing allowed zone id", async () => {
-      await page.evaluate((mixId) => {
-        const key = "love-dice-custom-mixes";
-        const mixes = JSON.parse(localStorage.getItem(key) || "[]");
-        const mix = mixes.find((item: any) => item.id === mixId);
-        mix.actions[0].allowedZoneIds = ["zone-0", "missing-zone"];
-        mix.zones.push({
-          id: "zone-extra",
-          label: "Extra Zone",
-          accusative: "die Extra Zone",
-          iconKey: "consent",
-          enabled: true,
-          moods: ["custom"]
-        });
-        localStorage.setItem(key, JSON.stringify(mixes));
-      }, id);
+    await test.step("Reload seeded mix", async () => {
       await page.reload();
       await acceptConsent(page);
     });

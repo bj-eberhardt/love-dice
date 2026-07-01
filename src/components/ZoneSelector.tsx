@@ -60,7 +60,11 @@ export function ZoneSelector({
   };
 
   return (
-    <div className="zone-selector" ref={rootRef}>
+    <div
+      className="zone-selector"
+      data-selection-state={selectedIds.length > 0 ? "restricted" : "all"}
+      ref={rootRef}
+    >
       <div
         data-testid="zone-selector-input"
         role="button"
@@ -83,7 +87,12 @@ export function ZoneSelector({
         <span className="zone-selector-values">
           {selectedZones.length > 0 ? (
             selectedZones.map((zone) => (
-              <span key={zone.id} className="zone-chip">
+              <span
+                key={zone.id}
+                data-testid={`zone-chip-${zone.id}`}
+                data-zone-label={zone.label}
+                className="zone-chip"
+              >
                 {zone.label}
                 <button
                   data-testid={`zone-chip-remove-${zone.id}`}
@@ -97,7 +106,9 @@ export function ZoneSelector({
               </span>
             ))
           ) : (
-            <span className="zone-selector-placeholder">Alle Orte erlaubt</span>
+            <span data-testid="zone-selector-placeholder" className="zone-selector-placeholder">
+              Alle Orte erlaubt
+            </span>
           )}
         </span>
         <ChevronDown className="zone-selector-chevron" size={16} aria-hidden="true" />
@@ -132,9 +143,15 @@ export function ZoneSelector({
               <label
                 key={zone.id}
                 data-testid={`zone-option-${zone.id}`}
+                data-zone-label={zone.label}
                 className="zone-checkbox-item"
               >
-                <input type="checkbox" checked={checked} onChange={() => toggleZone(zone.id)} />
+                <input
+                  data-testid={`zone-option-checkbox-${zone.id}`}
+                  type="checkbox"
+                  checked={checked}
+                  onChange={() => toggleZone(zone.id)}
+                />
                 <span>{zone.label}</span>
                 {checked ? <Check size={16} aria-hidden="true" /> : null}
               </label>

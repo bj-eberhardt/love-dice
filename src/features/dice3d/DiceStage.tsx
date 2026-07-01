@@ -54,6 +54,80 @@ const drawSparkle = (ctx: CanvasRenderingContext2D, x: number, y: number, size: 
   ctx.fill();
 };
 
+const diceLabelFont = (size: number) => `700 ${size}px Inter, Arial`;
+
+const ellipsizeToWidth = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number) => {
+  if (ctx.measureText(text).width <= maxWidth) return text;
+
+  let trimmed = text.trim();
+  while (trimmed.length > 1 && ctx.measureText(`${trimmed}…`).width > maxWidth) {
+    trimmed = trimmed.slice(0, -1).trimEnd();
+  }
+  return trimmed.length > 0 ? `${trimmed}…` : "…";
+};
+
+const wrapText = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number) => {
+  const words = text.trim().split(/\s+/).filter(Boolean);
+  const lines: string[] = [];
+
+  for (const word of words) {
+    if (lines.length === 0) {
+      lines.push(ellipsizeToWidth(ctx, word, maxWidth));
+      continue;
+    }
+
+    const nextLine = `${lines[lines.length - 1]} ${word}`;
+    if (ctx.measureText(nextLine).width <= maxWidth) {
+      lines[lines.length - 1] = nextLine;
+    } else {
+      lines.push(ellipsizeToWidth(ctx, word, maxWidth));
+    }
+  }
+
+  return lines.length > 0 ? lines : [""];
+};
+
+const fitLabelLines = (
+  ctx: CanvasRenderingContext2D,
+  label: string,
+  maxWidth: number,
+  maxLines: number,
+  maxFontSize: number,
+  minFontSize: number
+) => {
+  const cleanLabel = label.trim() || " ";
+
+  for (let fontSize = maxFontSize; fontSize >= minFontSize; fontSize -= 1) {
+    ctx.font = diceLabelFont(fontSize);
+    const lines = wrapText(ctx, cleanLabel, maxWidth);
+    if (lines.length <= maxLines) return { lines, fontSize };
+  }
+
+  ctx.font = diceLabelFont(minFontSize);
+  const lines = wrapText(ctx, cleanLabel, maxWidth);
+  const visibleLines = lines.slice(0, maxLines);
+  visibleLines[maxLines - 1] = ellipsizeToWidth(ctx, lines.slice(maxLines - 1).join(" "), maxWidth);
+  return { lines: visibleLines, fontSize: minFontSize };
+};
+
+const drawLabel = (ctx: CanvasRenderingContext2D, label: string, color: string) => {
+  const maxWidth = 410;
+  const { lines, fontSize } = fitLabelLines(ctx, label, maxWidth, 2, 40, 24);
+  const lineHeight = Math.round(fontSize * 1.15);
+  const blockHeight = lineHeight * lines.length;
+  const firstBaseline = 356 - blockHeight / 2 + lineHeight / 2;
+
+  ctx.save();
+  ctx.fillStyle = color;
+  ctx.font = diceLabelFont(fontSize);
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  lines.forEach((line, index) => {
+    ctx.fillText(line, 256, firstBaseline + index * lineHeight, maxWidth);
+  });
+  ctx.restore();
+};
+
 const drawIcon = (ctx: CanvasRenderingContext2D, iconKey: string, color: string) => {
   ctx.save();
   ctx.strokeStyle = color;
@@ -149,11 +223,7 @@ const makeTexture = (label: string, iconKey: string, color: string) => {
   ctx.lineWidth = 18;
   ctx.strokeRect(26, 26, 460, 460);
   drawIcon(ctx, iconKey, color);
-  ctx.fillStyle = color;
-  ctx.font = "700 40px Inter, Arial";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(label.slice(0, 12), 256, 356, 430);
+  drawLabel(ctx, label, color);
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   return texture;
@@ -195,7 +265,11 @@ function Die({
     const start = performance.now();
     const duration = 2450;
     const initial = ref.current.rotation.clone();
-    const spin = new THREE.Euler(target[0] + Math.PI * 8, target[1] + Math.PI * 10, target[2] + Math.PI * 8);
+    const spin = new THREE.Euler(
+      target[0] + Math.PI * 8,
+      target[1] + Math.PI * 10,
+      target[2] + Math.PI * 8
+    );
 
     const animate = (now: number) => {
       const progress = Math.min((now - start) / duration, 1);
@@ -249,8 +323,20 @@ export function DiceStage({
         <Suspense fallback={null}>
           <ambientLight intensity={0.8} />
           <spotLight position={[0, 6, 4]} angle={0.6} penumbra={0.8} intensity={3} castShadow />
-          <Die faces={actionFaces} resultFace={actionResult} color="#ff7bb7" position={[-1.45, 0.25, 0]} rollingKey={rollingKey} />
-          <Die faces={zoneFaces} resultFace={zoneResult} color="#66e0d1" position={[1.45, 0.25, 0]} rollingKey={rollingKey} />
+          <Die
+            faces={actionFaces}
+            resultFace={actionResult}
+            color="#ff7bb7"
+            position={[-1.45, 0.25, 0]}
+            rollingKey={rollingKey}
+          />
+          <Die
+            faces={zoneFaces}
+            resultFace={zoneResult}
+            color="#66e0d1"
+            position={[1.45, 0.25, 0]}
+            rollingKey={rollingKey}
+          />
           <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.78, 0]} receiveShadow>
             <circleGeometry args={[3.8, 72]} />
             <meshStandardMaterial color="#171b27" roughness={0.55} metalness={0.1} />

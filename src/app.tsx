@@ -133,6 +133,7 @@ export function App() {
     try {
       const nextRoll = createRoll(activeConfig, activeMood);
       clearRollRevealTimer();
+      setRoll(null);
       setAnimationRoll(nextRoll);
       setError("");
       setRolling(true);
@@ -398,6 +399,7 @@ export function App() {
               value={roll?.action.label ?? "Bereit"}
               iconKey={roll?.action.iconKey ?? "sparkle"}
               tone="pink"
+              dataState={roll ? "filled" : "empty"}
             />
             <ResultToken
               dataTestId="zone-result"
@@ -405,6 +407,7 @@ export function App() {
               value={roll?.zone.label ?? "Bereit"}
               iconKey={roll?.zone.iconKey ?? "consent"}
               tone="teal"
+              dataState={roll ? "filled" : "empty"}
             />
           </div>
           <p data-testid="result-text" data-is-rolling={rolling} className="instruction">
