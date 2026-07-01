@@ -513,31 +513,144 @@ test.describe("custom mixes", () => {
     await page.reload();
     await acceptConsent(page);
 
-    await test.step("Open mix", async () => {
+    await test.step("Open mix and first action card", async () => {
       await page.getByTestId(`mix-chip-${id}`).dblclick();
       await expect(page.getByTestId("mix-modal")).toBeVisible();
+      await page.getByTestId("card-summary-actions-action-0").click();
     });
 
-
-
-    await test.step("Open first action card, expand and select zones", async () => {
+    await test.step("Select two allowed zones", async () => {
       const card = page.getByTestId("card-actions-action-0");
-
-      await page.getByTestId("card-summary-actions-action-0").click();
       await expect(card.getByText("Alle Orte erlaubt")).toBeVisible();
       await card.getByTestId("zone-selector-input").click();
       await expect(card.getByTestId("zone-option-zone-0")).toBeVisible();
       await card.getByTestId("zone-option-zone-0").click();
       await card.getByTestId("zone-option-zone-1").click();
       await expect(card.locator(".zone-chip")).toContainText(["Zone 1", "Zone 2"]);
-
-      await test.step("Remove Zone 1 from list", async () => {
-        await card.getByTestId("zone-chip-remove-zone-0").click();
-        await expect(card.locator(".zone-chip")).toHaveCount(1);
-        await expect(card.locator(".zone-chip")).toContainText("Zone 2");
-      });
     });
 
+    await test.step("Remove one selected zone via chip", async () => {
+      const card = page.getByTestId("card-actions-action-0");
+      await card.getByTestId("zone-chip-remove-zone-0").click();
+      await expect(card.locator(".zone-chip")).toHaveCount(1);
+      await expect(card.locator(".zone-chip")).toContainText("Zone 2");
+    });
+  });
+
+  test("zone selector: select all and clear all", async ({ page }) => {
+    const name = `E2E Mix ${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    const id = await createCustomMix(page, name);
+    await page.reload();
+    await acceptConsent(page);
+
+    await test.step("Open mix and first action selector", async () => {
+      await page.getByTestId(`mix-chip-${id}`).dblclick();
+      await expect(page.getByTestId("mix-modal")).toBeVisible();
+      await page.getByTestId("card-summary-actions-action-0").click();
+      await page.getByTestId("card-actions-action-0").getByTestId("zone-selector-input").click();
+    });
+
+    await test.step("Select all available zones", async () => {
+      const card = page.getByTestId("card-actions-action-0");
+      await card.getByTestId("zone-selector-all").click();
+      await expect(card.locator(".zone-chip")).toHaveCount(6);
+      for (let i = 0; i < 6; i++) {
+        await expect(card.locator(".zone-chip").filter({ hasText: `Zone ${i + 1}` })).toHaveCount(
+          1
+        );
+      }
+    });
+
+    await test.step("Clear all selected zones", async () => {
+      const card = page.getByTestId("card-actions-action-0");
+      await expect(card.locator(".zone-selector-dropdown")).toBeVisible();
+      await card.getByTestId("zone-selector-clear").click();
+      await expect(card.locator(".zone-chip")).toHaveCount(0);
+      await expect(card.getByText("Alle Orte erlaubt")).toBeVisible();
+    });
+  });
+
+  test("zone selector: closes on Escape and outside click", async ({ page }) => {
+    const name = `E2E Mix ${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    const id = await createCustomMix(page, name);
+    await page.reload();
+    await acceptConsent(page);
+
+    await test.step("Open mix and first action selector", async () => {
+      await page.getByTestId(`mix-chip-${id}`).dblclick();
+      await expect(page.getByTestId("mix-modal")).toBeVisible();
+      await page.getByTestId("card-summary-actions-action-0").click();
+      await page.getByTestId("card-actions-action-0").getByTestId("zone-selector-input").click();
+      await expect(
+        page.getByTestId("card-actions-action-0").locator(".zone-selector-dropdown")
+      ).toBeVisible();
+    });
+
+    await test.step("Close dropdown with Escape", async () => {
+      const card = page.getByTestId("card-actions-action-0");
+      await page.keyboard.press("Escape");
+      await expect(card.locator(".zone-selector-dropdown")).toHaveCount(0);
+    });
+
+    await test.step("Close dropdown with outside click", async () => {
+      const card = page.getByTestId("card-actions-action-0");
+      await card.getByTestId("zone-selector-input").click();
+      await expect(card.locator(".zone-selector-dropdown")).toBeVisible();
+      await page.getByTestId("mix-name").click();
+      await expect(card.locator(".zone-selector-dropdown")).toHaveCount(0);
+    });
+  });
+
+  test("zone selector: dynamically added and renamed zones appear immediately", async ({
+    page
+  }) => {
+    const name = `E2E Mix ${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    const id = await createCustomMix(page, name);
+    await page.reload();
+    await acceptConsent(page);
+
+    await test.step("Open mix and first action card", async () => {
+      await page.getByTestId(`mix-chip-${id}`).dblclick();
+      await expect(page.getByTestId("mix-modal")).toBeVisible();
+      await page.getByTestId("card-summary-actions-action-0").click();
+    });
+
+    await test.step("Add a new zone in the same modal", async () => {
+      await page.getByTestId("add-zones").click();
+      await expect(page.locator('[data-testid^="card-zones-"]')).toHaveCount(7);
+    });
+
+    let newZoneId = "";
+    await test.step("Read the generated zone id and rename the new zone", async () => {
+      const newZoneCard = page.locator('[data-testid^="card-zones-"]').last();
+      const testId = await newZoneCard.getAttribute("data-testid");
+      newZoneId = testId?.replace("card-zones-", "") ?? "";
+      expect(newZoneId).toBeTruthy();
+      await newZoneCard.getByTestId(`input-label-zones-${newZoneId}`).fill("E2E Dynamic Zone");
+    });
+
+    await test.step("Verify the new zone is immediately available in the action selector", async () => {
+      const actionCard = page.getByTestId("card-actions-action-0");
+      await actionCard.getByTestId("zone-selector-input").click();
+      await expect(actionCard.getByTestId(`zone-option-${newZoneId}`)).toContainText(
+        "E2E Dynamic Zone"
+      );
+    });
+
+    await test.step("Select the new zone and verify chip label follows the rename", async () => {
+      const actionCard = page.getByTestId("card-actions-action-0");
+      await actionCard.getByTestId(`zone-option-${newZoneId}`).click();
+      await expect(actionCard.locator(".zone-chip")).toContainText("E2E Dynamic Zone");
+
+      await page.getByTestId(`input-label-zones-${newZoneId}`).fill("E2E Renamed Dynamic Zone");
+      await expect(actionCard.locator(".zone-chip")).toContainText("E2E Renamed Dynamic Zone");
+
+      await page.keyboard.press("Escape");
+      await actionCard.getByTestId("zone-selector-input").click();
+      await expect(actionCard.getByTestId(`zone-option-${newZoneId}`)).toContainText(
+        "E2E Renamed Dynamic Zone"
+      );
+    });
   });
 
   test("zone selector: empty selection means all zones allowed after save", async ({ page }) => {
@@ -546,14 +659,13 @@ test.describe("custom mixes", () => {
     await page.reload();
     await acceptConsent(page);
 
-    await test.step("Open mix", async () => {
+    await test.step("Open mix and first action card", async () => {
       await page.getByTestId(`mix-chip-${id}`).dblclick();
       await expect(page.getByTestId("mix-modal")).toBeVisible();
+      await page.getByTestId("card-summary-actions-action-0").click();
     });
 
-
-    await test.step("Open and expand first action", async () => {
-      await page.getByTestId("card-summary-actions-action-0").click();
+    await test.step("Select and then remove the only allowed zone", async () => {
       const card = page.getByTestId("card-actions-action-0");
       await card.getByTestId("zone-selector-input").click();
       await card.getByTestId("zone-option-zone-0").click();
@@ -561,56 +673,53 @@ test.describe("custom mixes", () => {
       await expect(card.getByText("Alle Orte erlaubt")).toBeVisible();
     });
 
-  await test.step("Save mix and verify allowedZoneIds is undefined", async () => {
-    await page.getByTestId("mix-save").click();
-    const savedMix = await page.evaluate((mixId) => {
-      const mixes = JSON.parse(localStorage.getItem("love-dice-custom-mixes") || "[]");
-      return mixes.find((mix: any) => mix.id === mixId);
-    }, id);
-    expect(savedMix.actions[0].allowedZoneIds).toBeUndefined();
-  });
-
-  });
-
-  test("zone selector: orphaned zone ids are removed on save", async ({ page }) => {
-    const name = `E2E Mix ${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-    const id = await createCustomMix(page, name);
-    await page.evaluate((mixId) => {
-      const key = "love-dice-custom-mixes";
-      const mixes = JSON.parse(localStorage.getItem(key) || "[]");
-      const mix = mixes.find((item: any) => item.id === mixId);
-      mix.actions[0].allowedZoneIds = ["zone-0", "missing-zone"];
-      mix.zones.push({
-        id: "zone-extra",
-        label: "Extra Zone",
-        accusative: "die Extra Zone",
-        iconKey: "consent",
-        enabled: true,
-        moods: ["custom"]
-      });
-      localStorage.setItem(key, JSON.stringify(mixes));
-    }, id);
-    await page.reload();
-    await acceptConsent(page);
-
-    await test.step("Open mix", async () => {
-      await page.getByTestId(`mix-chip-${id}`).dblclick();
-      await expect(page.getByTestId("mix-modal")).toBeVisible();
-    });
-
-    await test.step("Remove first zone and save", async () => {
-
-      await page.getByTestId("remove-zones-zone-0").click();
+    await test.step("Save mix and verify allowedZoneIds is undefined", async () => {
       await page.getByTestId("mix-save").click();
-    });
-
-    await test.step("Verify allowed zoneIds is undefined", async () => {
       const savedMix = await page.evaluate((mixId) => {
         const mixes = JSON.parse(localStorage.getItem("love-dice-custom-mixes") || "[]");
         return mixes.find((mix: any) => mix.id === mixId);
       }, id);
       expect(savedMix.actions[0].allowedZoneIds).toBeUndefined();
     });
+  });
 
+  test("zone selector: orphaned zone ids are removed on save", async ({ page }) => {
+    const name = `E2E Mix ${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    const id = await createCustomMix(page, name);
+
+    await test.step("Seed mix with one valid and one missing allowed zone id", async () => {
+      await page.evaluate((mixId) => {
+        const key = "love-dice-custom-mixes";
+        const mixes = JSON.parse(localStorage.getItem(key) || "[]");
+        const mix = mixes.find((item: any) => item.id === mixId);
+        mix.actions[0].allowedZoneIds = ["zone-0", "missing-zone"];
+        mix.zones.push({
+          id: "zone-extra",
+          label: "Extra Zone",
+          accusative: "die Extra Zone",
+          iconKey: "consent",
+          enabled: true,
+          moods: ["custom"]
+        });
+        localStorage.setItem(key, JSON.stringify(mixes));
+      }, id);
+      await page.reload();
+      await acceptConsent(page);
+    });
+
+    await test.step("Open mix and remove the remaining valid selected zone", async () => {
+      await page.getByTestId(`mix-chip-${id}`).dblclick();
+      await expect(page.getByTestId("mix-modal")).toBeVisible();
+      await page.getByTestId("remove-zones-zone-0").click();
+    });
+
+    await test.step("Save mix and verify allowedZoneIds is undefined", async () => {
+      await page.getByTestId("mix-save").click();
+      const savedMix = await page.evaluate((mixId) => {
+        const mixes = JSON.parse(localStorage.getItem("love-dice-custom-mixes") || "[]");
+        return mixes.find((mix: any) => mix.id === mixId);
+      }, id);
+      expect(savedMix.actions[0].allowedZoneIds).toBeUndefined();
+    });
   });
 });
