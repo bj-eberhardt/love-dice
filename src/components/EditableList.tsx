@@ -1,6 +1,7 @@
-import { Plus, Trash2 } from "lucide-react";
+﻿import { Plus, Trash2 } from "lucide-react";
 import { type DiceAction, type Zone } from "@/shared";
 import { iconFor } from "@/features/game/icons";
+import { ZoneSelector } from "./ZoneSelector";
 
 interface EditableListProps {
   title: string;
@@ -15,6 +16,8 @@ interface EditableListProps {
   onExpandedChange: React.Dispatch<React.SetStateAction<Set<string>>>;
   onActionText?: (id: string, text: string) => void;
   onZoneText?: (id: string, text: string) => void;
+  availableZones?: Zone[];
+  onZoneRestrictionChange?: (id: string, zoneIds: string[] | undefined) => void;
 }
 
 export function EditableList({
@@ -29,13 +32,17 @@ export function EditableList({
   onActionText,
   expandedIds,
   onExpandedChange,
-  onZoneText
+  onZoneText,
+  availableZones = [],
+  onZoneRestrictionChange
 }: EditableListProps) {
   return (
     <div className="config-list editable-list">
       <div className="list-head">
         <h3>{title}</h3>
-        <button data-testid={`add-${kind}`} className="ghost" onClick={onAdd}><Plus size={16} /> Hinzufügen</button>
+        <button data-testid={`add-${kind}`} className="ghost" onClick={onAdd}>
+          <Plus size={16} /> Hinzufügen
+        </button>
       </div>
       {items.map((item) => {
         const isExpanded = expandedIds.has(item.id);
@@ -49,7 +56,14 @@ export function EditableList({
         };
 
         return (
-          <div key={item.id} data-testid={`card-${kind}-${item.id}`} ref={(element) => { cardRefs.current[item.id] = element; }} className={isExpanded ? "editable-item expanded" : "editable-item"}>
+          <div
+            key={item.id}
+            data-testid={`card-${kind}-${item.id}`}
+            ref={(element) => {
+              cardRefs.current[item.id] = element;
+            }}
+            className={isExpanded ? "editable-item expanded" : "editable-item"}
+          >
             <div className="card-header">
               <input
                 data-testid={`toggle-${kind}-${item.id}`}
@@ -58,10 +72,24 @@ export function EditableList({
                 onChange={() => onToggle(item.id)}
                 aria-label={`${item.label} aktivieren`}
               />
-              <button data-testid={`card-summary-${kind}-${item.id}`} className="card-summary" type="button" aria-expanded={isExpanded} onClick={toggleExpanded}>
-                <span data-testid={`item-${kind}-title`} className="collapsed-name">{item.label}</span>
+              <button
+                data-testid={`card-summary-${kind}-${item.id}`}
+                className="card-summary"
+                type="button"
+                aria-expanded={isExpanded}
+                onClick={toggleExpanded}
+              >
+                <span data-testid={`item-${kind}-title`} className="collapsed-name">
+                  {item.label}
+                </span>
               </button>
-              <button data-testid={`remove-${kind}-${item.id}`} className="trash-icon" type="button" aria-label={`${item.label} entfernen`} onClick={() => onRemove(item.id)}>
+              <button
+                data-testid={`remove-${kind}-${item.id}`}
+                className="trash-icon"
+                type="button"
+                aria-label={`${item.label} entfernen`}
+                onClick={() => onRemove(item.id)}
+              >
                 <Trash2 size={17} />
               </button>
             </div>
@@ -71,20 +99,53 @@ export function EditableList({
                 <div className="card-icon">{iconFor(item.iconKey, "card-icon-svg")}</div>
                 <label className="field">
                   <span>{kind === "actions" ? "Name auf dem Würfel" : "Ort auf dem Würfel"}</span>
-                  <input data-testid={`input-label-${kind}-${item.id}`} required value={item.label} onChange={(event) => onLabel(item.id, event.target.value)} />
+                  <input
+                    data-testid={`input-label-${kind}-${item.id}`}
+                    required
+                    value={item.label}
+                    onChange={(event) => onLabel(item.id, event.target.value)}
+                  />
                 </label>
                 {"instructionTemplate" in item && onActionText ? (
-                  <label className="field full-field">
-                    <span>Aufgabe</span>
-                    <input data-testid={`input-action-${item.id}`} required value={actionTextFromTemplate(item.instructionTemplate)} onChange={(event) => onActionText(item.id, event.target.value)} />
-                    <small>Der gewürfelte Ort wird automatisch ergänzt. Schreibe optional <code>{"{ort}"}</code> an die gewünschte Stelle im Satz.</small>
-                  </label>
+                  <>
+                    <label className="field full-field">
+                      <span>Aufgabe</span>
+                      <input
+                        data-testid={`input-action-${item.id}`}
+                        required
+                        value={actionTextFromTemplate(item.instructionTemplate)}
+                        onChange={(event) => onActionText(item.id, event.target.value)}
+                      />
+                      <small>
+                        Der gewürfelte Ort wird automatisch ergänzt. Schreibe optional{" "}
+                        <code>{"{ort}"}</code> an die gewünschte Stelle im Satz.
+                      </small>
+                    </label>
+                    {onZoneRestrictionChange ? (
+                      <div className="field full-field">
+                        <span>Erlaubte Orte</span>
+                        <ZoneSelector
+                          selectedZoneIds={item.allowedZoneIds}
+                          availableZones={availableZones}
+                          onChange={(zoneIds) => onZoneRestrictionChange(item.id, zoneIds)}
+                        />
+                        <small>Leer bedeutet: Alle Orte sind für diese Aktion erlaubt.</small>
+                      </div>
+                    ) : null}
+                  </>
                 ) : null}
                 {"accusative" in item && onZoneText ? (
                   <label className="field full-field">
                     <span>Ort im Ergebnistext</span>
-                    <input data-testid={`input-zone-${item.id}`} required value={item.accusative} onChange={(event) => onZoneText(item.id, event.target.value)} />
-                    <small>So erscheint der Ort im Satz, z. B. „den Nacken" oder „die Hände".</small>
+                    <input
+                      data-testid={`input-zone-${item.id}`}
+                      required
+                      value={item.accusative}
+                      onChange={(event) => onZoneText(item.id, event.target.value)}
+                    />
+                    <small>
+                      So erscheint der Ort im Satz, z. B. „den Nacken" oder „die Hände".
+                    </small>
                   </label>
                 ) : null}
               </div>

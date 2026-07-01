@@ -1,14 +1,14 @@
 # Love Dice Game
 
-Eine lokale Browser-App fuer ein einvernehmliches Paar-Wuerfelspiel mit zwei interaktiven 3D-Wuerfeln: Aktion und Zone. Die App benoetigt kein Backend. Konfiguration und Spielzustand werden im Browser ueber `localStorage` persistiert.
+Eine lokale Browser-App für ein einvernehmliches Paar-Würfelspiel mit zwei interaktiven 3D-Würfeln: Aktion und Zone. Die App benötigt kein Backend. Konfiguration und Spielzustand werden im Browser über `localStorage` persistiert.
 
 ## Features
 
-- Consent-Startscreen fuer Volljaehrigkeit, Zustimmung und jederzeitiges Ueberspringen.
+- Consent-Startscreen für Volljährigkeit, Zustimmung und jederzeitiges Überspringen.
 - Stimmungsauswahl: Romantisch, Verspielt, Mutig und Eigene Mischung.
-- Zwei 3D-Wuerfel mit React Three Fiber und Three.js.
-- Pro Runde werden sechs erlaubte Aktionen und sechs erlaubte Zonen zufaellig auf die Wuerfel gelegt.
-- Die Wuerfelanimation landet deterministisch auf dem ausgewaehlten Ergebnis, damit Icon und Ergebnissatz zusammenpassen.
+- Zwei 3D-Würfel mit React Three Fiber und Three.js.
+- Pro Runde werden sechs erlaubte Aktionen und sechs erlaubte Zonen zufällig auf die Würfel gelegt.
+- Die Würfelanimation landet deterministisch auf dem ausgewählten Ergebnis, damit Icon und Ergebnissatz zusammenpassen.
 - Regelbasierte Kombinationslogik mit `zoneMode`, erlaubten Zonen und blockierten Zonen.
 - Ergebnistext aus konfigurierbaren Templates, z. B. `Massiere {zone.accusative}.`.
 - Konfigurationspanel zum Aktivieren/Deaktivieren von Aktionen und Zonen.
@@ -36,7 +36,7 @@ src/
     styles/global.css             # Globales UI-Styling
 ```
 
-Es gibt kein `apps/api`, keine Server-Routes, keine Datenbank und keine API-Abhaengigkeit. Persistenz passiert lokal im Browser.
+Es gibt kein `apps/api`, keine Server-Routes, keine Datenbank und keine API-Abhängigkeit. Persistenz passiert lokal im Browser.
 
 ## Entwicklung
 
@@ -57,7 +57,7 @@ Dev-Server starten:
 npm run dev
 ```
 
-Die App laeuft dann unter:
+Die App läuft dann unter:
 
 ```text
 http://localhost:5544
@@ -66,11 +66,11 @@ http://localhost:5544
 Wichtige Scripts:
 
 ```bash
-npm run typecheck      # TypeScript-Pruefung
+npm run typecheck      # TypeScript-Prüfung
 npm run lint           # ESLint
 npm run lint:fix       # ESLint Auto-Fixes
 npm run format         # Prettier formatieren
-npm run format:check   # Prettier pruefen
+npm run format:check   # Prettier prüfen
 npm run build          # Produktionsbuild nach dist/client
 npm run start          # Vite Preview auf Port 5544
 ```
@@ -92,6 +92,7 @@ npm run test:ui:debug  # run Playwright in debug mode
 ```
 
 Guidance for tests:
+
 - Tests use data-testid attributes for stable selectors (e.g. data-testid="consent-accept", data-testid="roll-button", data-testid="result-text").
 - Tests are in tests/ui and use descriptive test.step blocks to document test phases.
 - Avoid relying on translations; use data-ids or configuration ids where possible.
@@ -148,10 +149,10 @@ src/shared/defaults/configuration.ts
 
 Wichtige Felder:
 
-- `actions`: Aktionen fuer den Aktionswuerfel.
-- `zones`: Koerperbereiche/Zonen fuer den Zonenwuerfel.
+- `actions`: Aktionen für den Aktionswürfel.
+- `zones`: Körperbereiche/Zonen für den Zonenwürfel.
 - `moods`: Stimmungen, in denen ein Eintrag aktiv sein kann.
-- `enabled`: Ob ein Eintrag grundsaetzlich aktiv ist.
+- `enabled`: Ob ein Eintrag grundsätzlich aktiv ist.
 - `instructionTemplate`: Ergebnissatz mit Platzhaltern.
 - `zoneMode`: `required`, `optional` oder `ignore`.
 - `allowedZoneIds` / `blockedZoneIds`: optionale Kombinationsregeln.
@@ -161,6 +162,5 @@ Die Runtime-Konfiguration wird im Browser unter dem Key `love-dice-config` gespe
 ## Hinweise
 
 - Es gibt aktuell keine Backend-Speicherung, keine Benutzerkonten und kein Tracking.
-- Die 3D-Szene nutzt WebGL; der visuelle Wuerfel ist nicht die einzige Informationsquelle, da das Ergebnis immer auch textlich angezeigt wird.
-- Der grosse JavaScript-Bundle-Hinweis beim Build kommt vor allem von Three.js. Das ist fuer die aktuelle Version akzeptiert; bei Bedarf kann spaeter Code-Splitting fuer die 3D-Szene ergaenzt werden.
-
+- Die 3D-Szene nutzt WebGL; der visuelle Würfel ist nicht die einzige Informationsquelle, da das Ergebnis immer auch textlich angezeigt wird.
+- Der große JavaScript-Bundle-Hinweis beim Build kommt vor allem von Three.js. Das ist für die aktuelle Version akzeptiert; bei Bedarf kann später Code-Splitting für die 3D-Szene ergänzt werden.

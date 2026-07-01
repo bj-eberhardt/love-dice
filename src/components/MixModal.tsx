@@ -21,21 +21,26 @@ export function MixModal({ draft, saveError, onChange, onClose, onSave, onDelete
 
   const scrollToCard = (id: string) => {
     setExpandedIds((ids) => new Set(ids).add(id));
-    window.setTimeout(() => cardRefs.current[id]?.scrollIntoView({ behavior: "smooth", block: "center" }), 30);
+    window.setTimeout(
+      () => cardRefs.current[id]?.scrollIntoView({ behavior: "smooth", block: "center" }),
+      30
+    );
   };
 
   const updateName = (name: string) => onChange({ ...draft, name });
-  
+
   const toggle = (kind: "actions" | "zones", id: string) => {
     onChange({
       ...draft,
-      [kind]: draft[kind].map((item) => (item.id === id ? { ...item, enabled: !item.enabled } : item))
+      [kind]: draft[kind].map((item) =>
+        item.id === id ? { ...item, enabled: !item.enabled } : item
+      )
     });
   };
-  
-  const remove = (kind: "actions" | "zones", id: string) => 
+
+  const remove = (kind: "actions" | "zones", id: string) =>
     onChange({ ...draft, [kind]: draft[kind].filter((item) => item.id !== id) });
-  
+
   const addAction = () => {
     const id = createId("action");
     onChange({
@@ -55,7 +60,7 @@ export function MixModal({ draft, saveError, onChange, onClose, onSave, onDelete
     });
     scrollToCard(id);
   };
-  
+
   const addZone = () => {
     const id = createId("zone");
     onChange({
@@ -74,23 +79,34 @@ export function MixModal({ draft, saveError, onChange, onClose, onSave, onDelete
     });
     scrollToCard(id);
   };
-  
+
   const editLabel = (kind: "actions" | "zones", id: string, label: string) => {
-    onChange({ ...draft, [kind]: draft[kind].map((item) => (item.id === id ? { ...item, label } : item)) });
+    onChange({
+      ...draft,
+      [kind]: draft[kind].map((item) => (item.id === id ? { ...item, label } : item))
+    });
   };
-  
+
   const editActionText = (id: string, text: string) => {
     onChange({
       ...draft,
-      actions: draft.actions.map((item) => (item.id === id ? { ...item, instructionTemplate: templateFromActionText(text) } : item))
+      actions: draft.actions.map((item) =>
+        item.id === id ? { ...item, instructionTemplate: templateFromActionText(text) } : item
+      )
     });
   };
-  
+
   const editZoneText = (id: string, value: string) => {
     onChange({
       ...draft,
-      zones: draft.zones.map((item) =>
-        item.id === id ? { ...item, accusative: value } : item
+      zones: draft.zones.map((item) => (item.id === id ? { ...item, accusative: value } : item))
+    });
+  };
+  const editZoneRestrictions = (actionId: string, zoneIds: string[] | undefined) => {
+    onChange({
+      ...draft,
+      actions: draft.actions.map((item) =>
+        item.id === actionId ? { ...item, allowedZoneIds: zoneIds } : item
       )
     });
   };
@@ -109,7 +125,11 @@ export function MixModal({ draft, saveError, onChange, onClose, onSave, onDelete
     if (!file) return;
     try {
       const imported = configurationSchema.parse(JSON.parse(await file.text()));
-      onChange({ ...imported, id: imported.id || createId("mix"), updatedAt: new Date().toISOString() });
+      onChange({
+        ...imported,
+        id: imported.id || createId("mix"),
+        updatedAt: new Date().toISOString()
+      });
       setFormError("");
     } catch (caught) {
       setFormError(formatZodError(caught));
@@ -120,23 +140,52 @@ export function MixModal({ draft, saveError, onChange, onClose, onSave, onDelete
 
   return (
     <div className="modal-backdrop" role="presentation">
-      <section data-testid="mix-modal" className="modal" role="dialog" aria-modal="true" aria-labelledby="mix-title" aria-describedby="mix-description">
+      <section
+        data-testid="mix-modal"
+        className="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="mix-title"
+        aria-describedby="mix-description"
+      >
         <div className="modal-head">
           <div>
             <p className="eyebrow">Eigene Mischung</p>
             <h2 id="mix-title">Mischung konfigurieren</h2>
-            <p id="mix-description" className="modal-description">Wähle Aktionen und Orte aus. Klappe Karten auf, wenn du Texte ändern möchtest.</p>
+            <p id="mix-description" className="modal-description">
+              Wähle Aktionen und Orte aus. Klappe Karten auf, wenn du Texte ändern möchtest.
+            </p>
           </div>
           <div className="modal-head-actions">
-            <button data-testid="mix-import" className="secondary" onClick={() => fileRef.current?.click()}><Upload size={17} /> JSON importieren</button>
-            <button data-testid="mix-close" className="ghost" onClick={onClose}>Schließen</button>
+            <button
+              data-testid="mix-import"
+              className="secondary"
+              onClick={() => fileRef.current?.click()}
+            >
+              <Upload size={17} /> JSON importieren
+            </button>
+            <button data-testid="mix-close" className="ghost" onClick={onClose}>
+              Schließen
+            </button>
           </div>
-          <input data-testid="mix-import-input" ref={fileRef} hidden type="file" accept="application/json" onChange={importDraft} />
+          <input
+            data-testid="mix-import-input"
+            ref={fileRef}
+            hidden
+            type="file"
+            accept="application/json"
+            onChange={importDraft}
+          />
         </div>
 
         <label className="field full-field">
           <span>Name</span>
-          <input data-testid="mix-name" required value={draft.name} onChange={(event) => updateName(event.target.value)} />
+          <input
+            data-testid="mix-name"
+            required
+            value={draft.name}
+            onChange={(event) => updateName(event.target.value)}
+          />
         </label>
 
         <div className="config-grid modal-grid">
@@ -152,6 +201,8 @@ export function MixModal({ draft, saveError, onChange, onClose, onSave, onDelete
             expandedIds={expandedIds}
             onExpandedChange={setExpandedIds}
             onActionText={editActionText}
+            availableZones={draft.zones}
+            onZoneRestrictionChange={editZoneRestrictions}
           />
           <EditableList
             title="Orte"
@@ -168,15 +219,33 @@ export function MixModal({ draft, saveError, onChange, onClose, onSave, onDelete
           />
         </div>
 
-        {formError ? <p className="form-warning" role="alert">{formError}</p> : null}
-        {saveError ? <p className="form-warning" role="alert">{saveError}</p> : null}
+        {formError ? (
+          <p className="form-warning" role="alert">
+            {formError}
+          </p>
+        ) : null}
+        {saveError ? (
+          <p className="form-warning" role="alert">
+            {saveError}
+          </p>
+        ) : null}
 
         <div className="modal-footer">
-          <p>{draft.actions.filter((item) => item.enabled).length} Aktionen, {draft.zones.filter((item) => item.enabled).length} Orte aktiv. Für Würfe braucht es jeweils mindestens sechs.</p>
-          <button data-testid="mix-delete" className="danger" onClick={onDelete}><Trash2 size={17} /> Mischung löschen</button>
+          <p>
+            {draft.actions.filter((item) => item.enabled).length} Aktionen,{" "}
+            {draft.zones.filter((item) => item.enabled).length} Orte aktiv. Für Würfe braucht es
+            jeweils mindestens sechs.
+          </p>
+          <button data-testid="mix-delete" className="danger" onClick={onDelete}>
+            <Trash2 size={17} /> Mischung löschen
+          </button>
           <div className="modal-footer-actions">
-            <button data-testid="mix-export" className="secondary" onClick={exportDraft}><Download size={17} /> JSON exportieren</button>
-            <button data-testid="mix-save" className="primary" onClick={onSave}><Save size={18} /> Mischung speichern</button>
+            <button data-testid="mix-export" className="secondary" onClick={exportDraft}>
+              <Download size={17} /> JSON exportieren
+            </button>
+            <button data-testid="mix-save" className="primary" onClick={onSave}>
+              <Save size={18} /> Mischung speichern
+            </button>
           </div>
         </div>
       </section>

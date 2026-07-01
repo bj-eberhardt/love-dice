@@ -46,7 +46,8 @@ export const defaultConfiguration: DiceConfiguration = {
     {
       id: "surprise",
       label: "Überraschen",
-      instructionTemplate: "Überrasche dein Gegenüber mit einer zärtlichen Idee für {zone.accusative}.",
+      instructionTemplate:
+        "Überrasche dein Gegenüber mit einer zärtlichen Idee für {zone.accusative}.",
       zoneMode: "optional",
       iconKey: "sparkle",
       enabled: true,

@@ -58,7 +58,7 @@ Playwright UI tests:
 - Create tests under tests/ui and a playwright.config.ts that runs a preview server on port 5545 so tests can run parallel to dev on 5544.
 - Scripts added: preview:test, test:ui, test:ui:headed, test:ui:debug
 
-When adding tests, prefer data-testid attributes for selectors and use test.step to describe test phases. try to structure tests as best as possible. try to reuse helper instead of code duplication. 
+When adding tests, prefer data-testid attributes for selectors and use test.step to describe test phases. try to structure tests as best as possible. try to reuse helper instead of code duplication.
 
 test the changes by using headless test run (npm run test:ui:headless) and analyze the errors of the test run.
 
@@ -77,7 +77,7 @@ docker compose up --build
 ## Regeln für Änderungen
 
 - Nach jeder durchgeführten Aktion oder strukturellen Änderung muss `AGENT.md` aktualisiert werden, sodass AI-Tools den aktuellen Projektstand, die Architektur und wichtige Entscheidungen sofort erkennen.
-- Umlaute und deutschsprachige Texte immer direkt als UTF-8 schreiben, z. B. `für`, `Würfel`, `Änderung`, nicht als Umschreibung wie `fuer` oder `Wuerfel`.
+- Umlaute und deutschsprachige Texte immer direkt als UTF-8 schreiben, z. B. `für`, `Würfel`, `Änderung`, nicht als Umschreibung wie `für` oder `Würfel`.
 - Keine Backend-Komponenten einführen, solange es keinen klaren Need gibt.
 - Keine API-/Serverpersistenz annehmen; localStorage ist die Quelle für nutzerangepasste Konfiguration.
 - Bei neuen Spielinhalten zuerst `configuration.ts` und die Zod-Schemas beachten.
@@ -107,12 +107,11 @@ docker compose up --build
 
 - Mischungsdialog: Aktions- und Ortskarten sind standardmäßig eingeklappt. Der Header zeigt nur Aktiv-Schalter, Namen, Expand-Indikator und rotes Entfernen-Icon. Klick auf den Header toggelt Details; neu hinzugefügte Karten werden automatisch aufgeklappt und angesprungen.
 
-- Mischungsdialog zugänglicher gemacht: Dialog hat Titel und Beschreibung, Importfehler haben 
-ole=alert, Kartenheader nutzt getrennte Checkbox/Header-Button/Delete-Button ohne verschachtelte Interaktionen. Header-Kontrast verbessert, kein Expand-Icon mehr. Aufgaben unterstützen {ort} als intuitive Platzhalter-Schreibweise; beim Speichern wird sie intern auf den Zonenplatzhalter abgebildet.
+- Mischungsdialog zugänglicher gemacht: Dialog hat Titel und Beschreibung, Importfehler haben
+  ole=alert, Kartenheader nutzt getrennte Checkbox/Header-Button/Delete-Button ohne verschachtelte Interaktionen. Header-Kontrast verbessert, kein Expand-Icon mehr. Aufgaben unterstützen {ort} als intuitive Platzhalter-Schreibweise; beim Speichern wird sie intern auf den Zonenplatzhalter abgebildet.
 
 - Mode-Bar eigene Mischungen: Chips zeigen keine dauerhaften Edit/Delete-Icons mehr. Bei aktiver eigener Mischung erscheint ein …-Menü mit Bearbeiten/Löschen. Doppelklick und Long-Press auf einen Mischungs-Chip öffnen weiterhin das Edit-Modal. Löschen nutzt überall einen wiederverwendbaren ConfirmDialog. Scroll-Hints erscheinen nur bei tatsächlichem horizontalem Overflow und nur in scrollbare Richtung.
 
 - Mix-Menü in der Mode-Bar als Split-Button umgesetzt: aktiver eigener Mix zeigt … innerhalb derselben Chip-Hülle. Dropdown erhält hohen z-index und die horizontale Scroll-Leiste reserviert vertikalen Freiraum, damit das Menü nicht abgeschnitten wird.
 - Eigene Mischungen können über das aktive …-Menü kopiert werden. Kopien erhalten automatisch eindeutige Namen nach dem Muster Name Kopie, Name Kopie 2 usw.; beim Speichern blockiert das Modal leere oder doppelte Mischungsnamen mit einer sichtbaren Warnung.
 - Es dürfen nur Mischungen gespeichert werden, wo mindestens 6 Orte und mindestens 6 Aktionen gewhält wurden, die aktiv sind.
-
