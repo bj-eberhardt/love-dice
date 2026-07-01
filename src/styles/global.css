@@ -125,41 +125,63 @@ input {
 }
 
 .mode-scroll-wrap {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) 18px;
+  gap: 4px;
   min-width: 0;
-  position: relative;
 }
 
 .mode-scroll {
   display: flex;
   gap: 12px;
+  grid-column: 2;
+  min-width: 0;
   overflow-x: auto;
   overflow-y: hidden;
-  padding: 2px 26px 142px;
+  padding: 2px 0 142px;
   margin-bottom: -134px;
-  scrollbar-color: #485269 transparent;
-  scrollbar-width: thin;
+  scrollbar-width: none;
   white-space: nowrap;
+  width: 100%;
+}
+
+.mode-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.mode-scroll > * {
+  flex: 0 0 auto;
 }
 
 .scroll-hint {
   align-items: center;
-  bottom: auto;
+  background: transparent;
   color: #b8c0d3;
   display: flex;
   font-size: 1.8rem;
-  pointer-events: none;
-  position: absolute;
   height: 44px;
-  top: 2px;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0;
+  width: 18px;
   z-index: 1;
 }
 
+.scroll-hint:disabled {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.scroll-hint:not(:disabled):hover {
+  color: #f7f8fc;
+}
+
 .scroll-hint.left {
-  left: 0;
+  grid-column: 1;
 }
 
 .scroll-hint.right {
-  right: 0;
+  grid-column: 3;
 }
 
 .mix-chip-group {
@@ -318,8 +340,16 @@ input {
   background: linear-gradient(180deg, #141824, #0d1018);
   border: 1px solid #252b3a;
   border-radius: 8px;
+  justify-self: center;
   min-height: 360px;
+  max-width: 100%;
   overflow: hidden;
+  width: 100%;
+}
+
+.dice-stage canvas {
+  display: block;
+  margin: 0 auto;
 }
 
 .result-panel,
@@ -440,8 +470,14 @@ input {
   align-items: center;
   display: grid;
   gap: 14px;
-  grid-template-columns: 1fr auto auto;
 }
+
+@media screen and (min-width: 860px) {
+  .modal-footer {
+    grid-template-columns: 1fr auto auto;
+  }
+}
+
 
 .modal-footer > p {
   justify-self: start;
@@ -502,7 +538,7 @@ input {
   background: #1d2433;
   display: grid;
   gap: 10px;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
   min-height: 56px;
   padding: 10px 12px;
 }
@@ -547,6 +583,16 @@ button:focus-visible {
   align-items: center;
   background: #2b1d2a;
   border: 1px solid #ff7bb7;
+  border-radius: 8px;
+  color: #ffd6e6;
+  display: inline-flex;
+  justify-content: center;
+  min-height: 34px;
+  padding: 0 9px;
+}
+.expand-icon {
+  align-items: center;
+  background: inherit;
   border-radius: 8px;
   color: #ffd6e6;
   display: inline-flex;
@@ -604,6 +650,10 @@ button:focus-visible {
     padding: 18px;
   }
 
+  .app-shell {
+    padding-bottom: 104px;
+  }
+
   .game-layout,
   .config-grid,
   .mode-bar {
@@ -616,6 +666,22 @@ button:focus-visible {
 
   .sticky-add {
     width: 100%;
+  }
+
+  .controls {
+    bottom: 18px;
+    justify-content: center;
+    left: 18px;
+    pointer-events: none;
+    position: fixed;
+    right: 18px;
+    z-index: 9;
+  }
+
+  .controls .primary {
+    box-shadow: 0 16px 38px rgba(0, 0, 0, 0.42);
+    pointer-events: auto;
+    width: min(100%, 320px);
   }
 }
 

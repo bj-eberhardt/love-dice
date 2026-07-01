@@ -11,7 +11,7 @@ test("roll result is revealed only after each animation", async ({ page }) => {
   await test.step("Trigger first roll and keep result hidden while rolling", async () => {
 
     await test.step("Click roll button", async () => {
-      await page.locator('[data-testid="roll-button"]').click();
+      await page.getByTestId('roll-button').click();
     });
 
 
@@ -33,12 +33,12 @@ test("roll result is revealed only after each animation", async ({ page }) => {
 
   await test.step("Trigger reroll and clear previous result while rolling", async () => {
     await test.step("Click roll button", async () => {
-      await page.locator('[data-testid="roll-button"]').click();
+      await page.getByTestId('roll-button').click();
     });
 
 
     await test.step("Check rolling state and wait for rolling finished", async () => {
-      const result = page.locator('[data-testid="result-text"]');
+      const result = page.getByTestId('result-text');
 
       await page.locator('[data-is-rolling="true"]').waitFor({ state: "visible", timeout: 10000 });
       await expect(result).toHaveAttribute("data-is-rolling", "true");

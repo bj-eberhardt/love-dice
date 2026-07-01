@@ -1,4 +1,4 @@
-﻿import { Plus, Trash2 } from "lucide-react";
+﻿import { Plus, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { type DiceAction, type Zone } from "@/shared";
 import { iconFor } from "@/features/game/icons";
 import { ZoneSelector } from "./ZoneSelector";
@@ -91,6 +91,15 @@ export function EditableList({
                 onClick={() => onRemove(item.id)}
               >
                 <Trash2 size={17} />
+              </button>
+              <button
+                  data-testid={`collapse-${kind}-${item.id}`}
+                  className="expand-icon"
+                  type="button"
+                  aria-label={`${item.label} ausklappen/einklappen`}
+                  onClick={toggleExpanded}
+              >
+                {!isExpanded ? <ChevronDown size={17} /> : <ChevronUp size={17} />}
               </button>
             </div>
 

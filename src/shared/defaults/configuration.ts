@@ -1,4 +1,4 @@
-import type { DiceConfiguration } from "../schemas/configuration.js";
+import type { DiceConfiguration } from "@/shared";
 
 const moods = ["romantic", "playful", "bold", "custom"] as const;
 
@@ -14,7 +14,18 @@ export const defaultConfiguration: DiceConfiguration = {
       zoneMode: "required",
       iconKey: "kiss",
       enabled: true,
-      moods: ["romantic", "playful", "custom"]
+      moods: ["romantic", "playful", "custom"],
+      allowedZoneIds: ["lips", "neck", "hands", "shoulders", "back", "legs", "anywhere"]
+    },
+    {
+      id: "bite",
+      label: "Beiße",
+      instructionTemplate: "Beiße vorsichtig {zone.accusative}.",
+      zoneMode: "required",
+      iconKey: "bite",
+      enabled: true,
+      moods: ["bold"],
+      allowedZoneIds: ["lips", "neck", "hands", "shoulders", "back", "legs", "anywhere"]
     },
     {
       id: "massage",
@@ -23,7 +34,8 @@ export const defaultConfiguration: DiceConfiguration = {
       zoneMode: "required",
       iconKey: "massage",
       enabled: true,
-      moods: moods.slice()
+      moods: moods.slice(),
+      allowedZoneIds: ["neck", "hands", "shoulders", "back", "legs", "anywhere"]
     },
     {
       id: "stroke",
@@ -32,16 +44,18 @@ export const defaultConfiguration: DiceConfiguration = {
       zoneMode: "required",
       iconKey: "touch",
       enabled: true,
-      moods: moods.slice()
+      moods: moods.slice(),
+      allowedZoneIds: ["lips", "neck", "hands", "shoulders", "back", "legs", "anywhere"]
     },
     {
       id: "whisper",
       label: "Flüstern",
-      instructionTemplate: "Flüstere ein ehrliches Kompliment nahe bei {zone.accusative}.",
+      instructionTemplate: "Flüstere ein ehrliches Kompliment {zone.accusative}.",
       zoneMode: "optional",
       iconKey: "whisper",
       enabled: true,
-      moods: ["romantic", "playful", "custom"]
+      moods: ["romantic", "playful", "custom"],
+      allowedZoneIds: ["anywhere"]
     },
     {
       id: "surprise",
@@ -60,7 +74,8 @@ export const defaultConfiguration: DiceConfiguration = {
       zoneMode: "ignore",
       iconKey: "wish",
       enabled: true,
-      moods: moods.slice()
+      moods: moods.slice(),
+      allowedZoneIds: ["anywhere"]
     },
     {
       id: "compliment",
@@ -69,7 +84,8 @@ export const defaultConfiguration: DiceConfiguration = {
       zoneMode: "optional",
       iconKey: "heart",
       enabled: true,
-      moods: ["romantic", "custom"]
+      moods: ["romantic", "custom"],
+      allowedZoneIds: ["lips", "neck", "hands", "shoulders", "back", "legs", "anywhere"]
     },
     {
       id: "pause",
@@ -78,7 +94,8 @@ export const defaultConfiguration: DiceConfiguration = {
       zoneMode: "ignore",
       iconKey: "pause",
       enabled: true,
-      moods: ["romantic", "bold", "custom"]
+      moods: ["romantic", "bold", "custom"],
+      allowedZoneIds: ["anywhere"]
     }
   ],
   zones: [

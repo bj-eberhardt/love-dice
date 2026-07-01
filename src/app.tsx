@@ -9,8 +9,15 @@ import {
   type RollResult,
   type Zone
 } from "@/shared";
-import { MoreHorizontal, Plus, ShieldCheck, Shuffle } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  MoreHorizontal,
+  Plus,
+  ShieldCheck,
+  Shuffle
+} from "lucide-react";
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { DiceStage } from "./features/dice3d/DiceStage";
 import { ResultToken } from "./components/ResultToken";
@@ -73,6 +80,8 @@ export function App() {
   const modeScrollRef = useRef<HTMLDivElement>(null);
   const longPressTimerRef = useRef<number | null>(null);
   const rollRevealTimerRef = useRef<number | null>(null);
+  const scrollMeasureFrameRef = useRef<number | null>(null);
+  const scrollMeasureTimeoutRefs = useRef<number[]>([]);
 
   const activeConfig = useMemo(() => {
     if (activeMode.type === "mix") {
@@ -88,7 +97,7 @@ export function App() {
   );
   const initialZoneFaces = useMemo(() => emptyFaces(activeConfig.zones), [activeConfig.zones]);
 
-  const updateScrollHints = () => {
+  const updateScrollHints = useCallback(() => {
     const element = modeScrollRef.current;
     if (!element) return;
     const hasOverflow = element.scrollWidth > element.clientWidth + 1;
@@ -96,20 +105,55 @@ export function App() {
       left: hasOverflow && element.scrollLeft > 1,
       right: hasOverflow && element.scrollLeft + element.clientWidth < element.scrollWidth - 1
     });
-  };
+  }, []);
 
-  useEffect(() => {
-    updateScrollHints();
+  const clearScheduledScrollHintUpdates = useCallback(() => {
+    if (scrollMeasureFrameRef.current) {
+      window.cancelAnimationFrame(scrollMeasureFrameRef.current);
+      scrollMeasureFrameRef.current = null;
+    }
+    scrollMeasureTimeoutRefs.current.forEach((timeoutId) => window.clearTimeout(timeoutId));
+    scrollMeasureTimeoutRefs.current = [];
+  }, []);
+
+  const scheduleScrollHintUpdate = useCallback(() => {
+    clearScheduledScrollHintUpdates();
+    scrollMeasureFrameRef.current = window.requestAnimationFrame(() => {
+      scrollMeasureFrameRef.current = null;
+      updateScrollHints();
+    });
+    scrollMeasureTimeoutRefs.current = [80, 240].map((delay) =>
+      window.setTimeout(updateScrollHints, delay)
+    );
+  }, [clearScheduledScrollHintUpdates, updateScrollHints]);
+
+  const scrollModes = (direction: -1 | 1) => {
     const element = modeScrollRef.current;
     if (!element) return;
-    const resizeObserver = new ResizeObserver(updateScrollHints);
+    element.scrollBy({ left: direction * 220, behavior: "smooth" });
+    window.setTimeout(updateScrollHints, 280);
+  };
+
+  useLayoutEffect(() => {
+    updateScrollHints();
+    scheduleScrollHintUpdate();
+    const element = modeScrollRef.current;
+    if (!element) return;
+    const resizeObserver = new ResizeObserver(scheduleScrollHintUpdate);
     resizeObserver.observe(element);
-    window.addEventListener("resize", updateScrollHints);
+    Array.from(element.children).forEach((child) => resizeObserver.observe(child));
+    window.addEventListener("resize", scheduleScrollHintUpdate);
     return () => {
+      clearScheduledScrollHintUpdates();
       resizeObserver.disconnect();
-      window.removeEventListener("resize", updateScrollHints);
+      window.removeEventListener("resize", scheduleScrollHintUpdate);
     };
-  }, [customMixes.length]);
+  }, [
+    clearScheduledScrollHintUpdates,
+    customMixes.length,
+    scheduleScrollHintUpdate,
+    updateScrollHints
+  ]);
 
   const persistMixes = (nextMixes: DiceConfiguration[]) => {
     setCustomMixes(nextMixes);
@@ -290,12 +334,21 @@ export function App() {
 
       <section data-testid="mode-bar" className="mode-bar" aria-label="Modus wählen">
         <div className="mode-scroll-wrap">
-          {scrollHints.left ? (
-            <span className="scroll-hint left" aria-hidden="true">
-              ‹
-            </span>
-          ) : null}
-          <div className="mode-scroll" ref={modeScrollRef} onScroll={updateScrollHints}>
+          <button
+            data-testid="mode-scroll-left"
+            className="scroll-hint left"
+            aria-label="Modusleiste nach links scrollen"
+            disabled={!scrollHints.left}
+            onClick={() => scrollModes(-1)}
+          >
+            <ChevronLeft size={18} />
+          </button>
+          <div
+            data-testid="mode-scroll"
+            className="mode-scroll"
+            ref={modeScrollRef}
+            onScroll={updateScrollHints}
+          >
             {builtInModes.map((item) => (
               <button
                 key={item.id}
@@ -340,7 +393,7 @@ export function App() {
                         <MoreHorizontal size={17} />
                       </button>
                       {openMixMenuId === mix.id ? (
-                        <div className="mix-menu" role="menu">
+                        <div data-testid={`mix-menu-${mix.id}`} className="mix-menu" role="menu">
                           <button
                             data-testid={`mix-edit-${mix.id}`}
                             role="menuitem"
@@ -371,11 +424,15 @@ export function App() {
               );
             })}
           </div>
-          {scrollHints.right ? (
-            <span className="scroll-hint right" aria-hidden="true">
-              ›
-            </span>
-          ) : null}
+          <button
+            data-testid="mode-scroll-right"
+            className="scroll-hint right"
+            aria-label="Modusleiste nach rechts scrollen"
+            disabled={!scrollHints.right}
+            onClick={() => scrollModes(1)}
+          >
+            <ChevronRight size={18} />
+          </button>
         </div>
         <button data-testid="open-mix-modal" className="primary sticky-add" onClick={openNewMix}>
           <Plus size={18} /> Eigene Mischung
