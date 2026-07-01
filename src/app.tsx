@@ -7,6 +7,7 @@
   type DiceConfiguration,
   type Mood,
   type RollFace,
+  type RollHistoryEntry,
   type RollResult,
   type Zone
 } from "@/shared";
@@ -71,6 +72,7 @@ export function App() {
   const [customMixes, setCustomMixes] = useState<DiceConfiguration[]>(loadCustomMixes);
   const [roll, setRoll] = useState<RollResult | null>(null);
   const [animationRoll, setAnimationRoll] = useState<RollResult | null>(null);
+  const [rollHistory, setRollHistory] = useState<RollHistoryEntry[]>([]);
   const [rolling, setRolling] = useState(false);
   const [rollingKey, setRollingKey] = useState(0);
   const [error, setError] = useState("");
@@ -175,12 +177,13 @@ export function App() {
     clearRollRevealTimer();
     setRoll(null);
     setAnimationRoll(null);
+    setRollHistory([]);
     setRolling(false);
   };
 
   const startRoll = () => {
     try {
-      const nextRoll = createRoll(activeConfig, activeMood);
+      const nextRoll = createRoll(activeConfig, activeMood, Math.random, { history: rollHistory });
       clearRollRevealTimer();
       setRoll(null);
       setAnimationRoll(nextRoll);
@@ -189,6 +192,7 @@ export function App() {
       setRollingKey((key) => key + 1);
       rollRevealTimerRef.current = window.setTimeout(() => {
         setRoll(nextRoll);
+        setRollHistory((history) => [...history, nextRoll]);
         setAnimationRoll(null);
         setRolling(false);
         rollRevealTimerRef.current = null;
@@ -225,6 +229,7 @@ export function App() {
     clearLongPress();
     setActiveMode({ type: "mix", id: mix.id });
     setOpenMixMenuId(null);
+    resetRoll();
     window.setTimeout(updateScrollHints, 0);
   };
 
@@ -524,3 +529,6 @@ export function App() {
     </main>
   );
 }
+
+
+
