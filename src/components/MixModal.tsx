@@ -1,5 +1,5 @@
-import { configurationSchema, type DiceConfiguration } from "@/shared";
-import { Download, Save, Trash2, Upload } from "lucide-react";
+﻿import { configurationSchema, type DiceConfiguration } from "@/shared";
+import { Download, Save, Trash2, Upload, X } from "lucide-react";
 import { type ChangeEvent, useRef, useState } from "react";
 import { EditableList } from "./EditableList";
 import { formatZodError } from "@/utils/validationUtils";
@@ -54,7 +54,8 @@ export function MixModal({ draft, saveError, onChange, onClose, onSave, onDelete
           zoneMode: "optional",
           iconKey: "sparkle",
           enabled: true,
-          moods: ["custom"]
+          moods: ["custom"],
+          useInCustom: true
         }
       ]
     });
@@ -73,7 +74,8 @@ export function MixModal({ draft, saveError, onChange, onClose, onSave, onDelete
           accusative: "die neue Zone",
           iconKey: "consent",
           enabled: true,
-          moods: ["custom"]
+          moods: ["custom"],
+          useInCustom: true
         }
       ]
     });
@@ -148,6 +150,14 @@ export function MixModal({ draft, saveError, onChange, onClose, onSave, onDelete
         aria-labelledby="mix-title"
         aria-describedby="mix-description"
       >
+        <button
+          data-testid="mix-close"
+          className="icon-button modal-close"
+          aria-label="Schließen"
+          onClick={onClose}
+        >
+          <X size={18} />
+        </button>
         <div className="modal-head">
           <div>
             <p className="eyebrow">Eigene Mischung</p>
@@ -156,18 +166,7 @@ export function MixModal({ draft, saveError, onChange, onClose, onSave, onDelete
               Wähle Aktionen und Orte aus. Klappe Karten auf, wenn du Texte ändern möchtest.
             </p>
           </div>
-          <div className="modal-head-actions">
-            <button
-              data-testid="mix-import"
-              className="secondary"
-              onClick={() => fileRef.current?.click()}
-            >
-              <Upload size={17} /> JSON importieren
-            </button>
-            <button data-testid="mix-close" className="ghost" onClick={onClose}>
-              Schließen
-            </button>
-          </div>
+
           <input
             data-testid="mix-import-input"
             ref={fileRef}
@@ -177,17 +176,24 @@ export function MixModal({ draft, saveError, onChange, onClose, onSave, onDelete
             onChange={importDraft}
           />
         </div>
-
-        <label className="field full-field">
-          <span>Name</span>
-          <input
-            data-testid="mix-name"
-            required
-            value={draft.name}
-            onChange={(event) => updateName(event.target.value)}
-          />
-        </label>
-
+        <div className="mix-name-row">
+          <label className="field mix-name-field">
+            <span>Name</span>
+            <input
+              data-testid="mix-name"
+              required
+              value={draft.name}
+              onChange={(event) => updateName(event.target.value)}
+            />
+          </label>
+          <button
+            data-testid="mix-import"
+            className="secondary mix-import-button"
+            onClick={() => fileRef.current?.click()}
+          >
+            <Upload size={17} /> JSON importieren
+          </button>
+        </div>
         <div className="config-grid modal-grid">
           <EditableList
             title="Aktionen"
@@ -218,7 +224,6 @@ export function MixModal({ draft, saveError, onChange, onClose, onSave, onDelete
             onZoneText={editZoneText}
           />
         </div>
-
         {formError ? (
           <p className="form-warning" role="alert">
             {formError}
@@ -229,7 +234,6 @@ export function MixModal({ draft, saveError, onChange, onClose, onSave, onDelete
             {saveError}
           </p>
         ) : null}
-
         <div className="modal-footer">
           <p>
             {draft.actions.filter((item) => item.enabled).length} Aktionen,{" "}

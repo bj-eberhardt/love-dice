@@ -6,18 +6,50 @@ export type Mood = z.infer<typeof moodSchema>;
 export const zoneModeSchema = z.enum(["required", "optional", "ignore"]);
 export type ZoneMode = z.infer<typeof zoneModeSchema>;
 
-// Validator für nicht-leere trimmed strings
-const nonEmptyString = z.string().min(1).trim().refine(
-  (val) => val.length > 0,
-  { message: "Feld darf nicht leer sein" }
-);
+const nonEmptyString = z
+  .string()
+  .min(1)
+  .trim()
+  .refine((val) => val.length > 0, { message: "Feld darf nicht leer sein" });
 
+export const iconKeySchema = z.enum([
+  "anywhere",
+  "back",
+  "bite",
+  "breasts",
+  "butt",
+  "consent",
+  "ear",
+  "genitals",
+  "hands",
+  "heart",
+  "kiss",
+  "legs",
+  "lips",
+  "massage",
+  "neck",
+  "nipple",
+  "pause",
+  "rub",
+  "seduce",
+  "shoulders",
+  "smell",
+  "sparkle",
+  "suck",
+  "thighs",
+  "tickle",
+  "touch",
+  "whisper",
+  "wish"
+]);
+export type IconKey = z.infer<typeof iconKeySchema>;
 export const diceEntrySchema = z.object({
   id: z.string().min(1),
   label: nonEmptyString,
-  iconKey: z.string().min(1),
+  iconKey: iconKeySchema,
   enabled: z.boolean(),
-  moods: z.array(moodSchema).min(1)
+  moods: z.array(moodSchema).min(1),
+  useInCustom: z.boolean().optional().default(true)
 });
 
 export const zoneSchema = diceEntrySchema.extend({

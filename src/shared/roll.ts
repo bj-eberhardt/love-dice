@@ -1,4 +1,11 @@
-﻿import type { DiceAction, DiceConfiguration, Mood, RollFace, RollResult, Zone } from "./schemas/configuration.js";
+﻿import type {
+  DiceAction,
+  DiceConfiguration,
+  Mood,
+  RollFace,
+  RollResult,
+  Zone
+} from "./schemas/configuration.js";
 
 const takeSix = <T>(items: T[], random: () => number): T[] =>
   [...items].sort(() => random() - 0.5).slice(0, 6);
@@ -7,7 +14,6 @@ const supportsMood = (entry: { enabled: boolean; moods: Mood[] }, mood: Mood) =>
   entry.enabled && (mood === "custom" || entry.moods.includes(mood));
 
 const isPairAllowed = (action: DiceAction, zone: Zone) => {
-  if (action.zoneMode === "ignore") return true;
   if (action.allowedZoneIds?.length && !action.allowedZoneIds.includes(zone.id)) return false;
   if (action.blockedZoneIds?.includes(zone.id)) return false;
   return true;
@@ -28,10 +34,15 @@ export const createRoll = (
   const zones = configuration.zones.filter((zone) => supportsMood(zone, mood));
 
   if (actions.length < 6 || zones.length < 6) {
-    throw new Error("Für diese Stimmung müssen mindestens sechs Aktionen und sechs Zonen aktiv sein.");
+    throw new Error(
+      "Für diese Stimmung müssen mindestens sechs Aktionen und sechs Zonen aktiv sein."
+    );
   }
 
-  const actionFaces = takeSix(actions, random).map((action, faceIndex) => ({ ...action, faceIndex }));
+  const actionFaces = takeSix(actions, random).map((action, faceIndex) => ({
+    ...action,
+    faceIndex
+  }));
   const zoneFaces = takeSix(zones, random).map((zone, faceIndex) => ({ ...zone, faceIndex }));
   const pairs = actionFaces.flatMap((action) =>
     zoneFaces

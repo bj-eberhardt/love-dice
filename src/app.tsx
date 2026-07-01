@@ -1,6 +1,7 @@
-import {
+﻿import {
   createRoll,
   defaultConfiguration,
+  builtInConfigurations,
   configurationSchema,
   type DiceAction,
   type DiceConfiguration,
@@ -33,13 +34,14 @@ import {
 } from "./utils/mixUtils";
 import { formatZodError } from "./utils/validationUtils";
 
-const builtInModes: { id: Mood; label: string }[] = [
+const builtInModes: { id: BuiltInMood; label: string }[] = [
   { id: "romantic", label: "Romantisch" },
   { id: "playful", label: "Verspielt" },
   { id: "bold", label: "Mutig" }
 ];
 
-type ActiveMode = { type: "builtin"; mood: Mood } | { type: "mix"; id: string };
+type BuiltInMood = Exclude<Mood, "custom">;
+type ActiveMode = { type: "builtin"; mood: BuiltInMood } | { type: "mix"; id: string };
 type ConfirmRequest = {
   title: string;
   message: string;
@@ -83,19 +85,22 @@ export function App() {
   const scrollMeasureFrameRef = useRef<number | null>(null);
   const scrollMeasureTimeoutRefs = useRef<number[]>([]);
 
-  const activeConfig = useMemo(() => {
+  const activeConfig = useMemo<DiceConfiguration>(() => {
     if (activeMode.type === "mix") {
       return customMixes.find((mix) => mix.id === activeMode.id) ?? defaultConfiguration;
     }
-    return defaultConfiguration;
+    return builtInConfigurations[activeMode.mood];
   }, [activeMode, customMixes]);
 
   const activeMood = activeMode.type === "builtin" ? activeMode.mood : "custom";
   const initialActionFaces = useMemo(
-    () => emptyFaces(activeConfig.actions),
+    () => emptyFaces<DiceAction>(activeConfig.actions),
     [activeConfig.actions]
   );
-  const initialZoneFaces = useMemo(() => emptyFaces(activeConfig.zones), [activeConfig.zones]);
+  const initialZoneFaces = useMemo(
+    () => emptyFaces<Zone>(activeConfig.zones),
+    [activeConfig.zones]
+  );
 
   const updateScrollHints = useCallback(() => {
     const element = modeScrollRef.current;
@@ -195,7 +200,7 @@ export function App() {
 
   const openNewMix = () => {
     setDraftSaveError("");
-    setDraft(createDraft(defaultConfiguration));
+    setDraft(createDraft());
   };
 
   const clearLongPress = () => {
@@ -308,16 +313,24 @@ export function App() {
     return (
       <main className="consent-screen">
         <section className="hero">
-          <div>
+          <picture className="hero-asset" aria-hidden="true">
+            <source media="(max-width: 720px)" srcSet="/assets/hero-dice-mobile.png" />
+            <img src="/assets/hero-dice-desktop.png" alt="" />
+          </picture>
+          <div className="hero-content">
             <p className="eyebrow">Würfel & Wünsche</p>
-            <h1>Ein privates 3D-Würfelspiel für einvernehmliche Paarmomente.</h1>
+            <h1>Lust auf Würfel?</h1>
             <p className="lead">
-              Wählt gemeinsam Stimmung und Grenzen. Jede Runde kann neu gewürfelt werden.
+              Drei Stimmungen, zwei Würfel und klare Zustimmung für intime Paarmomente.
             </p>
+            <button
+              data-testid="consent-accept"
+              className="primary"
+              onClick={() => setConsent(true)}
+            >
+              <ShieldCheck size={20} /> Volljährigkeit und Zustimmung bestätigen
+            </button>
           </div>
-          <button data-testid="consent-accept" className="primary" onClick={() => setConsent(true)}>
-            <ShieldCheck size={20} /> Volljährigkeit und Zustimmung bestätigen
-          </button>
         </section>
       </main>
     );

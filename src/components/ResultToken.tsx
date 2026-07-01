@@ -1,9 +1,10 @@
-import { iconFor } from "@/features/game/icons";
+﻿import { iconFor } from "@/features/game/icons";
+import type { IconKey } from "@/shared";
 
 interface ResultTokenProps {
   title: string;
   value: string;
-  iconKey: string;
+  iconKey: IconKey;
   tone: "pink" | "teal";
   dataTestId: string;
   dataState: "empty" | "filled";

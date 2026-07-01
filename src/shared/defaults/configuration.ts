@@ -1,159 +1,256 @@
-import type { DiceConfiguration } from "@/shared";
+﻿import type { DiceAction, DiceConfiguration, Mood, Zone } from "@/shared";
 
-const moods = ["romantic", "playful", "bold", "custom"] as const;
+const allMoods: Mood[] = ["romantic", "playful", "bold", "custom"];
 
-export const defaultConfiguration: DiceConfiguration = {
-  id: "default",
-  name: "Zweisam Standard",
-  updatedAt: new Date(0).toISOString(),
-  actions: [
-    {
-      id: "kiss",
-      label: "Küssen",
-      instructionTemplate: "Küsse {zone.accusative}.",
-      zoneMode: "required",
-      iconKey: "kiss",
-      enabled: true,
-      moods: ["romantic", "playful", "custom"],
-      allowedZoneIds: ["lips", "neck", "hands", "shoulders", "back", "legs", "anywhere"]
-    },
-    {
-      id: "bite",
-      label: "Beiße",
-      instructionTemplate: "Beiße vorsichtig {zone.accusative}.",
-      zoneMode: "required",
-      iconKey: "bite",
-      enabled: true,
-      moods: ["bold"],
-      allowedZoneIds: ["lips", "neck", "hands", "shoulders", "back", "legs", "anywhere"]
-    },
-    {
-      id: "massage",
-      label: "Massieren",
-      instructionTemplate: "Massiere {zone.accusative}.",
-      zoneMode: "required",
-      iconKey: "massage",
-      enabled: true,
-      moods: moods.slice(),
-      allowedZoneIds: ["neck", "hands", "shoulders", "back", "legs", "anywhere"]
-    },
-    {
-      id: "stroke",
-      label: "Streicheln",
-      instructionTemplate: "Streichle {zone.accusative} langsam und aufmerksam.",
-      zoneMode: "required",
-      iconKey: "touch",
-      enabled: true,
-      moods: moods.slice(),
-      allowedZoneIds: ["lips", "neck", "hands", "shoulders", "back", "legs", "anywhere"]
-    },
-    {
-      id: "whisper",
-      label: "Flüstern",
-      instructionTemplate: "Flüstere ein ehrliches Kompliment {zone.accusative}.",
-      zoneMode: "optional",
-      iconKey: "whisper",
-      enabled: true,
-      moods: ["romantic", "playful", "custom"],
-      allowedZoneIds: ["anywhere"]
-    },
-    {
-      id: "surprise",
-      label: "Überraschen",
-      instructionTemplate:
-        "Überrasche dein Gegenüber mit einer zärtlichen Idee für {zone.accusative}.",
-      zoneMode: "optional",
-      iconKey: "sparkle",
-      enabled: true,
-      moods: ["playful", "bold", "custom"]
-    },
-    {
-      id: "wish",
-      label: "Wunsch erfüllen",
-      instructionTemplate: "Erfülle einen gemeinsamen Wunsch nach Absprache.",
-      zoneMode: "ignore",
-      iconKey: "wish",
-      enabled: true,
-      moods: moods.slice(),
-      allowedZoneIds: ["anywhere"]
-    },
-    {
-      id: "compliment",
-      label: "Kompliment",
-      instructionTemplate: "Sag etwas Schönes über {zone.accusative}.",
-      zoneMode: "optional",
-      iconKey: "heart",
-      enabled: true,
-      moods: ["romantic", "custom"],
-      allowedZoneIds: ["lips", "neck", "hands", "shoulders", "back", "legs", "anywhere"]
-    },
-    {
-      id: "pause",
-      label: "Innehalten",
-      instructionTemplate: "Haltet kurz inne und fragt einander, was gerade gut tut.",
-      zoneMode: "ignore",
-      iconKey: "pause",
-      enabled: true,
-      moods: ["romantic", "bold", "custom"],
-      allowedZoneIds: ["anywhere"]
-    }
-  ],
-  zones: [
-    {
-      id: "lips",
-      label: "Lippen",
-      accusative: "die Lippen",
-      iconKey: "lips",
-      enabled: true,
-      moods: moods.slice()
-    },
-    {
-      id: "neck",
-      label: "Nacken",
-      accusative: "den Nacken",
-      iconKey: "neck",
-      enabled: true,
-      moods: moods.slice()
-    },
-    {
-      id: "back",
-      label: "Rücken",
-      accusative: "den Rücken",
-      iconKey: "back",
-      enabled: true,
-      moods: moods.slice()
-    },
-    {
-      id: "hands",
-      label: "Hände",
-      accusative: "die Hände",
-      iconKey: "hands",
-      enabled: true,
-      moods: moods.slice()
-    },
-    {
-      id: "legs",
-      label: "Beine",
-      accusative: "die Beine",
-      iconKey: "legs",
-      enabled: true,
-      moods: moods.slice()
-    },
-    {
-      id: "shoulders",
-      label: "Schultern",
-      accusative: "die Schultern",
-      iconKey: "shoulders",
-      enabled: true,
-      moods: ["romantic", "playful", "custom"]
-    },
-    {
-      id: "anywhere",
-      label: "Nach Absprache",
-      accusative: "überall nach Absprache",
-      iconKey: "consent",
-      enabled: true,
-      moods: moods.slice()
-    }
-  ]
+type ActionInput = Omit<DiceAction, "enabled" | "moods" | "useInCustom"> & {
+  useInCustom?: boolean;
 };
+type ZoneInput = Omit<Zone, "enabled" | "moods" | "useInCustom"> & { useInCustom?: boolean };
+
+const action = (entry: ActionInput): DiceAction => ({
+  ...entry,
+  enabled: true,
+  moods: allMoods,
+  useInCustom: entry.useInCustom ?? true
+});
+
+const zone = (entry: ZoneInput): Zone => ({
+  ...entry,
+  enabled: true,
+  moods: allMoods,
+  useInCustom: entry.useInCustom ?? true
+});
+
+export const actionsById = {
+  kiss: action({
+    id: "kiss",
+    label: "Küssen",
+    instructionTemplate: "Küsse {zone.accusative}.",
+    zoneMode: "required",
+    iconKey: "kiss",
+    allowedZoneIds: ["lips", "neck", "hands", "shoulders", "back", "legs", "ear", "anywhere"]
+  }),
+  bite: action({
+    id: "bite",
+    label: "Beißen",
+    instructionTemplate: "Beiße vorsichtig {zone.accusative}.",
+    zoneMode: "required",
+    iconKey: "bite",
+    allowedZoneIds: [
+      "lips",
+      "neck",
+      "hands",
+      "shoulders",
+      "back",
+      "legs",
+      "ear",
+      "thighs",
+      "anywhere"
+    ]
+  }),
+  massage: action({
+    id: "massage",
+    label: "Massieren",
+    instructionTemplate: "Massiere {zone.accusative}.",
+    zoneMode: "required",
+    iconKey: "massage",
+    allowedZoneIds: ["neck", "hands", "shoulders", "back", "legs", "thighs", "breasts", "anywhere"]
+  }),
+  stroke: action({
+    id: "stroke",
+    label: "Streicheln",
+    instructionTemplate: "Streichle {zone.accusative} langsam und aufmerksam.",
+    zoneMode: "required",
+    iconKey: "touch"
+  }),
+  whisper: action({
+    id: "whisper",
+    label: "Flüstern",
+    instructionTemplate: "Flüstere ein ehrliches Kompliment {zone.accusative}.",
+    zoneMode: "optional",
+    iconKey: "whisper",
+    allowedZoneIds: ["ear", "neck", "anywhere"]
+  }),
+  surprise: action({
+    id: "surprise",
+    label: "Überraschen",
+    instructionTemplate:
+      "Überrasche dein Gegenüber mit einer zärtlichen Idee für {zone.accusative}.",
+    zoneMode: "optional",
+    iconKey: "sparkle"
+  }),
+  wish: action({
+    id: "wish",
+    label: "Wunsch erfüllen",
+    instructionTemplate: "Erfülle einen gemeinsamen Wunsch nach Absprache.",
+    zoneMode: "ignore",
+    iconKey: "wish",
+    allowedZoneIds: ["anywhere"]
+  }),
+  compliment: action({
+    id: "compliment",
+    label: "Kompliment",
+    instructionTemplate: "Sag etwas Schönes über {zone.accusative}.",
+    zoneMode: "optional",
+    iconKey: "heart"
+  }),
+  pause: action({
+    id: "pause",
+    label: "Innehalten",
+    instructionTemplate: "Haltet kurz inne und fragt einander, was gerade gut tut.",
+    zoneMode: "ignore",
+    iconKey: "pause",
+    allowedZoneIds: ["anywhere"]
+  }),
+  tickle: action({
+    id: "tickle",
+    label: "Kitzeln",
+    instructionTemplate: "Kitzle {zone.accusative} spielerisch.",
+    zoneMode: "required",
+    iconKey: "tickle",
+    allowedZoneIds: ["neck", "hands", "legs", "thighs", "back", "anywhere"]
+  }),
+  rub: action({
+    id: "rub",
+    label: "Reiben",
+    instructionTemplate: "Reibe {zone.accusative} langsam nach Absprache.",
+    zoneMode: "required",
+    iconKey: "rub",
+    useInCustom: false,
+    allowedZoneIds: ["back", "legs", "thighs", "breasts", "butt", "genitals", "anywhere"]
+  }),
+  seduce: action({
+    id: "seduce",
+    label: "Verführen",
+    instructionTemplate: "Verführe dein Gegenüber mit Fokus auf {zone.accusative}.",
+    zoneMode: "optional",
+    iconKey: "seduce"
+  }),
+  smell: action({
+    id: "smell",
+    label: "Riechen",
+    instructionTemplate: "Rieche aufmerksam an {zone.accusative}.",
+    zoneMode: "required",
+    iconKey: "smell",
+    allowedZoneIds: ["neck", "hands", "breasts", "thighs", "anywhere"]
+  }),
+  suck: action({
+    id: "suck",
+    label: "Saugen",
+    instructionTemplate: "Sauge sanft an {zone.accusative}, wenn es für euch beide passt.",
+    zoneMode: "required",
+    iconKey: "suck",
+    useInCustom: false,
+    allowedZoneIds: ["lips", "neck", "nipple", "breasts", "genitals", "anywhere"]
+  })
+} satisfies Record<string, DiceAction>;
+
+export const zonesById = {
+  lips: zone({ id: "lips", label: "Lippen", accusative: "die Lippen", iconKey: "lips" }),
+  neck: zone({ id: "neck", label: "Nacken", accusative: "den Nacken", iconKey: "neck" }),
+  back: zone({ id: "back", label: "Rücken", accusative: "den Rücken", iconKey: "back" }),
+  hands: zone({ id: "hands", label: "Hände", accusative: "die Hände", iconKey: "hands" }),
+  legs: zone({ id: "legs", label: "Beine", accusative: "die Beine", iconKey: "legs" }),
+  shoulders: zone({
+    id: "shoulders",
+    label: "Schultern",
+    accusative: "die Schultern",
+    iconKey: "shoulders"
+  }),
+  anywhere: zone({
+    id: "anywhere",
+    label: "Nach Absprache",
+    accusative: "überall nach Absprache",
+    iconKey: "consent"
+  }),
+  ear: zone({ id: "ear", label: "Ohr", accusative: "das Ohr", iconKey: "ear" }),
+  nipple: zone({
+    id: "nipple",
+    label: "Nippel",
+    accusative: "den Nippel",
+    iconKey: "nipple",
+    useInCustom: false
+  }),
+  thighs: zone({
+    id: "thighs",
+    label: "Schenkel",
+    accusative: "die Schenkel",
+    iconKey: "thighs"
+  }),
+  breasts: zone({
+    id: "breasts",
+    label: "Brüste",
+    accusative: "die Brüste",
+    iconKey: "breasts"
+  }),
+  genitals: zone({
+    id: "genitals",
+    label: "Geschlechtsteil",
+    accusative: "das Geschlechtsteil",
+    iconKey: "genitals"
+  }),
+  butt: zone({
+    id: "butt",
+    label: "Hintern",
+    accusative: "den Hintern",
+    iconKey: "butt",
+    useInCustom: false
+  })
+} satisfies Record<string, Zone>;
+
+type ActionId = keyof typeof actionsById;
+type ZoneId = keyof typeof zonesById;
+
+const pickActions = (ids: ActionId[], mood: Exclude<Mood, "custom">) =>
+  ids.map((id) => ({ ...actionsById[id], moods: [mood] }));
+const pickZones = (ids: ZoneId[], mood: Exclude<Mood, "custom">) =>
+  ids.map((id) => ({ ...zonesById[id], moods: [mood] }));
+
+const config = (
+  id: Exclude<Mood, "custom">,
+  name: string,
+  actions: ActionId[],
+  zones: ZoneId[]
+): DiceConfiguration => ({
+  id,
+  name,
+  updatedAt: new Date(0).toISOString(),
+  actions: pickActions(actions, id),
+  zones: pickZones(zones, id)
+});
+
+export const builtInConfigurations: Record<Exclude<Mood, "custom">, DiceConfiguration> = {
+  romantic: config(
+    "romantic",
+    "Romantisch",
+    ["kiss", "massage", "stroke", "whisper", "wish", "compliment", "pause", "surprise"],
+    ["lips", "neck", "back", "hands", "legs", "shoulders", "ear", "anywhere"]
+  ),
+  playful: config(
+    "playful",
+    "Verspielt",
+    ["kiss", "massage", "stroke", "whisper", "surprise", "wish", "tickle", "compliment"],
+    ["lips", "neck", "back", "hands", "legs", "shoulders", "ear", "anywhere"]
+  ),
+  bold: config(
+    "bold",
+    "Mutig",
+    ["kiss", "bite", "massage", "stroke", "surprise", "rub", "seduce", "smell", "suck", "pause"],
+    [
+      "lips",
+      "neck",
+      "back",
+      "hands",
+      "legs",
+      "ear",
+      "nipple",
+      "thighs",
+      "breasts",
+      "genitals",
+      "butt",
+      "anywhere"
+    ]
+  )
+};
+
+export const defaultConfiguration = builtInConfigurations.romantic;

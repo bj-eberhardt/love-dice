@@ -1,5 +1,5 @@
 ﻿import { Canvas } from "@react-three/fiber";
-import type { DiceAction, RollFace, Zone } from "@/shared";
+import type { DiceAction, IconKey, RollFace, Zone } from "@/shared";
 import { Suspense, useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 
@@ -128,7 +128,7 @@ const drawLabel = (ctx: CanvasRenderingContext2D, label: string, color: string) 
   ctx.restore();
 };
 
-const drawIcon = (ctx: CanvasRenderingContext2D, iconKey: string, color: string) => {
+const drawIcon = (ctx: CanvasRenderingContext2D, iconKey: IconKey, color: string) => {
   ctx.save();
   ctx.strokeStyle = color;
   ctx.fillStyle = color;
@@ -136,13 +136,39 @@ const drawIcon = (ctx: CanvasRenderingContext2D, iconKey: string, color: string)
 
   switch (iconKey) {
     case "kiss":
+      drawHeart(ctx, 0, 0, 92);
+      break;
     case "lips":
+      drawHeart(ctx, 0, 0, 92);
+      break;
     case "heart":
       drawHeart(ctx, 0, 0, 92);
       break;
+    case "suck":
+      drawHeart(ctx, 0, 0, 92);
+      break;
     case "massage":
+      drawHand(ctx, 0, 0);
+      break;
     case "hands":
+      drawHand(ctx, 0, 0);
+      break;
     case "touch":
+      drawHand(ctx, 0, 0);
+      break;
+    case "rub":
+      drawHand(ctx, 0, 0);
+      break;
+    case "breasts":
+      drawHand(ctx, 0, 0);
+      break;
+    case "butt":
+      drawHand(ctx, 0, 0);
+      break;
+    case "nipple":
+      drawHand(ctx, 0, 0);
+      break;
+    case "genitals":
       drawHand(ctx, 0, 0);
       break;
     case "whisper":
@@ -158,16 +184,10 @@ const drawIcon = (ctx: CanvasRenderingContext2D, iconKey: string, color: string)
       ctx.stroke();
       break;
     case "neck":
+      drawBodyTop(ctx);
+      break;
     case "shoulders":
-      ctx.lineWidth = 18;
-      ctx.lineCap = "round";
-      ctx.beginPath();
-      ctx.arc(0, -58, 42, 0, Math.PI * 2);
-      ctx.moveTo(-32, -12);
-      ctx.quadraticCurveTo(-26, 38, -84, 78);
-      ctx.moveTo(32, -12);
-      ctx.quadraticCurveTo(26, 38, 84, 78);
-      ctx.stroke();
+      drawBodyTop(ctx);
       break;
     case "back":
       ctx.lineWidth = 18;
@@ -182,15 +202,19 @@ const drawIcon = (ctx: CanvasRenderingContext2D, iconKey: string, color: string)
       ctx.stroke();
       break;
     case "legs":
-      ctx.lineWidth = 20;
+      drawLegs(ctx);
+      break;
+    case "thighs":
+      drawLegs(ctx);
+      break;
+    case "ear":
+      ctx.lineWidth = 16;
       ctx.lineCap = "round";
       ctx.beginPath();
-      ctx.moveTo(-34, -78);
-      ctx.lineTo(-20, 24);
-      ctx.lineTo(-48, 86);
-      ctx.moveTo(34, -78);
-      ctx.lineTo(20, 24);
-      ctx.lineTo(50, 86);
+      ctx.arc(0, -4, 58, Math.PI * 0.55, Math.PI * 1.45);
+      ctx.quadraticCurveTo(-22, 58, 12, 84);
+      ctx.moveTo(8, -40);
+      ctx.quadraticCurveTo(-24, -6, 4, 30);
       ctx.stroke();
       break;
     case "pause":
@@ -204,15 +228,100 @@ const drawIcon = (ctx: CanvasRenderingContext2D, iconKey: string, color: string)
       ctx.arc(0, -10, 42, Math.PI, Math.PI * 2);
       ctx.stroke();
       break;
-    default:
+    case "bite":
+      ctx.lineWidth = 16;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.arc(0, 0, 76, 0.18, Math.PI - 0.18);
+      ctx.moveTo(-48, 18);
+      ctx.lineTo(-24, 54);
+      ctx.lineTo(0, 18);
+      ctx.lineTo(24, 54);
+      ctx.lineTo(48, 18);
+      ctx.stroke();
+      break;
+    case "tickle":
+      ctx.lineWidth = 14;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.arc(0, 0, 74, 0, Math.PI * 2);
+      ctx.moveTo(-34, -16);
+      ctx.lineTo(-34, -15);
+      ctx.moveTo(34, -16);
+      ctx.lineTo(34, -15);
+      ctx.moveTo(-36, 30);
+      ctx.quadraticCurveTo(0, 62, 36, 30);
+      ctx.stroke();
+      break;
+    case "seduce":
+      ctx.lineWidth = 14;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(0, -92);
+      ctx.bezierCurveTo(68, -12, 42, 62, 0, 92);
+      ctx.bezierCurveTo(-42, 62, -68, -12, 0, -92);
+      ctx.stroke();
+      break;
+    case "smell":
+      ctx.lineWidth = 14;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(-70, -42);
+      ctx.quadraticCurveTo(-12, -82, 46, -42);
+      ctx.moveTo(-46, 2);
+      ctx.quadraticCurveTo(8, -30, 70, 8);
+      ctx.moveTo(-70, 52);
+      ctx.quadraticCurveTo(-6, 26, 44, 66);
+      ctx.stroke();
+      break;
+    case "sparkle":
       drawSparkle(ctx, 0, 0, 90);
       drawSparkle(ctx, 82, -66, 28);
+      break;
+    case "wish":
+      drawSparkle(ctx, 0, 0, 90);
+      drawSparkle(ctx, 82, -66, 28);
+      break;
+    case "anywhere":
+      drawSparkle(ctx, 0, 0, 90);
+      drawSparkle(ctx, 82, -66, 28);
+      break;
+    default:
+      assertNever(iconKey);
   }
 
   ctx.restore();
 };
 
-const makeTexture = (label: string, iconKey: string, color: string) => {
+const drawBodyTop = (ctx: CanvasRenderingContext2D) => {
+  ctx.lineWidth = 18;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.arc(0, -58, 42, 0, Math.PI * 2);
+  ctx.moveTo(-32, -12);
+  ctx.quadraticCurveTo(-26, 38, -84, 78);
+  ctx.moveTo(32, -12);
+  ctx.quadraticCurveTo(26, 38, 84, 78);
+  ctx.stroke();
+};
+
+const drawLegs = (ctx: CanvasRenderingContext2D) => {
+  ctx.lineWidth = 20;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(-34, -78);
+  ctx.lineTo(-20, 24);
+  ctx.lineTo(-48, 86);
+  ctx.moveTo(34, -78);
+  ctx.lineTo(20, 24);
+  ctx.lineTo(50, 86);
+  ctx.stroke();
+};
+
+const assertNever = (value: never): never => {
+  throw new Error(`Unhandled icon key: ${value}`);
+};
+const makeTexture = (label: string, iconKey: IconKey, color: string) => {
   const canvas = document.createElement("canvas");
   canvas.width = 512;
   canvas.height = 512;

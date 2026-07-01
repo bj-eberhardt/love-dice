@@ -1,4 +1,4 @@
-# Love Dice Game
+﻿# Love Dice Game
 
 Eine lokale Browser-App für ein einvernehmliches Paar-Würfelspiel mit zwei interaktiven 3D-Würfeln: Aktion und Zone. Die App benötigt kein Backend. Konfiguration und Spielzustand werden im Browser über `localStorage` persistiert.
 
@@ -72,7 +72,24 @@ npm run lint:fix       # ESLint Auto-Fixes
 npm run format         # Prettier formatieren
 npm run format:check   # Prettier prüfen
 npm run build          # Produktionsbuild nach dist/client
+npm test               # Vitest Unit-Tests
 npm run start          # Vite Preview auf Port 5544
+```
+
+## Unit tests (Vitest)
+
+Die Unit-Tests laufen mit Vitest und sind auf Dateien unter `src/**/*.test.ts(x)` begrenzt. Playwright-E2E-Tests liegen separat unter `tests/ui` und werden nicht vom Vitest-Runner eingesammelt.
+
+Ausführen:
+
+```bash
+npm test
+```
+
+Gezielt eine einzelne Testdatei ausführen:
+
+```bash
+npx vitest run src/shared/roll.test.ts
 ```
 
 ## UI tests (Playwright)
@@ -85,7 +102,7 @@ Install and run:
 npm ci
 npm run build
 npx playwright install --with-deps
-npm run test:ui        # run Playwright headless
+npm run test:ui        # open Playwright UI runner
 npm run test:ui:headless
 npm run test:ui:headed # run Playwright headed for debugging
 npm run test:ui:debug  # run Playwright in debug mode
