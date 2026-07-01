@@ -1,4 +1,4 @@
-﻿import {
+import {
   createRoll,
   defaultConfiguration,
   configurationSchema,
@@ -9,13 +9,22 @@
   type RollResult,
   type Zone
 } from "@/shared";
-import { Download, MoreHorizontal, Plus, Save, ShieldCheck, Shuffle, Trash2, Upload } from "lucide-react";
-import { type ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
+import { MoreHorizontal, Plus, ShieldCheck, Shuffle } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { DiceStage } from "./features/dice3d/DiceStage";
-import { iconFor } from "./features/game/icons";
+import { ResultToken } from "./components/ResultToken";
+import { MixModal } from "./components/MixModal";
+import { ConfirmDialog } from "./components/ConfirmDialog";
+import {
+  loadCustomMixes,
+  saveCustomMixes,
+  normalizeName,
+  createUniqueMixName,
+  createDraft,
+  createId
+} from "./utils/mixUtils";
 
-const customMixesKey = "love-dice-custom-mixes";
 const builtInModes: { id: Mood; label: string }[] = [
   { id: "romantic", label: "Romantisch" },
   { id: "playful", label: "Verspielt" },
@@ -23,7 +32,6 @@ const builtInModes: { id: Mood; label: string }[] = [
 ];
 
 type ActiveMode = { type: "builtin"; mood: Mood } | { type: "mix"; id: string };
-type EditableDraft = DiceConfiguration;
 type ConfirmRequest = {
   title: string;
   message: string;
@@ -34,58 +42,6 @@ type ConfirmRequest = {
 const emptyFaces = <T extends DiceAction | Zone>(items: T[]): RollFace<T>[] =>
   items.slice(0, 6).map((item, faceIndex) => ({ ...item, faceIndex }));
 
-const createId = (prefix: string) => `${prefix}-${crypto.randomUUID()}`;
-const normalizeName = (name: string) => name.trim().toLocaleLowerCase("de-DE");
-const createUniqueMixName = (name: string, mixes: DiceConfiguration[]) => {
-  const baseName = `${name.trim() || "Eigene Mischung"} Kopie`;
-  const usedNames = new Set(mixes.map((mix) => normalizeName(mix.name)));
-  if (!usedNames.has(normalizeName(baseName))) return baseName;
-
-  let index = 2;
-  while (usedNames.has(normalizeName(`${baseName} ${index}`))) index += 1;
-  return `${baseName} ${index}`;
-};
-
-const loadCustomMixes = (): DiceConfiguration[] => {
-  try {
-    const stored = localStorage.getItem(customMixesKey);
-    if (!stored) return [];
-    return configurationSchema.array().parse(JSON.parse(stored));
-  } catch {
-    return [];
-  }
-};
-
-const saveCustomMixes = (mixes: DiceConfiguration[]) => {
-  localStorage.setItem(customMixesKey, JSON.stringify(mixes));
-};
-
-const createDraft = (): EditableDraft => ({
-  ...defaultConfiguration,
-  id: createId("mix"),
-  name: "Neue Mischung",
-  updatedAt: new Date().toISOString(),
-  actions: defaultConfiguration.actions.map((action) => ({ ...action, moods: ["custom" as const] })),
-  zones: defaultConfiguration.zones.map((zone) => ({ ...zone, moods: ["custom" as const] }))
-});
-
-const actionTextFromTemplate = (template: string) =>
-  template
-    .replaceAll("{zone.accusative}", "{ort}")
-    .replaceAll("{zone.nominative}", "{ort}")
-    .replaceAll("{zone.label}", "{ort}")
-    .replace(/\s+/g, " ")
-    .replace(/[\s.]+$/, "")
-    .trim();
-
-const templateFromActionText = (text: string) => {
-  const cleanText = text.trim().replace(/[.]+$/, "");
-  if (!cleanText) return "Probiert {zone.accusative} nach Absprache aus.";
-  return cleanText.includes("{ort}")
-    ? `${cleanText.replaceAll("{ort}", "{zone.accusative}")}.`
-    : `${cleanText} {zone.accusative}.`;
-};
-
 export function App() {
   const [consent, setConsent] = useState(false);
   const [activeMode, setActiveMode] = useState<ActiveMode>({ type: "builtin", mood: "romantic" });
@@ -94,7 +50,7 @@ export function App() {
   const [rolling, setRolling] = useState(false);
   const [rollingKey, setRollingKey] = useState(0);
   const [error, setError] = useState("");
-  const [draft, setDraft] = useState<EditableDraft | null>(null);
+  const [draft, setDraft] = useState<DiceConfiguration | null>(null);
   const [draftSaveError, setDraftSaveError] = useState("");
   const [confirmRequest, setConfirmRequest] = useState<ConfirmRequest | null>(null);
   const [openMixMenuId, setOpenMixMenuId] = useState<string | null>(null);
@@ -156,7 +112,7 @@ export function App() {
 
   const openNewMix = () => {
     setDraftSaveError("");
-    setDraft(createDraft());
+    setDraft(createDraft(defaultConfiguration));
   };
 
   const clearLongPress = () => {
@@ -392,320 +348,6 @@ export function App() {
   );
 }
 
-function ResultToken({ title, value, iconKey, tone }: { title: string; value: string; iconKey: string; tone: "pink" | "teal" }) {
-  return (
-    <div className={`result-token ${tone}`}>
-      {iconFor(iconKey, "token-icon")}
-      <span>{title}</span>
-      <strong>{value}</strong>
-    </div>
-  );
-}
-
-function MixModal({
-  draft,
-  saveError,
-  onChange,
-  onClose,
-  onSave,
-  onDelete
-} : {
-  draft: EditableDraft;
-  saveError: string;
-  onChange: (draft: EditableDraft) => void;
-  onClose: () => void;
-  onSave: () => void;
-  onDelete: () => void;
-}) {
-  const fileRef = useRef<HTMLInputElement>(null);
-  const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
-  const [formError, setFormError] = useState("");
-  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
-
-  const scrollToCard = (id: string) => {
-    setExpandedIds((ids) => new Set(ids).add(id));
-    window.setTimeout(() => cardRefs.current[id]?.scrollIntoView({ behavior: "smooth", block: "center" }), 30);
-  };
-
-  const updateName = (name: string) => onChange({ ...draft, name });
-  const toggle = (kind: "actions" | "zones", id: string) => {
-    onChange({
-      ...draft,
-      [kind]: draft[kind].map((item) => (item.id === id ? { ...item, enabled: !item.enabled } : item))
-    });
-  };
-  const remove = (kind: "actions" | "zones", id: string) => onChange({ ...draft, [kind]: draft[kind].filter((item) => item.id !== id) });
-  const addAction = () => {
-    const id = createId("action");
-    onChange({
-      ...draft,
-      actions: [
-        ...draft.actions,
-        {
-          id,
-          label: "Neue Aktion",
-          instructionTemplate: "Probiert {zone.accusative} nach Absprache aus.",
-          zoneMode: "optional",
-          iconKey: "sparkle",
-          enabled: true,
-          moods: ["custom"]
-        }
-      ]
-    });
-    scrollToCard(id);
-  };
-  const addZone = () => {
-    const id = createId("zone");
-    onChange({
-      ...draft,
-      zones: [
-        ...draft.zones,
-        {
-          id,
-          label: "Neue Zone",
-          forms: { nominative: "die neue Zone", accusative: "die neue Zone" },
-          iconKey: "consent",
-          enabled: true,
-          moods: ["custom"]
-        }
-      ]
-    });
-    scrollToCard(id);
-  };
-  const editLabel = (kind: "actions" | "zones", id: string, label: string) => {
-    onChange({ ...draft, [kind]: draft[kind].map((item) => (item.id === id ? { ...item, label } : item)) });
-  };
-  const editActionText = (id: string, text: string) => {
-    onChange({
-      ...draft,
-      actions: draft.actions.map((item) => (item.id === id ? { ...item, instructionTemplate: templateFromActionText(text) } : item))
-    });
-  };
-  const editZoneText = (id: string, value: string) => {
-    onChange({
-      ...draft,
-      zones: draft.zones.map((item) =>
-        item.id === id ? { ...item, forms: { nominative: value, accusative: value } } : item
-      )
-    });
-  };
-
-  const exportDraft = () => {
-    const blob = new Blob([JSON.stringify(draft, null, 2)], { type: "application/json" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = `${draft.name || "eigene-mischung"}.json`;
-    link.click();
-    URL.revokeObjectURL(link.href);
-  };
-
-  const importDraft = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    try {
-      const imported = configurationSchema.parse(JSON.parse(await file.text()));
-      onChange({ ...imported, id: imported.id || createId("mix"), updatedAt: new Date().toISOString() });
-      setFormError("");
-    } catch (caught) {
-      setFormError(caught instanceof Error ? caught.message : "Die JSON-Datei konnte nicht gelesen werden.");
-    } finally {
-      event.target.value = "";
-    }
-  };
-
-  return (
-    <div className="modal-backdrop" role="presentation">
-      <section data-testid="mix-modal" className="modal" role="dialog" aria-modal="true" aria-labelledby="mix-title" aria-describedby="mix-description">
-        <div className="modal-head">
-          <div>
-            <p className="eyebrow">Eigene Mischung</p>
-            <h2 id="mix-title">Mischung konfigurieren</h2>
-            <p id="mix-description" className="modal-description">Wähle Aktionen und Orte aus. Klappe Karten auf, wenn du Texte ändern möchtest.</p>
-          </div>
-          <div className="modal-head-actions">
-            <button data-testid="mix-import" className="secondary" onClick={() => fileRef.current?.click()}><Upload size={17} /> JSON importieren</button>
-                        <button data-testid="mix-close" className="ghost" onClick={onClose}>Schließen</button>
-          </div>
-          <input data-testid="mix-import-input" ref={fileRef} hidden type="file" accept="application/json" onChange={importDraft} />
-        </div>
-
-        <label className="field full-field">
-          <span>Name</span>
-          <input data-testid="mix-name" value={draft.name} onChange={(event) => updateName(event.target.value)} />
-        </label>
-
-        <div className="config-grid modal-grid">
-          <EditableList
-            title="Aktionen"
-            items={draft.actions}
-            kind="actions"
-            cardRefs={cardRefs}
-            onToggle={(id) => toggle("actions", id)}
-            onRemove={(id) => remove("actions", id)}
-            onAdd={addAction}
-            onLabel={(id, label) => editLabel("actions", id, label)}
-            expandedIds={expandedIds}
-            onExpandedChange={setExpandedIds}
-            onActionText={editActionText}
-          />
-          <EditableList
-            title="Orte"
-            items={draft.zones}
-            kind="zones"
-            cardRefs={cardRefs}
-            onToggle={(id) => toggle("zones", id)}
-            onRemove={(id) => remove("zones", id)}
-            onAdd={addZone}
-            onLabel={(id, label) => editLabel("zones", id, label)}
-            expandedIds={expandedIds}
-            onExpandedChange={setExpandedIds}
-            onZoneText={editZoneText}
-          />
-        </div>
-
-        {formError ? <p className="form-warning" role="alert">{formError}</p> : null}
-        {saveError ? <p className="form-warning" role="alert">{saveError}</p> : null}
-
-        <div className="modal-footer">
-          <p>{draft.actions.filter((item) => item.enabled).length} Aktionen, {draft.zones.filter((item) => item.enabled).length} Orte aktiv. Für Würfe braucht es jeweils mindestens sechs.</p>
-          <button data-testid="mix-delete" className="danger" onClick={onDelete}><Trash2 size={17} /> Mischung löschen</button>
-          <div className="modal-footer-actions">
-                      <button data-testid="mix-export" className="secondary" onClick={exportDraft}><Download size={17} /> JSON exportieren</button>
-                      <button data-testid="mix-save" className="primary" onClick={onSave}><Save size={18} /> Mischung speichern</button>
-          </div>
-        </div>
-      </section>
-    </div>
-  );
-}
-
-function EditableList({
-  title,
-  items,
-  kind,
-  cardRefs,
-  onToggle,
-  onRemove,
-  onAdd,
-  onLabel,
-  onActionText,
-  expandedIds,
-  onExpandedChange,
-  onZoneText
-}: {
-  title: string;
-  items: (DiceAction | Zone)[];
-  kind: "actions" | "zones";
-  cardRefs: React.MutableRefObject<Record<string, HTMLDivElement | null>>;
-  onToggle: (id: string) => void;
-  onRemove: (id: string) => void;
-  onAdd: () => void;
-  onLabel: (id: string, label: string) => void;
-  expandedIds: Set<string>;
-  onExpandedChange: React.Dispatch<React.SetStateAction<Set<string>>>;
-  onActionText?: (id: string, text: string) => void;
-  onZoneText?: (id: string, text: string) => void;
-}) {
-  return (
-    <div className="config-list editable-list">
-      <div className="list-head">
-        <h3>{title}</h3>
-        <button data-testid={`add-${kind}`} className="ghost" onClick={onAdd}><Plus size={16} /> Hinzufügen</button>
-      </div>
-      {items.map((item) => {
-        const isExpanded = expandedIds.has(item.id);
-        const toggleExpanded = () => {
-          onExpandedChange((ids) => {
-            const nextIds = new Set(ids);
-            if (nextIds.has(item.id)) nextIds.delete(item.id);
-            else nextIds.add(item.id);
-            return nextIds;
-          });
-        };
-
-        return (
-                  <div key={item.id} data-testid={`card-${kind}-${item.id}`} ref={(element) => { cardRefs.current[item.id] = element; }} className={isExpanded ? "editable-item expanded" : "editable-item"}>
-            <div className="card-header">
-              <input
-                        data-testid={`toggle-${kind}-${item.id}`}
-                        type="checkbox"
-                        checked={item.enabled}
-                        onChange={() => onToggle(item.id)}
-                        aria-label={`${item.label} aktivieren`}
-                      />
-                      <button data-testid={`card-summary-${kind}-${item.id}`} className="card-summary" type="button" aria-expanded={isExpanded} onClick={toggleExpanded}>
-                        <span data-testid={`item-${kind}-title`} className="collapsed-name">{item.label}</span>
-                      </button>
-                      <button data-testid={`remove-${kind}-${item.id}`} className="trash-icon" type="button" aria-label={`${item.label} entfernen`} onClick={() => onRemove(item.id)}>
-                        <Trash2 size={17} />
-                      </button>
-                    </div>
-
-            {isExpanded ? (
-              <div className="card-details">
-                <div className="card-icon">{iconFor(item.iconKey, "card-icon-svg")}</div>
-                <label className="field">
-                  <span>{kind === "actions" ? "Name auf dem Würfel" : "Ort auf dem Würfel"}</span>
-                  <input data-testid={`input-label-${kind}-${item.id}`} value={item.label} onChange={(event) => onLabel(item.id, event.target.value)} />
-                </label>
-                {"instructionTemplate" in item && onActionText ? (
-                  <label className="field full-field">
-                    <span>Aufgabe</span>
-                    <input data-testid={`input-action-${item.id}`} value={actionTextFromTemplate(item.instructionTemplate)} onChange={(event) => onActionText(item.id, event.target.value)} />
-                    <small>Der gewürfelte Ort wird automatisch ergänzt. Schreibe optional <code>{"{ort}"}</code> an die gewünschte Stelle im Satz.</small>
-                  </label>
-                ) : null}
-                {"forms" in item && onZoneText ? (
-                  <label className="field full-field">
-                    <span>Ort im Ergebnistext</span>
-                    <input data-testid={`input-zone-${item.id}`} value={item.forms.accusative} onChange={(event) => onZoneText(item.id, event.target.value)} />
-                    <small>So erscheint der Ort im Satz, z. B. „den Nacken“ oder „die Hände“.</small>
-                  </label>
-                ) : null}
-              </div>
-            ) : null}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-
-
-
-
-
-
-
-
-
-function ConfirmDialog({
-  title,
-  message,
-  confirmLabel,
-  onCancel,
-  onConfirm
-}: {
-  title: string;
-  message: string;
-  confirmLabel: string;
-  onCancel: () => void;
-  onConfirm: () => void;
-}) {
-  return (
-    <div className="modal-backdrop confirm-backdrop" role="presentation">
-      <section className="confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-message">
-        <h2 id="confirm-title">{title}</h2>
-        <p id="confirm-message">{message}</p>
-        <div className="confirm-actions">
-          <button data-testid="confirm-cancel" className="secondary" onClick={onCancel}>Abbrechen</button>
-          <button data-testid="confirm-confirm" className="danger" onClick={onConfirm}><Trash2 size={17} /> {confirmLabel}</button>
-        </div>
-      </section>
-    </div>
-  );
-}
 
 
 
