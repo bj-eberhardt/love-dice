@@ -5,14 +5,15 @@ interface ResultTokenProps {
   value: string;
   iconKey: string;
   tone: "pink" | "teal";
+  dataTestId: string;
 }
 
-export function ResultToken({ title, value, iconKey, tone }: ResultTokenProps) {
+export function ResultToken({ title, value, iconKey, tone, dataTestId }: ResultTokenProps) {
   return (
-    <div className={`result-token ${tone}`}>
+    <div data-testid={dataTestId} className={`result-token ${tone}`}>
       {iconFor(iconKey, "token-icon")}
       <span>{title}</span>
-      <strong>{value}</strong>
+      <strong data-testid='result-value'>{value}</strong>
     </div>
   );
 }

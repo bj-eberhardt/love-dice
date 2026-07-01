@@ -12,7 +12,16 @@ test('basic roll produces result text', async ({ page }) => {
     await page.locator('[data-testid="roll-button"]').click();
     const result = page.locator('[data-testid="result-text"]');
     await result.waitFor({ state: 'visible', timeout: 10000 });
+
+    await page.locator('[data-is-rolling="true"]').waitFor({state: 'visible', timeout: 10000});
+
+    await expect(page.getByTestId('action-result').getByTestId('result-value')).not.toContainText("Bereit");
+    await expect(page.getByTestId('zone-result').getByTestId('result-value')).not.toContainText("Bereit");
+
+
     const txt = await result.innerText();
     expect(txt.length).toBeGreaterThan(0);
+
+    await page.locator('[data-is-rolling="false"]').waitFor({state: 'visible', timeout: 10000});
   });
 });

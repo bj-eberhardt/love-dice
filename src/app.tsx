@@ -318,10 +318,10 @@ export function App() {
 
         <div className="result-panel" aria-live="polite">
           <div className="result-columns">
-            <ResultToken title="Aktion" value={roll?.action.label ?? "Bereit"} iconKey={roll?.action.iconKey ?? "sparkle"} tone="pink" />
-            <ResultToken title="Zone" value={roll?.zone.label ?? "Bereit"} iconKey={roll?.zone.iconKey ?? "consent"} tone="teal" />
+            <ResultToken dataTestId="action-result" title="Aktion" value={roll?.action.label ?? "Bereit"} iconKey={roll?.action.iconKey ?? "sparkle"} tone="pink" />
+            <ResultToken dataTestId="zone-result" title="Zone" value={roll?.zone.label ?? "Bereit"} iconKey={roll?.zone.iconKey ?? "consent"} tone="teal" />
           </div>
-          <p data-testid="result-text" className="instruction">{rolling ? "Die Würfel rollen..." : roll?.instruction ?? "Tippe auf Würfeln, um eine neue Runde zu starten."}</p>
+          <p data-testid="result-text" data-is-rolling={rolling} className="instruction">{rolling ? "Die Würfel rollen..." : roll?.instruction ?? "Tippe auf Würfeln, um eine neue Runde zu starten."}</p>
           {error ? <p className="error">{error}</p> : null}
           <div className="controls">
             <button data-testid="roll-button" className="primary" onClick={startRoll} disabled={rolling}>
