@@ -54,6 +54,95 @@ const drawSparkle = (ctx: CanvasRenderingContext2D, x: number, y: number, size: 
   ctx.fill();
 };
 
+const drawLips = (ctx: CanvasRenderingContext2D) => {
+  ctx.save();
+  ctx.rotate(-0.18);
+  ctx.beginPath();
+  ctx.moveTo(-104, 0);
+  ctx.bezierCurveTo(-68, -52, -28, -52, 0, -14);
+  ctx.bezierCurveTo(28, -52, 68, -52, 104, 0);
+  ctx.bezierCurveTo(60, 30, 24, 34, 0, 18);
+  ctx.bezierCurveTo(-24, 34, -60, 30, -104, 0);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.globalCompositeOperation = "destination-out";
+  ctx.beginPath();
+  ctx.moveTo(-84, 3);
+  ctx.bezierCurveTo(-36, 15, 36, 15, 84, 3);
+  ctx.bezierCurveTo(36, 42, -36, 42, -84, 3);
+  ctx.fill();
+  ctx.restore();
+};
+
+const drawPursedLips = (ctx: CanvasRenderingContext2D) => {
+  ctx.save();
+  ctx.lineWidth = 18;
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 48, 78, 0, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 20, 36, 0, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
+};
+
+const drawTwinCircles = (ctx: CanvasRenderingContext2D) => {
+  ctx.save();
+  ctx.lineWidth = 16;
+  [-48, 48].forEach((x) => {
+    ctx.beginPath();
+    ctx.arc(x, 0, 48, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(x, 0, 9, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  ctx.restore();
+};
+
+const drawPeach = (ctx: CanvasRenderingContext2D) => {
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(0, 92);
+  ctx.bezierCurveTo(-92, 64, -112, -28, -50, -78);
+  ctx.bezierCurveTo(-24, -98, -6, -72, 0, -42);
+  ctx.bezierCurveTo(6, -72, 24, -98, 50, -78);
+  ctx.bezierCurveTo(112, -28, 92, 64, 0, 92);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.globalCompositeOperation = "destination-out";
+  ctx.lineWidth = 16;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(0, -48);
+  ctx.bezierCurveTo(-4, -4, -4, 42, 0, 78);
+  ctx.stroke();
+  ctx.restore();
+};
+
+const drawGenderSymbol = (ctx: CanvasRenderingContext2D) => {
+  ctx.save();
+  ctx.lineWidth = 15;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.beginPath();
+  ctx.arc(-16, -8, 48, 0, Math.PI * 2);
+  ctx.moveTo(18, -42);
+  ctx.lineTo(82, -106);
+  ctx.moveTo(82, -106);
+  ctx.lineTo(82, -62);
+  ctx.moveTo(82, -106);
+  ctx.lineTo(38, -106);
+  ctx.moveTo(-16, 40);
+  ctx.lineTo(-16, 112);
+  ctx.moveTo(-54, 78);
+  ctx.lineTo(22, 78);
+  ctx.stroke();
+  ctx.restore();
+};
+
 const diceLabelFont = (size: number) => `700 ${size}px Inter, Arial`;
 
 const ellipsizeToWidth = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number) => {
@@ -139,13 +228,13 @@ const drawIcon = (ctx: CanvasRenderingContext2D, iconKey: IconKey, color: string
       drawHeart(ctx, 0, 0, 92);
       break;
     case "lips":
-      drawHeart(ctx, 0, 0, 92);
+      drawLips(ctx);
       break;
     case "heart":
       drawHeart(ctx, 0, 0, 92);
       break;
     case "suck":
-      drawHeart(ctx, 0, 0, 92);
+      drawPursedLips(ctx);
       break;
     case "massage":
       drawHand(ctx, 0, 0);
@@ -160,16 +249,16 @@ const drawIcon = (ctx: CanvasRenderingContext2D, iconKey: IconKey, color: string
       drawHand(ctx, 0, 0);
       break;
     case "breasts":
-      drawHand(ctx, 0, 0);
+      drawTwinCircles(ctx);
       break;
     case "butt":
-      drawHand(ctx, 0, 0);
+      drawPeach(ctx);
       break;
     case "nipple":
-      drawHand(ctx, 0, 0);
+      drawTwinCircles(ctx);
       break;
     case "genitals":
-      drawHand(ctx, 0, 0);
+      drawGenderSymbol(ctx);
       break;
     case "whisper":
       ctx.lineWidth = 16;
@@ -377,18 +466,82 @@ const drawFaceBackground = (ctx: CanvasRenderingContext2D, color: string) => {
 
 const makeTexture = (label: string, iconKey: IconKey, color: string) => {
   const canvas = document.createElement("canvas");
-  canvas.width = 512;
-  canvas.height = 512;
+  canvas.width = 1024;
+  canvas.height = 1024;
   const ctx = canvas.getContext("2d")!;
+  ctx.scale(2, 2);
+
   drawFaceBackground(ctx, color);
+
   ctx.save();
   ctx.shadowColor = color;
-  ctx.shadowBlur = 8;
+  ctx.shadowBlur = 6;
   drawIcon(ctx, iconKey, color);
+  ctx.restore();
+
+  ctx.save();
+  ctx.shadowColor = "rgba(0, 0, 0, 0.45)";
+  ctx.shadowBlur = 2;
+  ctx.shadowOffsetY = 1;
   drawLabel(ctx, label, color);
   ctx.restore();
+
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 4;
+  texture.minFilter = THREE.LinearMipmapLinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  texture.needsUpdate = true;
+  return texture;
+};
+
+const makeTableTexture = () => {
+  const canvas = document.createElement("canvas");
+  canvas.width = 1024;
+  canvas.height = 1024;
+  const ctx = canvas.getContext("2d")!;
+
+  const base = ctx.createRadialGradient(512, 420, 80, 512, 512, 620);
+  base.addColorStop(0, "#30384b");
+  base.addColorStop(0.5, "#202637");
+  base.addColorStop(1, "#111622");
+  ctx.fillStyle = base;
+  ctx.fillRect(0, 0, 1024, 1024);
+
+  ctx.globalAlpha = 0.16;
+  for (let y = -1024; y < 1024; y += 26) {
+    ctx.strokeStyle = y % 52 === 0 ? "#677088" : "#090c13";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(1024, y + 1024);
+    ctx.stroke();
+  }
+
+  ctx.globalAlpha = 0.12;
+  for (let x = 0; x < 1024; x += 34) {
+    ctx.strokeStyle = x % 68 === 0 ? "#5b657c" : "#0b0e16";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x - 420, 1024);
+    ctx.stroke();
+  }
+
+  ctx.globalAlpha = 1;
+  const vignette = ctx.createRadialGradient(512, 500, 260, 512, 520, 620);
+  vignette.addColorStop(0, "rgba(255, 255, 255, 0.03)");
+  vignette.addColorStop(0.68, "rgba(0, 0, 0, 0.08)");
+  vignette.addColorStop(1, "rgba(0, 0, 0, 0.42)");
+  ctx.fillStyle = vignette;
+  ctx.fillRect(0, 0, 1024, 1024);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 4;
+  texture.wrapS = THREE.ClampToEdgeWrapping;
+  texture.wrapT = THREE.ClampToEdgeWrapping;
+  texture.needsUpdate = true;
   return texture;
 };
 
@@ -413,8 +566,8 @@ function Die({
         (face) =>
           new THREE.MeshStandardMaterial({
             map: makeTexture(face.label, face.iconKey, color),
-            roughness: 0.38,
-            metalness: 0.06
+            roughness: 0.56,
+            metalness: 0.04
           })
       ),
     [color, faces]
@@ -480,6 +633,8 @@ export function DiceStage({
   zoneResult?: RollFace<Zone>;
   rollingKey: number;
 }) {
+  const tableTexture = useMemo(makeTableTexture, []);
+
   return (
     <div className="dice-stage" aria-label="3D-Würfelbereich">
       <Canvas shadows camera={{ position: [0, 2.2, 6], fov: 44 }}>
@@ -516,11 +671,12 @@ export function DiceStage({
             <mesh receiveShadow>
               <circleGeometry args={[2.72, 96]} />
               <meshStandardMaterial
-                color="#242a3b"
-                roughness={0.78}
-                metalness={0.03}
+                map={tableTexture}
+                color="#f7f8fc"
+                roughness={0.86}
+                metalness={0.02}
                 transparent
-                opacity={0.74}
+                opacity={0.82}
               />
             </mesh>
             <mesh position={[0, 0, -0.012]}>

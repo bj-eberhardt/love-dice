@@ -285,7 +285,7 @@ export const zonesById = {
   butt: zone({
     id: "butt",
     label: "Hintern",
-    accusative: "den Hintern",
+    accusative: "den Po",
     iconKey: "butt",
     useInCustom: false
   })
