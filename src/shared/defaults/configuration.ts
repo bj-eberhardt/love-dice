@@ -28,12 +28,26 @@ export const actionsById = {
     instructionTemplate: "Küsse {zone.accusative}.",
     zoneMode: "required",
     iconKey: "kiss",
-    allowedZoneIds: ["lips", "neck", "hands", "shoulders", "back", "legs", "ear", "anywhere"]
+    allowedZoneIds: [
+      "lips",
+      "neck",
+      "hands",
+      "shoulders",
+      "back",
+      "legs",
+      "ear",
+      "nipple",
+      "breasts",
+      "genitals",
+      "butt",
+      "thighs",
+      "anywhere"
+    ]
   }),
   bite: action({
     id: "bite",
     label: "Beißen",
-    instructionTemplate: "Beiße vorsichtig {zone.accusative}.",
+    instructionTemplate: "Beiße vorsichtig in {zone.accusative}.",
     zoneMode: "required",
     iconKey: "bite",
     allowedZoneIds: [
@@ -44,7 +58,10 @@ export const actionsById = {
       "back",
       "legs",
       "ear",
+      "nipple",
       "thighs",
+      "breasts",
+      "butt",
       "anywhere"
     ]
   }),
@@ -54,14 +71,40 @@ export const actionsById = {
     instructionTemplate: "Massiere {zone.accusative}.",
     zoneMode: "required",
     iconKey: "massage",
-    allowedZoneIds: ["neck", "hands", "shoulders", "back", "legs", "thighs", "breasts", "anywhere"]
+    allowedZoneIds: [
+      "neck",
+      "hands",
+      "shoulders",
+      "back",
+      "legs",
+      "thighs",
+      "breasts",
+      "butt",
+      "genitals",
+      "anywhere"
+    ]
   }),
   stroke: action({
     id: "stroke",
     label: "Streicheln",
     instructionTemplate: "Streichle {zone.accusative} langsam und aufmerksam.",
     zoneMode: "required",
-    iconKey: "touch"
+    iconKey: "touch",
+    allowedZoneIds: [
+      "lips",
+      "neck",
+      "back",
+      "hands",
+      "legs",
+      "shoulders",
+      "ear",
+      "nipple",
+      "thighs",
+      "breasts",
+      "genitals",
+      "butt",
+      "anywhere"
+    ]
   }),
   whisper: action({
     id: "whisper",
@@ -108,7 +151,17 @@ export const actionsById = {
     instructionTemplate: "Kitzle {zone.accusative} spielerisch.",
     zoneMode: "required",
     iconKey: "tickle",
-    allowedZoneIds: ["neck", "hands", "legs", "thighs", "back", "anywhere"]
+    allowedZoneIds: [
+      "neck",
+      "hands",
+      "legs",
+      "thighs",
+      "back",
+      "ear",
+      "shoulders",
+      "butt",
+      "anywhere"
+    ]
   }),
   rub: action({
     id: "rub",
@@ -117,22 +170,54 @@ export const actionsById = {
     zoneMode: "required",
     iconKey: "rub",
     useInCustom: false,
-    allowedZoneIds: ["back", "legs", "thighs", "breasts", "butt", "genitals", "anywhere"]
+    allowedZoneIds: [
+      "back",
+      "legs",
+      "thighs",
+      "breasts",
+      "butt",
+      "genitals",
+      "neck",
+      "hands",
+      "nipple",
+      "anywhere"
+    ]
   }),
   seduce: action({
     id: "seduce",
     label: "Verführen",
     instructionTemplate: "Verführe dein Gegenüber mit Fokus auf {zone.accusative}.",
     zoneMode: "optional",
-    iconKey: "seduce"
+    iconKey: "seduce",
+    allowedZoneIds: [
+      "lips",
+      "neck",
+      "ear",
+      "nipple",
+      "thighs",
+      "breasts",
+      "genitals",
+      "butt",
+      "anywhere"
+    ]
   }),
   smell: action({
     id: "smell",
     label: "Riechen",
-    instructionTemplate: "Rieche aufmerksam an {zone.accusative}.",
+    instructionTemplate: "Rieche aufmerksam. Konzentration auf {zone.accusative}.",
     zoneMode: "required",
     iconKey: "smell",
-    allowedZoneIds: ["neck", "hands", "breasts", "thighs", "anywhere"]
+    allowedZoneIds: [
+      "neck",
+      "hands",
+      "breasts",
+      "thighs",
+      "lips",
+      "ear",
+      "nipple",
+      "butt",
+      "anywhere"
+    ]
   }),
   suck: action({
     id: "suck",
@@ -141,7 +226,15 @@ export const actionsById = {
     zoneMode: "required",
     iconKey: "suck",
     useInCustom: false,
-    allowedZoneIds: ["lips", "neck", "nipple", "breasts", "genitals", "anywhere"]
+    allowedZoneIds: [
+      "lips",
+      "nipple",
+      "breasts",
+      "genitals",
+      "ear",
+      "thighs",
+      "anywhere"
+    ]
   })
 } satisfies Record<string, DiceAction>;
 

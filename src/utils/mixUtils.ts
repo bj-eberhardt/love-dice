@@ -1,4 +1,10 @@
-﻿import { actionsById, configurationSchema, zonesById, type DiceConfiguration } from "@/shared";
+﻿import {
+  actionsById,
+  configurationSchema,
+  isPairAllowed,
+  zonesById,
+  type DiceConfiguration
+} from "@/shared";
 
 const customMixesKey = "love-dice-custom-mixes";
 
@@ -30,14 +36,18 @@ export const createUniqueMixName = (name: string, mixes: DiceConfiguration[]) =>
   return `${baseName} ${index}`;
 };
 
-export const createDraft = (): DiceConfiguration => ({
-  id: createId("mix"),
-  name: "Neue Mischung",
-  updatedAt: new Date().toISOString(),
-  actions: Object.values(actionsById)
-    .filter((action) => action.useInCustom)
-    .map((action) => ({ ...action, moods: ["custom" as const] })),
-  zones: Object.values(zonesById)
-    .filter((zone) => zone.useInCustom)
-    .map((zone) => ({ ...zone, moods: ["custom" as const] }))
-});
+export const createDraft = (): DiceConfiguration => {
+  const defaultZones = Object.values(zonesById).filter((zone) => zone.useInCustom);
+
+  return {
+    id: createId("mix"),
+    name: "Neue Mischung",
+    updatedAt: new Date().toISOString(),
+    actions: Object.values(actionsById)
+      .filter(
+        (action) => action.useInCustom && defaultZones.some((zone) => isPairAllowed(action, zone))
+      )
+      .map((action) => ({ ...action, moods: ["custom" as const] })),
+    zones: defaultZones.map((zone) => ({ ...zone, moods: ["custom" as const] }))
+  };
+};

@@ -13,13 +13,13 @@ const takeSix = <T>(items: T[], random: () => number): T[] =>
 const supportsMood = (entry: { enabled: boolean; moods: Mood[] }, mood: Mood) =>
   entry.enabled && (mood === "custom" || entry.moods.includes(mood));
 
-const isPairAllowed = (action: DiceAction, zone: Zone) => {
+export const isPairAllowed = (action: DiceAction, zone: Zone) => {
   if (action.allowedZoneIds?.length && !action.allowedZoneIds.includes(zone.id)) return false;
   if (action.blockedZoneIds?.includes(zone.id)) return false;
   return true;
 };
 
-const fillTemplate = (action: DiceAction, zone: Zone) =>
+export const fillTemplate = (action: DiceAction, zone: Zone) =>
   action.instructionTemplate
     .replaceAll("{zone.accusative}", zone.accusative)
     .replaceAll("{zone.label}", zone.label)
