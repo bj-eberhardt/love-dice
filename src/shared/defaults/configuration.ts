@@ -84,7 +84,7 @@ export const defaultConfiguration: DiceConfiguration = {
     {
       id: "lips",
       label: "Lippen",
-      forms: { nominative: "die Lippen", accusative: "die Lippen" },
+      accusative: "die Lippen",
       iconKey: "lips",
       enabled: true,
       moods: moods.slice()
@@ -92,7 +92,7 @@ export const defaultConfiguration: DiceConfiguration = {
     {
       id: "neck",
       label: "Nacken",
-      forms: { nominative: "der Nacken", accusative: "den Nacken" },
+      accusative: "den Nacken",
       iconKey: "neck",
       enabled: true,
       moods: moods.slice()
@@ -100,7 +100,7 @@ export const defaultConfiguration: DiceConfiguration = {
     {
       id: "back",
       label: "Rücken",
-      forms: { nominative: "der Rücken", accusative: "den Rücken" },
+      accusative: "den Rücken",
       iconKey: "back",
       enabled: true,
       moods: moods.slice()
@@ -108,7 +108,7 @@ export const defaultConfiguration: DiceConfiguration = {
     {
       id: "hands",
       label: "Hände",
-      forms: { nominative: "die Hände", accusative: "die Hände" },
+      accusative: "die Hände",
       iconKey: "hands",
       enabled: true,
       moods: moods.slice()
@@ -116,7 +116,7 @@ export const defaultConfiguration: DiceConfiguration = {
     {
       id: "legs",
       label: "Beine",
-      forms: { nominative: "die Beine", accusative: "die Beine" },
+      accusative: "die Beine",
       iconKey: "legs",
       enabled: true,
       moods: moods.slice()
@@ -124,7 +124,7 @@ export const defaultConfiguration: DiceConfiguration = {
     {
       id: "shoulders",
       label: "Schultern",
-      forms: { nominative: "die Schultern", accusative: "die Schultern" },
+      accusative: "die Schultern",
       iconKey: "shoulders",
       enabled: true,
       moods: ["romantic", "playful", "custom"]
@@ -132,7 +132,7 @@ export const defaultConfiguration: DiceConfiguration = {
     {
       id: "anywhere",
       label: "Nach Absprache",
-      forms: { nominative: "überall nach Absprache", accusative: "überall nach Absprache" },
+      accusative: "überall nach Absprache",
       iconKey: "consent",
       enabled: true,
       moods: moods.slice()

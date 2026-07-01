@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test';
+import type { DiceConfiguration } from '../../src/shared/schemas/configuration';
 
 export async function acceptConsent(page: Page) {
   const accept = page.getByTestId('consent-accept');
@@ -16,7 +17,7 @@ export async function acceptConsent(page: Page) {
 
 export async function createCustomMix(page: Page, name: string) {
   const rand = Math.random().toString(36).slice(2, 8);
-  const mix = {
+  const mix: DiceConfiguration = {
     id: `mix-${rand}`,
     name,
     updatedAt: new Date().toISOString(),
@@ -24,18 +25,18 @@ export async function createCustomMix(page: Page, name: string) {
       id: `action-${i}`,
       label: `Action ${i + 1}`,
       instructionTemplate: 'Probiert {zone.accusative} nach Absprache aus.',
-      zoneMode: 'optional',
+      zoneMode: 'optional' as const,
       iconKey: 'sparkle',
       enabled: true,
-      moods: ['custom']
+      moods: ['custom'] as const
     })),
     zones: Array.from({ length: 6 }).map((_, i) => ({
       id: `zone-${i}`,
       label: `Zone ${i + 1}`,
-      forms: { nominative: `die Zone ${i + 1}`, accusative: `die Zone ${i + 1}` },
+      accusative: `die Zone ${i + 1}`,
       iconKey: 'consent',
       enabled: true,
-      moods: ['custom']
+      moods: ['custom'] as const
     }))
   };
 

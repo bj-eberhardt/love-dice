@@ -24,6 +24,7 @@ import {
   createDraft,
   createId
 } from "./utils/mixUtils";
+import { formatZodError } from "./utils/validationUtils";
 
 const builtInModes: { id: Mood; label: string }[] = [
   { id: "romantic", label: "Romantisch" },
@@ -179,7 +180,6 @@ export function App() {
       return;
     }
 
-
     try {
       const parsed = configurationSchema.parse({ ...draft, name, updatedAt: new Date().toISOString() });
       const nextMixes = customMixes.some((mix) => mix.id === parsed.id)
@@ -192,7 +192,7 @@ export function App() {
       setRoll(null);
       setError("");
     } catch (caught) {
-      setDraftSaveError(caught instanceof Error ? caught.message : "Die Mischung ist unvollständig.");
+      setDraftSaveError(formatZodError(caught));
     }
   };
 

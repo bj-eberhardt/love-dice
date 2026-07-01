@@ -71,19 +71,19 @@ export function EditableList({
                 <div className="card-icon">{iconFor(item.iconKey, "card-icon-svg")}</div>
                 <label className="field">
                   <span>{kind === "actions" ? "Name auf dem Würfel" : "Ort auf dem Würfel"}</span>
-                  <input data-testid={`input-label-${kind}-${item.id}`} value={item.label} onChange={(event) => onLabel(item.id, event.target.value)} />
+                  <input data-testid={`input-label-${kind}-${item.id}`} required value={item.label} onChange={(event) => onLabel(item.id, event.target.value)} />
                 </label>
                 {"instructionTemplate" in item && onActionText ? (
                   <label className="field full-field">
                     <span>Aufgabe</span>
-                    <input data-testid={`input-action-${item.id}`} value={actionTextFromTemplate(item.instructionTemplate)} onChange={(event) => onActionText(item.id, event.target.value)} />
+                    <input data-testid={`input-action-${item.id}`} required value={actionTextFromTemplate(item.instructionTemplate)} onChange={(event) => onActionText(item.id, event.target.value)} />
                     <small>Der gewürfelte Ort wird automatisch ergänzt. Schreibe optional <code>{"{ort}"}</code> an die gewünschte Stelle im Satz.</small>
                   </label>
                 ) : null}
-                {"forms" in item && onZoneText ? (
+                {"accusative" in item && onZoneText ? (
                   <label className="field full-field">
                     <span>Ort im Ergebnistext</span>
-                    <input data-testid={`input-zone-${item.id}`} value={item.forms.accusative} onChange={(event) => onZoneText(item.id, event.target.value)} />
+                    <input data-testid={`input-zone-${item.id}`} required value={item.accusative} onChange={(event) => onZoneText(item.id, event.target.value)} />
                     <small>So erscheint der Ort im Satz, z. B. „den Nacken" oder „die Hände".</small>
                   </label>
                 ) : null}

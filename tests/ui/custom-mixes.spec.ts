@@ -341,4 +341,124 @@ test.describe('custom mixes', () => {
 
     });
   });
+
+  test('validation: action label cannot be empty', async ({ page }) => {
+    const name = `E2E Mix ${Date.now()}-${Math.random().toString(36).slice(2,6)}`;
+    const id = await createCustomMix(page, name);
+    await page.reload();
+    await acceptConsent(page);
+
+    await test.step('Open mix and clear action label', async () => {
+      await page.waitForSelector(`[data-testid="mix-chip-${id}"]`, { state: 'visible', timeout: 10000 });
+      await page.getByTestId(`mix-chip-${id}`).dblclick();
+      await expect(page.getByTestId('mix-modal')).toBeVisible();
+
+      // Expand first action and clear label
+      await page.getByTestId('card-summary-actions-action-0').click();
+      await page.getByTestId('input-label-actions-action-0').fill('');
+      
+      // Try to save
+      await page.getByTestId('mix-save').click();
+      
+      // Should show validation error
+      await expect(page.locator('.form-warning')).toContainText(/Feld erforderlich|nicht leer/i);
+      await expect(page.getByTestId('mix-modal')).toBeVisible();
+    });
+  });
+
+  test('validation: action instructionTemplate cannot be empty', async ({ page }) => {
+    const name = `E2E Mix ${Date.now()}-${Math.random().toString(36).slice(2,6)}`;
+    const id = await createCustomMix(page, name);
+    await page.reload();
+    await acceptConsent(page);
+
+    await test.step('Open mix and clear action instruction', async () => {
+      await page.waitForSelector(`[data-testid="mix-chip-${id}"]`, { state: 'visible', timeout: 10000 });
+      await page.getByTestId(`mix-chip-${id}`).dblclick();
+      await expect(page.getByTestId('mix-modal')).toBeVisible();
+
+      // Expand first action and clear instruction
+      await page.getByTestId('card-summary-actions-action-0').click();
+      await page.getByTestId('input-action-action-0').fill('');
+      
+      // Try to save
+      await page.getByTestId('mix-save').click();
+      
+      // Should show validation error
+      await expect(page.locator('.form-warning')).toContainText(/Feld erforderlich|nicht leer/i);
+      await expect(page.getByTestId('mix-modal')).toBeVisible();
+    });
+  });
+
+  test('validation: zone label cannot be empty', async ({ page }) => {
+    const name = `E2E Mix ${Date.now()}-${Math.random().toString(36).slice(2,6)}`;
+    const id = await createCustomMix(page, name);
+    await page.reload();
+    await acceptConsent(page);
+
+    await test.step('Open mix and clear zone label', async () => {
+      await page.waitForSelector(`[data-testid="mix-chip-${id}"]`, { state: 'visible', timeout: 10000 });
+      await page.getByTestId(`mix-chip-${id}`).dblclick();
+      await expect(page.getByTestId('mix-modal')).toBeVisible();
+
+      // Expand first zone and clear label
+      await page.getByTestId('card-summary-zones-zone-0').click();
+      await page.getByTestId('input-label-zones-zone-0').fill('');
+      
+      // Try to save
+      await page.getByTestId('mix-save').click();
+      
+      // Should show validation error
+      await expect(page.locator('.form-warning')).toContainText(/Feld erforderlich|nicht leer/i);
+      await expect(page.getByTestId('mix-modal')).toBeVisible();
+    });
+  });
+
+  test('validation: zone accusative cannot be empty', async ({ page }) => {
+    const name = `E2E Mix ${Date.now()}-${Math.random().toString(36).slice(2,6)}`;
+    const id = await createCustomMix(page, name);
+    await page.reload();
+    await acceptConsent(page);
+
+    await test.step('Open mix and clear zone accusative', async () => {
+      await page.waitForSelector(`[data-testid="mix-chip-${id}"]`, { state: 'visible', timeout: 10000 });
+      await page.getByTestId(`mix-chip-${id}`).dblclick();
+      await expect(page.getByTestId('mix-modal')).toBeVisible();
+
+      // Expand first zone and clear accusative
+      await page.getByTestId('card-summary-zones-zone-0').click();
+      await page.getByTestId('input-zone-zone-0').fill('');
+      
+      // Try to save
+      await page.getByTestId('mix-save').click();
+      
+      // Should show validation error
+      await expect(page.locator('.form-warning')).toContainText(/Feld erforderlich|nicht leer/i);
+      await expect(page.getByTestId('mix-modal')).toBeVisible();
+    });
+  });
+
+  test('validation: only-whitespace fields are treated as empty', async ({ page }) => {
+    const name = `E2E Mix ${Date.now()}-${Math.random().toString(36).slice(2,6)}`;
+    const id = await createCustomMix(page, name);
+    await page.reload();
+    await acceptConsent(page);
+
+    await test.step('Open mix and fill action label with whitespace only', async () => {
+      await page.waitForSelector(`[data-testid="mix-chip-${id}"]`, { state: 'visible', timeout: 10000 });
+      await page.getByTestId(`mix-chip-${id}`).dblclick();
+      await expect(page.getByTestId('mix-modal')).toBeVisible();
+
+      // Expand first action and fill with spaces
+      await page.getByTestId('card-summary-actions-action-0').click();
+      await page.getByTestId('input-label-actions-action-0').fill('   ');
+      
+      // Try to save
+      await page.getByTestId('mix-save').click();
+      
+      // Should show validation error
+      await expect(page.locator('.form-warning')).toContainText(/Feld erforderlich|nicht leer/i);
+      await expect(page.getByTestId('mix-modal')).toBeVisible();
+    });
+  });
 });

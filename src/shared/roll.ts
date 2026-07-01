@@ -15,10 +15,9 @@ const isPairAllowed = (action: DiceAction, zone: Zone) => {
 
 const fillTemplate = (action: DiceAction, zone: Zone) =>
   action.instructionTemplate
-    .replaceAll("{zone.accusative}", zone.forms.accusative)
-    .replaceAll("{zone.nominative}", zone.forms.nominative)
+    .replaceAll("{zone.accusative}", zone.accusative)
     .replaceAll("{zone.label}", zone.label)
-    .replaceAll("{ort}", zone.forms.accusative);
+    .replaceAll("{ort}", zone.accusative);
 
 export const createRoll = (
   configuration: DiceConfiguration,

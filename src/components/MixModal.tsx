@@ -1,7 +1,8 @@
 import { configurationSchema, type DiceConfiguration } from "@/shared";
-import { Download, MoreHorizontal, Save, Trash2, Upload } from "lucide-react";
+import { Download, Save, Trash2, Upload } from "lucide-react";
 import { type ChangeEvent, useRef, useState } from "react";
 import { EditableList } from "./EditableList";
+import { formatZodError } from "@/utils/validationUtils";
 
 interface MixModalProps {
   draft: DiceConfiguration;
@@ -64,7 +65,7 @@ export function MixModal({ draft, saveError, onChange, onClose, onSave, onDelete
         {
           id,
           label: "Neue Zone",
-          forms: { nominative: "die neue Zone", accusative: "die neue Zone" },
+          accusative: "die neue Zone",
           iconKey: "consent",
           enabled: true,
           moods: ["custom"]
@@ -89,7 +90,7 @@ export function MixModal({ draft, saveError, onChange, onClose, onSave, onDelete
     onChange({
       ...draft,
       zones: draft.zones.map((item) =>
-        item.id === id ? { ...item, forms: { nominative: value, accusative: value } } : item
+        item.id === id ? { ...item, accusative: value } : item
       )
     });
   };
@@ -111,7 +112,7 @@ export function MixModal({ draft, saveError, onChange, onClose, onSave, onDelete
       onChange({ ...imported, id: imported.id || createId("mix"), updatedAt: new Date().toISOString() });
       setFormError("");
     } catch (caught) {
-      setFormError(caught instanceof Error ? caught.message : "Die JSON-Datei konnte nicht gelesen werden.");
+      setFormError(formatZodError(caught));
     } finally {
       event.target.value = "";
     }
@@ -135,7 +136,7 @@ export function MixModal({ draft, saveError, onChange, onClose, onSave, onDelete
 
         <label className="field full-field">
           <span>Name</span>
-          <input data-testid="mix-name" value={draft.name} onChange={(event) => updateName(event.target.value)} />
+          <input data-testid="mix-name" required value={draft.name} onChange={(event) => updateName(event.target.value)} />
         </label>
 
         <div className="config-grid modal-grid">
@@ -189,7 +190,7 @@ function createId(prefix: string) {
 
 function templateFromActionText(text: string) {
   const cleanText = text.trim().replace(/[.]+$/, "");
-  if (!cleanText) return "Probiert {zone.accusative} nach Absprache aus.";
+  if (!cleanText) return "";
   return cleanText.includes("{ort}")
     ? `${cleanText.replaceAll("{ort}", "{zone.accusative}")}.`
     : `${cleanText} {zone.accusative}.`;
