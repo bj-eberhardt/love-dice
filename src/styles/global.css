@@ -425,11 +425,23 @@ input {
   justify-content: center;
 }
 
+@media screen and (min-width: 500px) {
+  .result-token {
+    flex: 1 1 150px;
+  }
+}
+
+.result-columns {
+  justify-content: center;
+}
+
 .result-token {
   border: 1px solid #30384a;
   border-radius: 8px;
-  flex: 1 1 150px;
   padding: 16px;
+  flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: 150px;
 }
 
 .result-token span {
@@ -770,10 +782,6 @@ button:focus-visible {
 
   .dice-stage {
     min-height: 300px;
-  }
-
-  .sticky-add {
-    width: 100%;
   }
 
   .controls {

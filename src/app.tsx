@@ -108,7 +108,10 @@ export function App() {
 
   const updateScrollHints = useCallback(() => {
     const element = modeScrollRef.current;
-    if (!element) return;
+    if (!element) {
+      setTimeout(updateScrollHints, 50);
+      return;
+    }
     const hasOverflow = element.scrollWidth > element.clientWidth + 1;
     setScrollHints({
       left: hasOverflow && element.scrollLeft > 1,
@@ -232,7 +235,7 @@ export function App() {
     setActiveMode({ type: "mix", id: mix.id });
     setOpenMixMenuId(null);
     resetRoll();
-    window.setTimeout(updateScrollHints, 0);
+    window.setTimeout(updateScrollHints, 10);
   };
 
   const copyMix = (mix: DiceConfiguration) => {
@@ -443,6 +446,13 @@ export function App() {
                 </span>
               );
             })}
+            <button
+              data-testid="open-mix-modal"
+              className="primary sticky-add"
+              onClick={openNewMix}
+            >
+              <Plus size={18} /> Eigene Mischung
+            </button>
           </div>
           <button
             data-testid="mode-scroll-right"
@@ -454,9 +464,6 @@ export function App() {
             <ChevronRight size={18} />
           </button>
         </div>
-        <button data-testid="open-mix-modal" className="primary sticky-add" onClick={openNewMix}>
-          <Plus size={18} /> Eigene Mischung
-        </button>
       </section>
 
       <section className="game-layout">
