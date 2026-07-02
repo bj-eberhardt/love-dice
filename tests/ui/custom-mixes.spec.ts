@@ -732,6 +732,8 @@ test.describe("custom mixes", () => {
       );
 
       await page.keyboard.press("Escape");
+      await expect(actionCard.locator(".zone-selector-dropdown")).toHaveCount(0);
+
       await actionCard.getByTestId("zone-selector-input").click();
       await expect(actionCard.getByTestId(`zone-option-${newZoneId}`)).toHaveAttribute(
         "data-zone-label",
