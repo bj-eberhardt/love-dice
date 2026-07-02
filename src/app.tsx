@@ -518,6 +518,10 @@ export function App() {
           onDelete={() => requestDeleteMix(draft)}
         />
       ) : null}
+      <footer className="app-footer" data-testid="app-version">
+        v{__APP_VERSION__}
+      </footer>
+
       {confirmRequest ? (
         <ConfirmDialog
           title={confirmRequest.title}
