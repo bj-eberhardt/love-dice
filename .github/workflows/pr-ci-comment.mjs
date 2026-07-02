@@ -87,17 +87,32 @@ function formatDuration(ms) {
 }
 
 function formatFailures(failures) {
-  if (failures.length === 0) return "No failed Playwright test cases.";
+  if (failures.length === 0) return "No failed test cases.";
 
   return failures
     .map((failure) => {
-      const retryText = failure.retryCount > 0 ? `, retries: ${failure.retryCount}` : "";
-      const header = `- ${iconFor(failure.status)} ${failure.title} (${failure.status}${retryText}${formatDuration(failure.duration)})`;
+      const header = `- ${iconFor(failure.status)} ${failure.title} (${failure.filename})`;
       if (!failure.error) return header;
       return `${header}`;
     })
     .join("\n\n");
 }
+
+function formatPlaywrightFailures(failures) {
+  if (failures.length === 0) return "No failed Playwright test cases.";
+
+  return failures
+      .map((failure) => {
+        const retryText = failure.retryCount > 0 ? `, retries: ${failure.retryCount}` : "";
+        const header = `- ${iconFor(failure.status)} ${failure.title} (${failure.status}${retryText}${formatDuration(failure.duration)})`;
+        if (!failure.error) return header;
+        return `${header}`;
+      })
+      .join("\n\n");
+}
+
+
+
 
 async function readPlaywrightStats() {
   try {
@@ -116,7 +131,14 @@ async function readTestStats() {
     const raw = await readFile(testResultsPath, "utf8");
     const report = JSON.parse(raw);
     const { numFailedTestSuites: failed, numTotalTests: total, numPassedTests: passed } = report;
-    return { passed: passed, failed, skipped: 0, total, failures: [] };
+    const result = report.testResults.flatMap((testResult) => {
+      const filename = testResult.name.split(/[\\/]/).pop();
+      return testResult.assertionResults.map((assertion) => ({
+        filename,
+        title: assertion.title,
+      }));
+    });
+    return { passed: passed, failed, skipped: 0, total, failures: result };
   } catch {
     return { passed: 0, failed: 0, skipped: 0, total: 0, failures: [] };
   }
@@ -145,7 +167,7 @@ const summary = [
   `| E2E tests | ${e2e} |`,
   "",
   "",
-  details(`Playwright failures (${playwright.failed})`, formatFailures(playwright.failures)),
+  details(`Playwright failures (${playwright.failed})`, formatPlaywrightFailures(playwright.failures)),
   "",
   "",
   details(`Test failures (${testResult.failed})`, formatFailures(testResult.failures)),

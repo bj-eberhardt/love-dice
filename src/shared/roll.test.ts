@@ -17,7 +17,7 @@ const builtInMoods = ["romantic", "playful", "bold"] as const;
 type BuiltInMood = (typeof builtInMoods)[number];
 
 const expectedInstructions: Record<string, string> = {
-  "romantic|kiss|lips": "Küsse die Lippen.",
+  "romantic|kiss|lips": "Küsse die LippenA.",
   "romantic|kiss|neck": "Küsse den Nacken.",
   "romantic|kiss|back": "Küsse den Rücken.",
   "romantic|kiss|hands": "Küsse die Hände.",
