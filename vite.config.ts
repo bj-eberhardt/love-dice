@@ -1,11 +1,13 @@
-﻿import react from "@vitejs/plugin-react";
+import react from "@vitejs/plugin-react";
 import { resolve } from "node:path";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   plugins: [react()],
+  publicDir: "public",
   build: {
     outDir: "dist/client",
+    copyPublicDir: true,
     emptyOutDir: true,
     rollupOptions: {
       output: {
