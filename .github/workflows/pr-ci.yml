@@ -85,7 +85,7 @@ jobs:
         with:
           script: |
             const fs = require('node:fs');
-            const marker = '<!-- herzgarten-pr-ci-comment -->';
+            const marker = '<!-- pr-ci-comment -->';
             const body = fs.readFileSync('pr-ci-comment.md', 'utf8');
             const { owner, repo } = context.repo;
             const issue_number = context.payload.pull_request.number;
