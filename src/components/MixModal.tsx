@@ -1,6 +1,6 @@
 ﻿import { configurationSchema, derivePluralDative, type DiceConfiguration } from "@/shared";
 import { Download, Save, Trash2, Upload, X } from "lucide-react";
-import { type ChangeEvent, useRef, useState } from "react";
+import { type ChangeEvent, type FormEvent, type InvalidEvent, useRef, useState } from "react";
 import { EditableList } from "./EditableList";
 import { formatZodError } from "@/utils/validationUtils";
 
@@ -130,6 +130,22 @@ export function MixModal({ draft, saveError, onChange, onClose, onSave, onDelete
     });
   };
 
+  const handleInvalid = (event: InvalidEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setFormError("Bitte f?lle alle Pflichtfelder aus.");
+  };
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const parsed = configurationSchema.safeParse(draft);
+    if (!parsed.success) {
+      setFormError(formatZodError(parsed.error));
+      return;
+    }
+    setFormError("");
+    onSave();
+  };
+
   const exportDraft = () => {
     const blob = new Blob([JSON.stringify(draft, null, 2)], { type: "application/json" });
     const link = document.createElement("a");
@@ -159,13 +175,15 @@ export function MixModal({ draft, saveError, onChange, onClose, onSave, onDelete
 
   return (
     <div className="modal-backdrop" role="presentation">
-      <section
+      <form
         data-testid="mix-modal"
         className="modal"
         role="dialog"
         aria-modal="true"
         aria-labelledby="mix-title"
         aria-describedby="mix-description"
+        onSubmit={handleSubmit}
+        onInvalid={handleInvalid}
       >
         <button
           data-testid="mix-close"
@@ -206,6 +224,7 @@ export function MixModal({ draft, saveError, onChange, onClose, onSave, onDelete
           <button
             data-testid="mix-import"
             className="secondary mix-import-button"
+            type="button"
             onClick={() => fileRef.current?.click()}
           >
             <Upload size={17} /> JSON importieren
@@ -257,19 +276,19 @@ export function MixModal({ draft, saveError, onChange, onClose, onSave, onDelete
             {draft.zones.filter((item) => item.enabled).length} Orte aktiv. Für Würfe braucht es
             jeweils mindestens sechs.
           </p>
-          <button data-testid="mix-delete" className="danger" onClick={onDelete}>
+          <button data-testid="mix-delete" className="danger" type="button" onClick={onDelete}>
             <Trash2 size={17} /> Mischung löschen
           </button>
           <div className="modal-footer-actions">
-            <button data-testid="mix-export" className="secondary" onClick={exportDraft}>
+            <button data-testid="mix-export" className="secondary" type="button" onClick={exportDraft}>
               <Download size={17} /> JSON exportieren
             </button>
-            <button data-testid="mix-save" className="primary" onClick={onSave}>
+            <button data-testid="mix-save" className="primary" type="submit">
               <Save size={18} /> Mischung speichern
             </button>
           </div>
         </div>
-      </section>
+      </form>
     </div>
   );
 }

@@ -485,6 +485,30 @@ test.describe("custom mixes", () => {
     });
   });
 
+  test("validation: zone dative cannot be empty", async ({ page }) => {
+    const name = `E2E Mix ${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    const id = await createCustomMix(page, name);
+    await page.reload();
+    await acceptConsent(page);
+
+    await test.step("Open mix and clear zone dative", async () => {
+      await page.waitForSelector(`[data-testid="mix-chip-${id}"]`, {
+        state: "visible",
+        timeout: 10000
+      });
+      await page.getByTestId(`mix-chip-${id}`).dblclick();
+      await expect(page.getByTestId("mix-modal")).toBeVisible();
+
+      await page.getByTestId("card-summary-zones-zone-0").click();
+      await page.getByTestId("input-zone-dative-zone-0").fill("");
+
+      await page.getByTestId("mix-save").click();
+
+      await expect(page.locator(".form-warning")).toBeVisible();
+      await expect(page.getByTestId("mix-modal")).toBeVisible();
+    });
+  });
+
   test("zone dative is required but auto-filled from accusative for new plural zones", async ({
     page
   }) => {
@@ -498,6 +522,12 @@ test.describe("custom mixes", () => {
       newZoneId = testId?.replace("card-zones-", "") ?? "";
       expect(newZoneId).toBeTruthy();
       await expect(newZoneCard.getByTestId(`input-zone-dative-${newZoneId}`)).toHaveValue("");
+    });
+
+    await test.step("Saving with empty dative shows a validation error", async () => {
+      await page.getByTestId("mix-save").click();
+      await expect(page.locator(".form-warning")).toBeVisible();
+      await expect(page.getByTestId("mix-modal")).toBeVisible();
     });
 
     await test.step("Fill accusative and verify plural dative suggestion", async () => {

@@ -9,8 +9,7 @@
   type RollFace,
   type RollHistoryEntry,
   type RollResult,
-  type Zone,
-  withMissingDatives
+  type Zone
 } from "@/shared";
 import {
   ChevronLeft,
@@ -20,9 +19,7 @@ import {
   ShieldCheck,
   Shuffle
 } from "lucide-react";
-import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
-
-import { DiceStage } from "./features/dice3d/DiceStage";
+import { Suspense, lazy, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { ResultToken } from "./components/ResultToken";
 import { MixModal } from "./components/MixModal";
 import { ConfirmDialog } from "./components/ConfirmDialog";
@@ -41,6 +38,11 @@ const builtInModes: { id: BuiltInMood; label: string }[] = [
   { id: "playful", label: "Verspielt" },
   { id: "bold", label: "Mutig" }
 ];
+
+
+const DiceStage = lazy(() =>
+  import("./features/dice3d/DiceStage").then((module) => ({ default: module.DiceStage }))
+);
 
 type BuiltInMood = Exclude<Mood, "custom">;
 type ActiveMode = { type: "builtin"; mood: BuiltInMood } | { type: "mix"; id: string };
@@ -275,13 +277,11 @@ export function App() {
     }
 
     try {
-      const cleanedDraft = cleanupOrphanedZoneIds(
-        withMissingDatives({
-          ...draft,
-          name,
-          updatedAt: new Date().toISOString()
-        })
-      );
+      const cleanedDraft = cleanupOrphanedZoneIds({
+        ...draft,
+        name,
+        updatedAt: new Date().toISOString()
+      });
       const parsed = configurationSchema.parse(cleanedDraft);
       const nextMixes = customMixes.some((mix) => mix.id === parsed.id)
         ? customMixes.map((mix) => (mix.id === parsed.id ? parsed : mix))
@@ -461,13 +461,15 @@ export function App() {
       </section>
 
       <section className="game-layout">
-        <DiceStage
-          actionFaces={animationRoll?.actionFaces ?? roll?.actionFaces ?? initialActionFaces}
-          zoneFaces={animationRoll?.zoneFaces ?? roll?.zoneFaces ?? initialZoneFaces}
-          actionResult={animationRoll?.action ?? roll?.action}
-          zoneResult={animationRoll?.zone ?? roll?.zone}
-          rollingKey={rollingKey}
-        />
+        <Suspense fallback={<div className="dice-stage" aria-hidden="true" />}>
+          <DiceStage
+            actionFaces={animationRoll?.actionFaces ?? roll?.actionFaces ?? initialActionFaces}
+            zoneFaces={animationRoll?.zoneFaces ?? roll?.zoneFaces ?? initialZoneFaces}
+            actionResult={animationRoll?.action ?? roll?.action}
+            zoneResult={animationRoll?.zone ?? roll?.zone}
+            rollingKey={rollingKey}
+          />
+        </Suspense>
 
         <div className="result-panel" aria-live="polite">
           <div className="result-columns">

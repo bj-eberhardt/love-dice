@@ -6,7 +6,17 @@ export default defineConfig({
   plugins: [react()],
   build: {
     outDir: "dist/client",
-    emptyOutDir: true
+    emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes("node_modules")) return;
+          if (id.includes("@react-three/fiber")) return "react-three";
+          if (id.includes("three")) return "three";
+          if (id.includes("react") || id.includes("react-dom")) return "react-vendor";
+        }
+      }
+    }
   },
   server: {
     port: 5544,

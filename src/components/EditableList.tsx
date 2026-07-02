@@ -40,7 +40,7 @@ export function EditableList({
     <div className="config-list editable-list">
       <div className="list-head">
         <h3>{title}</h3>
-        <button data-testid={`add-${kind}`} className="ghost" onClick={onAdd}>
+        <button data-testid={`add-${kind}`} className="ghost" type="button" onClick={onAdd}>
           <Plus size={16} /> Hinzufügen
         </button>
       </div>
