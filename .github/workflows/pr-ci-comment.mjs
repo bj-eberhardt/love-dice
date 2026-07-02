@@ -1,4 +1,6 @@
-import { readFile } from 'node:fs/promises';
+/* global process */
+/* global console */
+import {readFile} from 'node:fs/promises';
 
 const marker = '<!-- pr-ci-comment -->';
 const playwrightResultsPath = process.env.PLAYWRIGHT_RESULTS_PATH || 'test-results/playwright-results.json';
@@ -27,15 +29,6 @@ function details(summary, body) {
 ${body.trim() || '_No content._'}
 
 </details>`;
-}
-
-async function readText(path, fallback = '_File was not generated._') {
-  try {
-    const content = await readFile(path, 'utf8');
-    return content.trim() || '_File is empty._';
-  } catch {
-    return fallback;
-  }
 }
 
 function testTitle(parts, spec, test) {
@@ -117,13 +110,24 @@ async function readPlaywrightStats() {
   }
 }
 
+async function readTestStats() {
+  try {
+    const raw = await readFile(testResultsPath, 'utf8');
+    const report = JSON.parse(raw);
+    const {numFailedTestSuites: failed, numTotalTests:total,numPassedTests:passed} = report;
+    return {passed: passed, failed, skipped: 0, total, failures: []};
+  } catch {
+    return { passed: 0, failed: 0, skipped: 0, total: 0, failures: [] };
+  }
+}
+
 const build = labelFor(process.env.BUILD_OUTCOME);
 const lint = labelFor(process.env.LINT_OUTCOME);
 const test = labelFor(process.env.TEST_OUTCOME);
 const e2e = labelFor(process.env.E2E_OUTCOME);
 const reportUrl = process.env.PLAYWRIGHT_REPORT_URL || process.env.RUN_URL || '';
 const playwright = await readPlaywrightStats();
-const playwrightIcon = playwright.failed > 0 ? iconFor('failed') : iconFor('passed');
+const testResult = await readTestStats();
 
 const summary = [
   marker,
@@ -141,6 +145,12 @@ const summary = [
   details(
     `Playwright failures (${playwright.failed})`,
     formatFailures(playwright.failures),
+  ),
+  '',
+  '',
+  details(
+      `Test failures (${testResult.failed})`,
+      formatFailures(testResult.failures),
   ),
   '',
   '',

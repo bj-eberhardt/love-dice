@@ -45,7 +45,7 @@ jobs:
         continue-on-error: true
         env:
           CI: "true"
-          E2E_WORKERS: 5
+          E2E_WORKERS: 2
         run: npm run test:ui:headless
 
       - name: Upload Playwright report

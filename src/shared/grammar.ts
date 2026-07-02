@@ -1,4 +1,4 @@
-import type { DiceConfiguration, Zone } from "./schemas/configuration.js";
+import type { DiceConfiguration } from "./schemas/configuration.js";
 
 const normalizeSpaces = (value: string) => value.trim().replace(/\s+/g, " ");
 
@@ -37,12 +37,4 @@ export function withMissingDatives<T extends DiceConfiguration>(configuration: T
       };
     })
   };
-}
-
-export function zoneAccusative(zone: Zone) {
-  return zone.text.de.accusative;
-}
-
-export function zoneDative(zone: Zone) {
-  return zone.text.de.dative;
 }
