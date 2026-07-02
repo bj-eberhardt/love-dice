@@ -23,7 +23,7 @@ Produktionsauslieferung: statisches Frontend via nginx Docker-Image auf Host-Por
 - Frontend-only: Kein `apps/api`, kein Fastify, keine Datenbank, keine API-Routen.
 - Eine einzige root `package.json`: Keine npm workspaces, keine internen Packages und kein `apps`-Verzeichnis mehr.
 - Shared-Domain-Code liegt unter `src/shared`.
-- Konfiguration wird lokal im Browser im Key `love-dice-config` gespeichert.
+- Konfiguration wird lokal im Browser im Local-Storage-Key `love-dice-config` gespeichert.
 - Der Wurf ist regelbasiert und deterministisch animiert: Das Ergebnis wird vor der Animation bestimmt, danach werden die Würfel so animiert, dass die passende Fläche vorne sichtbar und direkt lesbar ist.
 
 ## Wichtige Dateien

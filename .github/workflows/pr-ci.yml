@@ -30,10 +30,15 @@ jobs:
         continue-on-error: true
         run: npm run build
 
-      - name: Lint frontend
+      - name: Lint check
         id: lint
         continue-on-error: true
         run: npm run lint
+
+      - name: Formatting check
+        id: prettier
+        continue-on-error: true
+        run: npm run format:check
 
       - name: Run tests
         id: test
@@ -66,12 +71,22 @@ jobs:
           path: test-results/
           if-no-files-found: warn
 
+      - name: Upload unit test results
+        id: unittest-results-artifact
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: unit-test-results
+          path: unit-test-results/
+          if-no-files-found: warn
+
       - name: Create PR comment body
         id: comment-body
         if: always()
         env:
           BUILD_OUTCOME: ${{ steps.build.outcome }}
           LINT_OUTCOME: ${{ steps.lint.outcome }}
+          PRETTIER_OUTCOME: ${{ steps.prettier.outcome }}
           TEST_OUTCOME: ${{ steps.test.outcome }}
           E2E_OUTCOME: ${{ steps.e2e.outcome }}
           PLAYWRIGHT_REPORT_URL: ${{ steps.playwright-report-artifact.outputs.artifact-url }}
@@ -109,8 +124,7 @@ jobs:
               repo,
               issue_number,
               body,
-            });    
-
+            });
 
       - name: Fail on unsuccessful checks
         if: >-

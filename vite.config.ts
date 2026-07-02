@@ -34,9 +34,7 @@ export default defineConfig({
   test: {
     include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
     environment: "node",
-    reporters: [
-      'default', 'json'
-    ],
-    outputFile: 'test-results/test-results.json'
+    reporters: ["default", "json"],
+    outputFile: "unit-test-results/test-results.json"
   }
 });

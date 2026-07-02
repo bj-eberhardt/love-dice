@@ -1,4 +1,4 @@
-﻿import { Check, ChevronDown, X } from "lucide-react";
+import { Check, ChevronDown, X } from "lucide-react";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { type Zone } from "@/shared";
 
@@ -74,13 +74,13 @@ export function ZoneSelector({
         aria-expanded={isOpen}
         aria-disabled={disabled}
         onClick={() => {
-          if (!disabled) setIsOpen((open) => !open);
+          if (!disabled) setIsOpen(true);
         }}
         onKeyDown={(event) => {
           if (disabled) return;
           if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();
-            setIsOpen((open) => !open);
+            setIsOpen(true);
           }
         }}
       >
@@ -134,7 +134,7 @@ export function ZoneSelector({
                 emitSelection(availableZones.map((zone) => zone.id));
               }}
             >
-              Alle auswählen
+              Alle ausw�hlen
             </button>
           </div>
           {availableZones.map((zone) => {

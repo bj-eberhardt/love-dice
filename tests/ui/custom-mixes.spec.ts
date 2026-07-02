@@ -731,10 +731,17 @@ test.describe("custom mixes", () => {
         "E2E Renamed Dynamic Zone"
       );
 
-      await page.keyboard.press("Escape");
-      await expect(actionCard.locator(".zone-selector-dropdown")).toHaveCount(0);
+      const selectorInput = actionCard.getByTestId("zone-selector-input");
+      const selectorDropdown = actionCard.locator(".zone-selector-dropdown");
 
-      await actionCard.getByTestId("zone-selector-input").click();
+      await page.keyboard.press("Escape");
+      await expect(selectorDropdown).toHaveCount(0);
+      await expect(selectorInput).toHaveAttribute("aria-expanded", "false");
+
+      await selectorInput.scrollIntoViewIfNeeded();
+      await selectorInput.click();
+      await expect(selectorInput).toHaveAttribute("aria-expanded", "true");
+      await expect(selectorDropdown).toBeVisible();
       await expect(actionCard.getByTestId(`zone-option-${newZoneId}`)).toHaveAttribute(
         "data-zone-label",
         "E2E Renamed Dynamic Zone"
