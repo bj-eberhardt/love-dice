@@ -446,6 +446,9 @@ export function App() {
                 </span>
               );
             })}
+            <button data-testid="open-mix-modal" className="primary sticky-add" onClick={openNewMix}>
+              <Plus size={18} /> Eigene Mischung
+            </button>
           </div>
           <button
             data-testid="mode-scroll-right"
@@ -457,9 +460,6 @@ export function App() {
             <ChevronRight size={18} />
           </button>
         </div>
-        <button data-testid="open-mix-modal" className="primary sticky-add" onClick={openNewMix}>
-          <Plus size={18} /> Eigene Mischung
-        </button>
       </section>
 
       <section className="game-layout">

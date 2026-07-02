@@ -781,10 +781,6 @@ button:focus-visible {
     min-height: 300px;
   }
 
-  .sticky-add {
-    width: 100%;
-  }
-
   .controls {
     bottom: 18px;
     justify-content: center;
