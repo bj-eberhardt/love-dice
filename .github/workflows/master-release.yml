@@ -64,7 +64,7 @@ jobs:
       - name: Tag and push Docker image
         if: success()
         run: |
-          docker buildx build -f Dockerfile.prod --platform linux/amd64,linux/arm64 -t "${{ secrets.DOCKERHUB_USERNAME }}/love-dice:latest" -t "${{ secrets.DOCKERHUB_USERNAME }}/love-dice:${{ steps.get-version.outputs.version }}" --push .
+          docker buildx build -f Dockerfile --platform linux/amd64,linux/arm64 -t "${{ secrets.DOCKERHUB_USERNAME }}/love-dice:latest" -t "${{ secrets.DOCKERHUB_USERNAME }}/love-dice:${{ steps.get-version.outputs.version }}" --push .
 
       - name: Push version and tag
         run: |
