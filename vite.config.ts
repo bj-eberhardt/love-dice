@@ -33,6 +33,10 @@ export default defineConfig({
   },
   test: {
     include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
-    environment: "node"
+    environment: "node",
+    reporters: [
+      'default', 'json'
+    ],
+    outputFile: 'test-results/test-output.json'
   }
 });

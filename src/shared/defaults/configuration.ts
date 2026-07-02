@@ -1,4 +1,4 @@
-﻿import { createGermanZoneText } from "@/shared";
+﻿import { createGermanZoneText } from "../grammar";
 import type { DiceAction, DiceConfiguration, Mood, Zone } from "@/shared";
 
 const allMoods: Mood[] = ["romantic", "playful", "bold", "custom"];
