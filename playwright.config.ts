@@ -16,7 +16,8 @@ export default defineConfig({
     headless: true,
     baseURL: "http://localhost:5545",
     trace: "on-first-retry",
-    screenshot: "only-on-failure"
+    screenshot: "only-on-failure",
+    video: "retain-on-failure"
   },
   webServer: process.env.CI
     ? {

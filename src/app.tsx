@@ -322,7 +322,7 @@ export function App() {
         <section className="hero">
           <picture className="hero-asset" aria-hidden="true">
             <source media="(max-width: 720px)" srcSet="/assets/hero-dice-mobile.png" />
-            <img src="/assets/hero-dice-desktop.png" alt="" />
+            <img data-testid="consent-hero-image" src="/assets/hero-dice-desktop.png" alt="" />
           </picture>
           <div className="hero-content">
             <p className="eyebrow">Würfel & Wünsche</p>
