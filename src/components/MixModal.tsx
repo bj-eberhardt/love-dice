@@ -280,7 +280,12 @@ export function MixModal({ draft, saveError, onChange, onClose, onSave, onDelete
             <Trash2 size={17} /> Mischung löschen
           </button>
           <div className="modal-footer-actions">
-            <button data-testid="mix-export" className="secondary" type="button" onClick={exportDraft}>
+            <button
+              data-testid="mix-export"
+              className="secondary"
+              type="button"
+              onClick={exportDraft}
+            >
               <Download size={17} /> JSON exportieren
             </button>
             <button data-testid="mix-save" className="primary" type="submit">

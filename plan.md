@@ -95,7 +95,6 @@ Eigene Mischung: Ihr aktiviert nur Kategorien, die euch beide interessieren
 
 Die App sollte nur Aufgaben würfeln, die in den zuvor gemeinsam gewählten Kategorien liegen.
 
-
 Jede Runde hat einen gut sichtbaren „Überspringen ohne Erklärung“-Button. -> erstelle ein ausführliches konzept für die webapp. sie soll ansprechend aussehen, auch im dunklen kontrastreich sein. außerdem soll der würfel interaktiv, 3d und schön designt aussehen und sich wenn möglich echt drehen und irgendwo stehen bleiben. zu jedem körperteil soll auch ein svg icon desselbigen auf dem würfel abgebildet werden. auch die aktion soll durch ein svg icon symbolisiert werden. die richtige textliche aktion steht dann nach dem würfeln unter den würfeln bereit. die würfel aktionen sollen in einer konfiguration gespeichert werden können und leicht anpassbar sein. wenn die würfel gewürfelt werden, soll randomisiert 6 zonen, 6 aktionen genommen auf den würfel abgebildet und dann gewürfelt werden. die webapp soll am besten in react und node erzeugt werden. der output soll in dist folder erstellt werden. es soll via docker im watch modus entwickelbar sein. ich möchte linting und formatting haben. plane das feature ausführlich. wenn mir der plan gefällt, können wir das projekt erzeugen.
 
 Ich strukturiere das als umsetzungsnahes Produkt- und Technik-Konzept: Spielablauf, UI/Design, 3D-Würfel, Konfiguration, Datenmodell, React/Node-Architektur, Docker-Entwicklung sowie Qualitätssicherung.
@@ -104,6 +103,7 @@ Die Würfel sollten nicht als unkontrollierte Physik-Simulation gebaut werden: I
 
 Nachgedacht für 1m 47s
 Konzept: „Würfel & Wünsche“ – interaktive Paar-Webapp
+
 1. Zielbild
 
 Die Webapp ist ein privates, erwachsenes Zwei-Personen-Spiel mit zwei 3D-Würfeln:
@@ -120,7 +120,7 @@ Massiere den Nacken.
 Die App bleibt dabei bewusst kooperativ: Es gibt keine Strafpunkte, keine unangenehmen Begründungen und keinen Wettbewerb. Eine deutlich sichtbare Schaltfläche „Überspringen – ohne Erklärung“ ist jederzeit verfügbar.
 
 2. Spielablauf
-Startscreen
+   Startscreen
 
 Der erste Screen stellt den Rahmen klar und ruhig dar:
 
@@ -137,11 +137,11 @@ Stimmungswahl
 
 Vor dem Start wählt das Paar eine Stimmung. Diese bestimmt, welche Konfigurationsgruppen für die Runde aktiv sind.
 
-Stimmung	Charakter	Standardinhalt
-Romantisch	ruhig, nah, zärtlich	Komplimente, Küssen, Nähe, Massage
-Verspielt	locker, neckisch, kreativ	kleine Challenges, Rollentausch, Überraschungen
-Mutig	intensiver, aber vollständig konfigurierbar	nur zuvor aktivierte und erlaubte Einträge
-Eigene Mischung	komplett individuell	freie Auswahl aus eigenen Kategorien
+Stimmung Charakter Standardinhalt
+Romantisch ruhig, nah, zärtlich Komplimente, Küssen, Nähe, Massage
+Verspielt locker, neckisch, kreativ kleine Challenges, Rollentausch, Überraschungen
+Mutig intensiver, aber vollständig konfigurierbar nur zuvor aktivierte und erlaubte Einträge
+Eigene Mischung komplett individuell freie Auswahl aus eigenen Kategorien
 
 Wichtig: Die Stimmung ist nur ein Filter. Sie zwingt keine Inhalte auf. Jede Gruppe kann verändert, deaktiviert oder mit eigenen Einträgen ergänzt werden.
 
@@ -191,13 +191,13 @@ Zone ignorieren: Für Einträge wie „Wunsch erfüllen“ wird die Zonenfläche
 Beispiel:
 
 {
-  "id": "fulfil-wish",
-  "label": "Wunsch erfüllen",
-  "instructionTemplate": "Erfülle einen gemeinsamen Wunsch – nach Absprache.",
-  "zoneMode": "ignore",
-  "iconKey": "sparkle-wish",
-  "enabled": true,
-  "moods": ["romantic", "playful", "bold"]
+"id": "fulfil-wish",
+"label": "Wunsch erfüllen",
+"instructionTemplate": "Erfülle einen gemeinsamen Wunsch – nach Absprache.",
+"zoneMode": "ignore",
+"iconKey": "sparkle-wish",
+"enabled": true,
+"moods": ["romantic", "playful", "bold"]
 }
 
 Damit verhindert die App unpassende oder unklare Kombinationen, obwohl beide Würfel unabhängig rotieren.
@@ -231,27 +231,27 @@ aktiv/deaktiviert
 Beispiel für eine Zone:
 
 {
-  "id": "neck",
-  "label": "Nacken",
-  "forms": {
-    "nominative": "der Nacken",
-    "accusative": "den Nacken"
-  },
-  "iconKey": "body-neck",
-  "enabled": true,
-  "moods": ["romantic", "playful", "bold"]
+"id": "neck",
+"label": "Nacken",
+"forms": {
+"nominative": "der Nacken",
+"accusative": "den Nacken"
+},
+"iconKey": "body-neck",
+"enabled": true,
+"moods": ["romantic", "playful", "bold"]
 }
 
 Beispiel für eine Aktion:
 
 {
-  "id": "massage",
-  "label": "Massieren",
-  "instructionTemplate": "Massiere {accusative}.",
-  "zoneMode": "required",
-  "iconKey": "action-massage",
-  "enabled": true,
-  "moods": ["romantic", "playful", "bold"]
+"id": "massage",
+"label": "Massieren",
+"instructionTemplate": "Massiere {accusative}.",
+"zoneMode": "required",
+"iconKey": "action-massage",
+"enabled": true,
+"moods": ["romantic", "playful", "bold"]
 }
 
 So kann die App grammatikalisch gute Ergebnisse bilden, anstatt nur starre Begriffe wie „Massieren + Nacken“ anzuzeigen.
@@ -271,7 +271,7 @@ Vorschau der jeweiligen SVG-Symbole direkt in der Konfigurationsliste.
 Für Version 1 sollten SVG-Icons aus einer fest eingebauten, kuratierten Icon-Bibliothek gewählt werden. Das hält das Design konsistent und vermeidet Probleme durch beliebige hochgeladene SVG-Dateien. Eine spätere Version kann einen geprüften Import für eigene Icons erhalten.
 
 5. Visuelles Konzept
-Stilrichtung
+   Stilrichtung
 
 Die App soll erwachsen, modern und hochwertig wirken, aber nicht kitschig oder überladen. Die Stimmung ist eher „privater Abend / dunkles Studio / elegantes Spielobjekt“ als Comic oder Spielhalle.
 
@@ -284,14 +284,14 @@ viel freiem Raum,
 großen gut bedienbaren Buttons,
 sichtbarer Trennung von Aktion und Zone.
 Farbpalette
-Element	Farbe	Zweck
-Hintergrund	#0A0C12	fast schwarzes Blau
-Kartenfläche	#161A25	ruhige Oberfläche
-Haupttext	#F7F8FC	sehr hoher Kontrast
-Sekundärtext	#B8C0D3	lesbare Hinweise
-Aktionsakzent	#FF7BB7	Aktionswürfel, primäre Interaktion
-Zonenakzent	#66E0D1	Zonenwürfel
-Fokus / Warnung	#FFD166	Fokusrahmen, Hinweise
+Element Farbe Zweck
+Hintergrund #0A0C12 fast schwarzes Blau
+Kartenfläche #161A25 ruhige Oberfläche
+Haupttext #F7F8FC sehr hoher Kontrast
+Sekundärtext #B8C0D3 lesbare Hinweise
+Aktionsakzent #FF7BB7 Aktionswürfel, primäre Interaktion
+Zonenakzent #66E0D1 Zonenwürfel
+Fokus / Warnung #FFD166 Fokusrahmen, Hinweise
 
 Die Haupttextfarbe auf dem dunklen Hintergrund erreicht ungefähr ein Kontrastverhältnis von 18,4:1. Auch die Akzentfarben bleiben auf dem Hintergrund deutlich lesbar. Farbe wird nie allein als Bedeutungsträger verwendet: Aktion und Zone unterscheiden sich zusätzlich durch Überschrift, Würfeltyp, Icon-Stil und Text.
 
@@ -300,7 +300,7 @@ Layout der Spielansicht
 Auf Desktop:
 
 ────────────────────────────────────────────
- Stimmung: Romantisch        Einstellungen
+Stimmung: Romantisch Einstellungen
 ────────────────────────────────────────────
 
               [ Aktionswürfel ] [ Zonenwürfel ]
@@ -311,7 +311,7 @@ Auf Desktop:
 
             „Massiere den Nacken.“
 
- [ Würfeln ]  [ Annehmen ]  [ Überspringen – ohne Erklärung ]
+[ Würfeln ] [ Annehmen ] [ Überspringen – ohne Erklärung ]
 
 ────────────────────────────────────────────
 
@@ -324,8 +324,7 @@ Beim Landen: sehr kurze Lichtwelle unter jedem Würfel.
 Nach dem Ergebnis: Text erscheint mit dezentem Fade-in.
 Bei „Überspringen“: Ergebnis verschwindet ruhig, keine Bewertung.
 Optionaler Ton und optionales haptisches Feedback auf Mobilgeräten.
-Einstellung für reduzierte Animationen.
-6. 3D-Würfel-Konzept
+Einstellung für reduzierte Animationen. 6. 3D-Würfel-Konzept
 Optik der Würfel
 
 Jeder Würfel besteht aus:
@@ -392,8 +391,7 @@ Der Hauptbutton „Würfeln“ löst dieselbe Aktion aus.
 Während des Rollens ist die Kamera gesperrt.
 Nach dem Ergebnis kann die Person den Würfel per Drag leicht drehen, um ihn zu betrachten.
 Bei prefers-reduced-motion wird eine kurze, ruhige Drehung statt einer langen Rollanimation gezeigt.
-Ohne WebGL gibt es einen sauberen 2D-Fallback mit animierten Würfelkarten und denselben Ergebnissen.
-7. Technische Architektur
+Ohne WebGL gibt es einen sauberen 2D-Fallback mit animierten Würfelkarten und denselben Ergebnissen. 7. Technische Architektur
 Empfohlener Stack
 
 Frontend
@@ -419,43 +417,43 @@ React eignet sich hier gut für die klar getrennten Bereiche Spiel, Konfiguratio
 Projektstruktur
 dice-and-desire/
 ├── apps/
-│   ├── web/
-│   │   ├── src/
-│   │   │   ├── app/
-│   │   │   ├── features/
-│   │   │   │   ├── game/
-│   │   │   │   ├── dice3d/
-│   │   │   │   ├── configuration/
-│   │   │   │   └── consent/
-│   │   │   ├── components/
-│   │   │   ├── assets/
-│   │   │   │   └── icons/
-│   │   │   ├── styles/
-│   │   │   └── main.tsx
-│   │   └── vite.config.ts
-│   │
-│   └── api/
-│       ├── src/
-│       │   ├── routes/
-│       │   ├── repositories/
-│       │   ├── services/
-│       │   └── server.ts
-│       └── tsconfig.build.json
+│ ├── web/
+│ │ ├── src/
+│ │ │ ├── app/
+│ │ │ ├── features/
+│ │ │ │ ├── game/
+│ │ │ │ ├── dice3d/
+│ │ │ │ ├── configuration/
+│ │ │ │ └── consent/
+│ │ │ ├── components/
+│ │ │ ├── assets/
+│ │ │ │ └── icons/
+│ │ │ ├── styles/
+│ │ │ └── main.tsx
+│ │ └── vite.config.ts
+│ │
+│ └── api/
+│ ├── src/
+│ │ ├── routes/
+│ │ ├── repositories/
+│ │ ├── services/
+│ │ └── server.ts
+│ └── tsconfig.build.json
 │
 ├── packages/
-│   └── shared/
-│       ├── src/
-│       │   ├── schemas/
-│       │   ├── types/
-│       │   └── defaults/
-│       └── index.ts
+│ └── shared/
+│ ├── src/
+│ │ ├── schemas/
+│ │ ├── types/
+│ │ └── defaults/
+│ └── index.ts
 │
 ├── dist/
-│   ├── client/
-│   └── server/
+│ ├── client/
+│ └── server/
 │
 ├── data/
-│   └── dice-app.sqlite
+│ └── dice-app.sqlite
 │
 ├── Dockerfile
 ├── docker-compose.dev.yml
@@ -468,33 +466,33 @@ Produktionsausgabe
 Der Build erzeugt bewusst alles unter einem gemeinsamen Root-Verzeichnis:
 
 dist/
-├── client/     # Vite-Build: HTML, CSS, JavaScript, Assets
-└── server/     # kompilierter Node-/Fastify-Server
+├── client/ # Vite-Build: HTML, CSS, JavaScript, Assets
+└── server/ # kompilierter Node-/Fastify-Server
 
 Der Node-Server liefert im Produktionsmodus sowohl /api/* als auch die statischen Dateien aus dist/client aus. Dadurch genügt später ein einzelner Container für die fertige Anwendung.
 
 8. Frontend-Komponenten
-Wesentliche Komponenten
-AppShell
-├── ConsentGate
-├── MoodSelector
-├── GameScreen
-│   ├── DiceStage
-│   │   ├── ActionDie
-│   │   ├── ZoneDie
-│   │   ├── DicePodium
-│   │   └── SceneLighting
-│   ├── ResultPanel
-│   ├── RoundControls
-│   └── LiveRegion
-├── ConfigurationScreen
-│   ├── ProfileSelector
-│   ├── ActionEditor
-│   ├── ZoneEditor
-│   ├── IconPicker
-│   └── ImportExportPanel
-└── SettingsPanel
-Spielzustand
+   Wesentliche Komponenten
+   AppShell
+   ├── ConsentGate
+   ├── MoodSelector
+   ├── GameScreen
+   │ ├── DiceStage
+   │ │ ├── ActionDie
+   │ │ ├── ZoneDie
+   │ │ ├── DicePodium
+   │ │ └── SceneLighting
+   │ ├── ResultPanel
+   │ ├── RoundControls
+   │ └── LiveRegion
+   ├── ConfigurationScreen
+   │ ├── ProfileSelector
+   │ ├── ActionEditor
+   │ ├── ZoneEditor
+   │ ├── IconPicker
+   │ └── ImportExportPanel
+   └── SettingsPanel
+   Spielzustand
 
 Der Spielablauf wird als klare State Machine umgesetzt:
 
@@ -512,8 +510,7 @@ Das verhindert typische Fehler wie:
 mehrfaches Würfeln während einer Animation,
 Ergebnisanzeige vor dem tatsächlichen Stillstand,
 Änderung der Konfiguration während eines laufenden Wurfs,
-inkonsistente Anzeige zwischen Würfeloberfläche und Text.
-9. Backend und Speicherung
+inkonsistente Anzeige zwischen Würfeloberfläche und Text. 9. Backend und Speicherung
 Lokale Speicherung zuerst
 
 Die App sollte möglichst privat funktionieren:
@@ -528,18 +525,18 @@ Der Node-Server speichert benannte Konfigurationen in SQLite. Das ist besonders 
 
 Vorgeschlagene Endpunkte:
 
-GET    /api/health
-GET    /api/configurations
-POST   /api/configurations
-PUT    /api/configurations/:id
+GET /api/health
+GET /api/configurations
+POST /api/configurations
+PUT /api/configurations/:id
 DELETE /api/configurations/:id
-POST   /api/configurations/import
-GET    /api/configurations/:id/export
+POST /api/configurations/import
+GET /api/configurations/:id/export
 
 Die gesamte Spiel- und Würfellogik bleibt im Frontend reaktionsschnell. Der Server ist hauptsächlich für gespeicherte Profile, Import/Export und eine saubere Produktionsauslieferung zuständig.
 
 10. Docker-Entwicklung im Watch-Modus
-Entwicklungsmodus
+    Entwicklungsmodus
 
 Die Entwicklungsumgebung besteht aus zwei Containern:
 
@@ -575,8 +572,7 @@ TypeScript prüfen.
 Web-Frontend nach dist/client bauen.
 API nach dist/server kompilieren.
 Nur notwendige Runtime-Dateien in das finale Image kopieren.
-Node liefert API und Client aus.
-11. Linting, Formatting und Codequalität
+Node liefert API und Client aus. 11. Linting, Formatting und Codequalität
 Vorgesehene Werkzeuge
 ESLint mit TypeScript- und React-Regeln
 Prettier für einheitliches Formatting
@@ -598,7 +594,7 @@ pnpm test:e2e
 Der Produktionsbuild läuft nur erfolgreich durch, wenn TypeScript-Prüfung, Linting und Build keine Fehler enthalten.
 
 12. Teststrategie
-Unit-Tests
+    Unit-Tests
 
 Für die Spiellogik:
 
@@ -644,34 +640,34 @@ jederzeit zugänglicher Pause-/Beenden-Button.
 Der Text unter den Würfeln ist dabei immer die maßgebliche, barrierefreie Ergebnisausgabe. Die 3D-Würfel sind visuell attraktiv, aber nicht die einzige Informationsquelle.
 
 14. Umsetzungsphasen
-Phase 1 – Fundament
-React-/Node-Monorepo
-Docker-Entwicklung
-Vite- und Fastify-Grundgerüst
-dist/client und dist/server
-ESLint, Prettier, TypeScript
-Consent Gate und dunkles Basisdesign
-Phase 2 – Konfiguration und Spielregeln
-Standardprofile
-Aktionen und Zonen editierbar
-Speichern in SQLite und lokalem Browser-Speicher
-Zufallslogik mit sechs Flächen pro Würfel
-Kompatibilitätsregeln
-Ergebnistext und Überspringen
-Phase 3 – 3D-Würfel
-React Three Fiber Szene
-abgerundete Würfel
-SVG-Texturen auf allen Flächen
-Rollanimation mit kontrolliertem Zielzustand
-Podest, Licht, Schatten und Ergebnisanimation
-WebGL- und Reduced-Motion-Fallback
-Phase 4 – Qualität und Feinschliff
-Testabdeckung
-responsive Optimierung
-Tastatur- und Screenreader-Prüfung
-Import/Export von Profilen
-Produktions-Docker-Image
-Dokumentation mit Start-, Build- und Docker-Befehlen
+    Phase 1 – Fundament
+    React-/Node-Monorepo
+    Docker-Entwicklung
+    Vite- und Fastify-Grundgerüst
+    dist/client und dist/server
+    ESLint, Prettier, TypeScript
+    Consent Gate und dunkles Basisdesign
+    Phase 2 – Konfiguration und Spielregeln
+    Standardprofile
+    Aktionen und Zonen editierbar
+    Speichern in SQLite und lokalem Browser-Speicher
+    Zufallslogik mit sechs Flächen pro Würfel
+    Kompatibilitätsregeln
+    Ergebnistext und Überspringen
+    Phase 3 – 3D-Würfel
+    React Three Fiber Szene
+    abgerundete Würfel
+    SVG-Texturen auf allen Flächen
+    Rollanimation mit kontrolliertem Zielzustand
+    Podest, Licht, Schatten und Ergebnisanimation
+    WebGL- und Reduced-Motion-Fallback
+    Phase 4 – Qualität und Feinschliff
+    Testabdeckung
+    responsive Optimierung
+    Tastatur- und Screenreader-Prüfung
+    Import/Export von Profilen
+    Produktions-Docker-Image
+    Dokumentation mit Start-, Build- und Docker-Befehlen
 15. Abnahmekriterien
 
 Das Feature gilt als fertig, wenn:

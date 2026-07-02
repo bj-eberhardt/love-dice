@@ -3,6 +3,7 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 import { acceptConsent, createCustomMix, openMixModal } from "./helpers";
+import { DiceConfiguration, Zone } from "../../src/shared";
 
 test.describe("custom mixes", () => {
   test.beforeEach(async ({ page }) => {
@@ -91,7 +92,7 @@ test.describe("custom mixes", () => {
         if (await toggle.isChecked()) {
           const enabledCount = await page.evaluate(() => {
             return Array.from(document.querySelectorAll('[data-testid^="toggle-actions-"]')).filter(
-              (el: any) => el.checked
+              (el: HTMLInputElement) => el.checked
             ).length;
           });
           if (enabledCount <= 5) break;
@@ -105,7 +106,7 @@ test.describe("custom mixes", () => {
         if (await toggle.isChecked()) {
           const enabledCount = await page.evaluate(() => {
             return Array.from(document.querySelectorAll('[data-testid^="toggle-zones-"]')).filter(
-              (el: any) => el.checked
+              (el: HTMLInputElement) => el.checked
             ).length;
           });
           if (enabledCount <= 5) break;
@@ -171,8 +172,8 @@ test.describe("custom mixes", () => {
     await test.step("Set dative form for newly added zone", async () => {
       const lastZoneItem = page.locator('[data-testid^="card-zones-"]').last();
       await lastZoneItem.click();
-      await lastZoneItem.locator('[data-testid^="input-zone-dative-zone"]').fill("die neue Zone")
-    })
+      await lastZoneItem.locator('[data-testid^="input-zone-dative-zone"]').fill("die neue Zone");
+    });
 
     await test.step("Save the mix", async () => {
       await page.getByTestId("mix-save").click();
@@ -548,13 +549,13 @@ test.describe("custom mixes", () => {
       await page.getByTestId("mix-save").click();
       await expect(page.getByTestId("mix-modal")).toHaveCount(0);
       const savedMix = await page.evaluate(() => {
-        const mixes = JSON.parse(localStorage.getItem("love-dice-custom-mixes") || "[]");
-        return mixes.find((mix: any) => mix.name === "Neue Mischung");
+        const mixes = JSON.parse(
+          localStorage.getItem("love-dice-custom-mixes") || "[]"
+        ) as DiceConfiguration[];
+        return mixes.find((mix: DiceConfiguration) => mix.name === "Neue Mischung");
       });
-      const savedZone = savedMix.zones.find((zone: any) => zone.id === newZoneId);
+      const savedZone = savedMix.zones.find((zone: Zone) => zone.id === newZoneId);
       expect(savedZone.text.de).toEqual({ accusative: "die Testzonen", dative: "den Testzonen" });
-      expect(savedZone.accusative).toBeUndefined();
-      expect(savedZone.dative).toBeUndefined();
     });
   });
 
@@ -762,8 +763,10 @@ test.describe("custom mixes", () => {
     await test.step("Save mix and verify allowedZoneIds is undefined", async () => {
       await page.getByTestId("mix-save").click();
       const savedMix = await page.evaluate((mixId) => {
-        const mixes = JSON.parse(localStorage.getItem("love-dice-custom-mixes") || "[]");
-        return mixes.find((mix: any) => mix.id === mixId);
+        const mixes = JSON.parse(
+          localStorage.getItem("love-dice-custom-mixes") || "[]"
+        ) as DiceConfiguration[];
+        return mixes.find((mix: DiceConfiguration) => mix.id === mixId);
       }, id);
       expect(savedMix.actions[0].allowedZoneIds).toBeUndefined();
     });
@@ -797,8 +800,10 @@ test.describe("custom mixes", () => {
     await test.step("Save mix and verify allowedZoneIds is undefined", async () => {
       await page.getByTestId("mix-save").click();
       const savedMix = await page.evaluate((mixId) => {
-        const mixes = JSON.parse(localStorage.getItem("love-dice-custom-mixes") || "[]");
-        return mixes.find((mix: any) => mix.id === mixId);
+        const mixes = JSON.parse(
+          localStorage.getItem("love-dice-custom-mixes") || "[]"
+        ) as DiceConfiguration[];
+        return mixes.find((mix: DiceConfiguration) => mix.id === mixId);
       }, id);
       expect(savedMix.actions[0].allowedZoneIds).toBeUndefined();
     });

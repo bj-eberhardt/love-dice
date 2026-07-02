@@ -9,7 +9,6 @@
   Pause,
   Smile,
   Sparkles,
-  Stars,
   Wind
 } from "lucide-react";
 import type { IconKey } from "@/shared";

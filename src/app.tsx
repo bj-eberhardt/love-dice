@@ -39,7 +39,6 @@ const builtInModes: { id: BuiltInMood; label: string }[] = [
   { id: "bold", label: "Mutig" }
 ];
 
-
 const DiceStage = lazy(() =>
   import("./features/dice3d/DiceStage").then((module) => ({ default: module.DiceStage }))
 );

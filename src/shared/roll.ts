@@ -2,7 +2,6 @@
   DiceAction,
   DiceConfiguration,
   Mood,
-  RollFace,
   RollResult,
   Zone
 } from "./schemas/configuration.js";

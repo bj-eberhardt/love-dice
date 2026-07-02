@@ -1,4 +1,4 @@
-﻿import { createGermanZoneText } from "../grammar.js";
+﻿import { createGermanZoneText } from "@/shared";
 import type { DiceAction, DiceConfiguration, Mood, Zone } from "@/shared";
 
 const allMoods: Mood[] = ["romantic", "playful", "bold", "custom"];
@@ -254,7 +254,13 @@ export const zonesById = {
     dative: "dem Nacken",
     iconKey: "neck"
   }),
-  back: zone({ id: "back", label: "Rücken", accusative: "den Rücken", dative: "dem Rücken", iconKey: "back" }),
+  back: zone({
+    id: "back",
+    label: "Rücken",
+    accusative: "den Rücken",
+    dative: "dem Rücken",
+    iconKey: "back"
+  }),
   hands: zone({ id: "hands", label: "Hände", accusative: "die Hände", iconKey: "hands" }),
   legs: zone({
     id: "legs",
