@@ -71,6 +71,15 @@ jobs:
           path: test-results/
           if-no-files-found: warn
 
+      - name: Upload unit test results
+        id: unittest-results-artifact
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: unit-test-results
+          path: unit-test-results/
+          if-no-files-found: warn
+
       - name: Create PR comment body
         id: comment-body
         if: always()

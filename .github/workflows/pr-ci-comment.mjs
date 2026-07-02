@@ -5,7 +5,7 @@ import { readFile } from "node:fs/promises";
 const marker = "<!-- pr-ci-comment -->";
 const playwrightResultsPath =
   process.env.PLAYWRIGHT_RESULTS_PATH || "test-results/playwright-results.json";
-const testResultsPath = process.env.TEST_RESULTS_PATH || "test-results/test-results.json";
+const testResultsPath = process.env.TEST_RESULTS_PATH || "unit-test-results/test-results.json";
 const emptyStats = () => ({ passed: 0, failed: 0, skipped: 0, total: 0, failures: [] });
 
 function iconFor(outcome) {
@@ -249,7 +249,7 @@ const testResult = await VitestReport.read(testResultsPath);
 
 const summary = [
   marker,
-  "## PR CI",
+  "## PR CI Summary",
   "",
   "",
   "| Check | Status |",
