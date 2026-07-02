@@ -102,17 +102,14 @@ function formatPlaywrightFailures(failures) {
   if (failures.length === 0) return "No failed Playwright test cases.";
 
   return failures
-      .map((failure) => {
-        const retryText = failure.retryCount > 0 ? `, retries: ${failure.retryCount}` : "";
-        const header = `- ${iconFor(failure.status)} ${failure.title} (${failure.status}${retryText}${formatDuration(failure.duration)})`;
-        if (!failure.error) return header;
-        return `${header}`;
-      })
-      .join("\n\n");
+    .map((failure) => {
+      const retryText = failure.retryCount > 0 ? `, retries: ${failure.retryCount}` : "";
+      const header = `- ${iconFor(failure.status)} ${failure.title} (${failure.status}${retryText}${formatDuration(failure.duration)})`;
+      if (!failure.error) return header;
+      return `${header}`;
+    })
+    .join("\n\n");
 }
-
-
-
 
 async function readPlaywrightStats() {
   try {
@@ -135,7 +132,7 @@ async function readTestStats() {
       const filename = testResult.name.split(/[\\/]/).pop();
       return testResult.assertionResults.map((assertion) => ({
         filename,
-        title: assertion.title,
+        title: assertion.title
       }));
     });
     return { passed: passed, failed, skipped: 0, total, failures: result };
@@ -167,7 +164,10 @@ const summary = [
   `| E2E tests | ${e2e} |`,
   "",
   "",
-  details(`Playwright failures (${playwright.failed})`, formatPlaywrightFailures(playwright.failures)),
+  details(
+    `Playwright failures (${playwright.failed})`,
+    formatPlaywrightFailures(playwright.failures)
+  ),
   "",
   "",
   details(`Test failures (${testResult.failed})`, formatFailures(testResult.failures)),
