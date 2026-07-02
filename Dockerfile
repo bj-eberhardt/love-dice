@@ -3,6 +3,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 COPY index.html vite.config.ts tsconfig.json tsconfig.app.json eslint.config.js prettier.config.cjs ./
 COPY src ./src
+COPY public ./public
 RUN npm ci
 RUN npm run build
 

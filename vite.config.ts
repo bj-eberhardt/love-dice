@@ -1,11 +1,21 @@
-﻿import react from "@vitejs/plugin-react";
+import react from "@vitejs/plugin-react";
+import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { defineConfig } from "vitest/config";
 
+const packageJson = JSON.parse(readFileSync(resolve(__dirname, "package.json"), "utf8")) as {
+  version: string;
+};
+
 export default defineConfig({
   plugins: [react()],
+  define: {
+    __APP_VERSION__: JSON.stringify(packageJson.version)
+  },
+  publicDir: "public",
   build: {
     outDir: "dist/client",
+    copyPublicDir: true,
     emptyOutDir: true,
     rollupOptions: {
       output: {

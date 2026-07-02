@@ -7,6 +7,19 @@ test("consent flow at start screen", async ({ page }) => {
     await expect(page).toHaveURL(/localhost/);
   });
 
+  await test.step("Hero image is loaded and visible", async () => {
+    const heroImage = page.getByTestId("consent-hero-image");
+    await expect(heroImage).toBeVisible();
+    await expect(heroImage).toHaveAttribute("src", "/assets/hero-dice-desktop.png");
+    await expect
+      .poll(async () =>
+        heroImage.evaluate(
+          (image) => image.complete && image.naturalWidth > 0 && image.naturalHeight > 0
+        )
+      )
+      .toBe(true);
+  });
+
   await test.step("Accept consent", async () => {
     await acceptConsent(page);
   });

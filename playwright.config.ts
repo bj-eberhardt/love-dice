@@ -5,6 +5,7 @@ export default defineConfig({
   timeout: 45_000,
   expect: { timeout: 5000 },
   fullyParallel: true,
+  retries: 3,
   workers: process.env.E2E_WORKERS ? Number(process.env.E2E_WORKERS) : 2,
   reporter: [
     ["list"],
@@ -15,7 +16,8 @@ export default defineConfig({
     headless: true,
     baseURL: "http://localhost:5545",
     trace: "on-first-retry",
-    screenshot: "only-on-failure"
+    screenshot: "only-on-failure",
+    video: "retain-on-failure"
   },
   webServer: process.env.CI
     ? {

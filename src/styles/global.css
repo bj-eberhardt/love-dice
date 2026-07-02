@@ -381,6 +381,13 @@ input {
   grid-template-columns: minmax(0, 1.35fr) minmax(330px, 0.65fr);
 }
 
+.app-footer {
+  color: rgba(247, 248, 252, 0.42);
+  font-size: 0.72rem;
+  margin: 28px auto 0;
+  text-align: center;
+}
+
 .dice-stage {
   aspect-ratio: 16 / 10;
   background:
