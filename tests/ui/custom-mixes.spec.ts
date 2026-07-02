@@ -168,6 +168,12 @@ test.describe("custom mixes", () => {
       await page.getByTestId(`toggle-zones-zone-1`).click();
     });
 
+    await test.step("Set dative form for newly added zone", async () => {
+      const lastZoneItem = page.locator('[data-testid^="card-zones-"]').last();
+      await lastZoneItem.click();
+      await lastZoneItem.locator('[data-testid^="input-zone-dative-zone"]').fill("die neue Zone")
+    })
+
     await test.step("Save the mix", async () => {
       await page.getByTestId("mix-save").click();
       await expect(page.getByTestId("mix-modal")).toHaveCount(0);

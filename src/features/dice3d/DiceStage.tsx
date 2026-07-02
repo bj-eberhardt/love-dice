@@ -1,7 +1,17 @@
 ﻿import { Canvas } from "@react-three/fiber";
 import type { DiceAction, IconKey, RollFace, Zone } from "@/shared";
 import { Suspense, useEffect, useMemo, useRef } from "react";
-import * as THREE from "three";
+import {
+  CanvasTexture,
+  ClampToEdgeWrapping,
+  Euler,
+  LinearFilter,
+  LinearMipmapLinearFilter,
+  MathUtils,
+  MeshStandardMaterial,
+  SRGBColorSpace
+} from "three";
+import type { Mesh } from "three";
 
 // BoxGeometry material order: right, left, top, bottom, front, back.
 // The selected result is rotated to the front face so users can read it directly.
@@ -486,11 +496,11 @@ const makeTexture = (label: string, iconKey: IconKey, color: string) => {
   drawLabel(ctx, label, color);
   ctx.restore();
 
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
+  const texture = new CanvasTexture(canvas);
+  texture.colorSpace = SRGBColorSpace;
   texture.anisotropy = 4;
-  texture.minFilter = THREE.LinearMipmapLinearFilter;
-  texture.magFilter = THREE.LinearFilter;
+  texture.minFilter = LinearMipmapLinearFilter;
+  texture.magFilter = LinearFilter;
   texture.needsUpdate = true;
   return texture;
 };
@@ -536,11 +546,11 @@ const makeTableTexture = () => {
   ctx.fillStyle = vignette;
   ctx.fillRect(0, 0, 1024, 1024);
 
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
+  const texture = new CanvasTexture(canvas);
+  texture.colorSpace = SRGBColorSpace;
   texture.anisotropy = 4;
-  texture.wrapS = THREE.ClampToEdgeWrapping;
-  texture.wrapT = THREE.ClampToEdgeWrapping;
+  texture.wrapS = ClampToEdgeWrapping;
+  texture.wrapT = ClampToEdgeWrapping;
   texture.needsUpdate = true;
   return texture;
 };
@@ -558,13 +568,13 @@ function Die({
   position: [number, number, number];
   rollingKey: number;
 }) {
-  const ref = useRef<THREE.Mesh>(null);
+  const ref = useRef<Mesh>(null);
   const animationRef = useRef<number | null>(null);
   const materials = useMemo(
     () =>
       faces.map(
         (face) =>
-          new THREE.MeshStandardMaterial({
+          new MeshStandardMaterial({
             map: makeTexture(face.label, face.iconKey, color),
             roughness: 0.56,
             metalness: 0.04
@@ -581,7 +591,7 @@ function Die({
     const start = performance.now();
     const duration = 2450;
     const initial = ref.current.rotation.clone();
-    const spin = new THREE.Euler(
+    const spin = new Euler(
       target[0] + Math.PI * 8,
       target[1] + Math.PI * 10,
       target[2] + Math.PI * 8
@@ -590,9 +600,9 @@ function Die({
     const animate = (now: number) => {
       const progress = Math.min((now - start) / duration, 1);
       const ease = 1 - Math.pow(1 - progress, 3);
-      ref.current!.rotation.x = THREE.MathUtils.lerp(initial.x, spin.x, ease);
-      ref.current!.rotation.y = THREE.MathUtils.lerp(initial.y, spin.y, ease);
-      ref.current!.rotation.z = THREE.MathUtils.lerp(initial.z, spin.z, ease);
+      ref.current!.rotation.x = MathUtils.lerp(initial.x, spin.x, ease);
+      ref.current!.rotation.y = MathUtils.lerp(initial.y, spin.y, ease);
+      ref.current!.rotation.z = MathUtils.lerp(initial.z, spin.z, ease);
       ref.current!.position.y = position[1] + Math.sin(progress * Math.PI) * 0.7;
 
       if (progress < 1) {

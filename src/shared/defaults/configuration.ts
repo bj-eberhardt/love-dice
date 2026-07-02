@@ -175,7 +175,7 @@ export const actionsById = {
   rub: action({
     id: "rub",
     label: "Reiben",
-    instructionTemplate: "Reibe an {dative}",
+    instructionTemplate: "Reibe erotisch an {dative}",
     zoneMode: "required",
     iconKey: "rub",
     useInCustom: false,
