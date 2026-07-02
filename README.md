@@ -1,42 +1,27 @@
 ﻿# Love Dice Game
 
-Eine lokale Browser-App für ein einvernehmliches Paar-Würfelspiel mit zwei interaktiven 3D-Würfeln: Aktion und Zone. Die App benötigt kein Backend. Konfiguration und Spielzustand werden im Browser über `localStorage` persistiert.
+![Teaser](docs/teaser.png)
+
+Eine Browser-App für ein einvernehmliches Paar-Würfelspiel mit zwei interaktiven 3D-Würfeln: 
+__Aktion__ und __Zone__. 
+
+Ihr sucht euch eine voreingestellte Stimmung oder erstellt eigene Würfel-Paare, danach
+würfelt ihr die Würfel und bekommt eine zufällige Kombination aus Aktion und Zone, z.B. `Massiere den Rücken`.
+
+Wenn Euch die gewürfelte Kombination nicht gefällt, könnt ihr jederzeit neu würfeln.
+
 
 ## Features
 
-- Consent-Startscreen für Volljährigkeit, Zustimmung und jederzeitiges Überspringen.
-- Stimmungsauswahl: Romantisch, Verspielt, Mutig und Eigene Mischung.
-- Zwei 3D-Würfel mit React Three Fiber und Three.js.
-- Pro Runde werden sechs erlaubte Aktionen und sechs erlaubte Zonen zufällig auf die Würfel gelegt.
-- Die Würfelanimation landet deterministisch auf dem ausgewählten Ergebnis, damit Icon und Ergebnissatz zusammenpassen.
-- Regelbasierte Kombinationslogik mit `zoneMode`, erlaubten Zonen und blockierten Zonen.
-- Ergebnistext aus konfigurierbaren Templates, z. B. `Massiere {accusative}.`.
-- Konfigurationspanel zum Aktivieren/Deaktivieren von Aktionen und Zonen.
-- JSON-Export der aktuellen Konfiguration.
+- alles wird lokal im eigenen Browser gespeichert, keine Registrierung, kein Tracking.
+- Stimmungsauswahl für den schnellen Spielstart: Romantisch, Verspielt, Mutig
+- Eigene Würfel-Paare können einfach erstellt, bearbeitet und gespeichert werden. Auch ein Export ist vorhanden, damit ihr eure Würfel-Paare z.B. mit dem Partner teilen könnt.
 - Dunkles, kontrastreiches responsive UI.
 
 ## Architektur
 
-Die App ist bewusst frontend-only aufgebaut.
+Die App ist bewusst frontend-only aufgebaut. Es werden keine Daten an einen Server geschickt, keine Registrierung benötigt und keine Tracking-Mechanismen eingesetzt. Alles passiert lokal im Browser.
 
-```text
-index.html
-vite.config.ts
-tsconfig.app.json
-src/
-    app.tsx                       # Haupt-UI und Spielablauf
-    main.tsx                      # React Bootstrap
-    features/dice3d/DiceStage.tsx # Three.js/React Three Fiber Szene
-    features/game/icons.tsx       # Icon-Mapping
-    shared/
-      defaults/configuration.ts   # Standard-Aktionen und -Zonen
-      schemas/configuration.ts    # Zod-Schemas und Typen
-      roll.ts                     # Zufalls- und Kombinationslogik
-      index.ts                    # Shared Exports
-    styles/global.css             # Globales UI-Styling
-```
-
-Es gibt kein `apps/api`, keine Server-Routes, keine Datenbank und keine API-Abhängigkeit. Persistenz passiert lokal im Browser.
 
 ## Entwicklung
 
@@ -44,24 +29,29 @@ Voraussetzungen:
 
 - Node.js 24 oder kompatibel
 - npm
+- docker (optional, für Docker-Dev-Modus)
 
-Installation:
+### Installation
 
 ```bash
 npm ci
 ```
 
-Dev-Server starten:
+### Dev-Server starten
 
 ```bash
 npm run dev
 ```
 
-Die App läuft dann unter:
-
-```text
-http://localhost:5544
+oder via docker:
+```bash
+docker compose -f docker-compose.dev.yml up --build
 ```
+
+Die App läuft dann unter:
+http://localhost:5544
+
+### Dev Skripte
 
 Wichtige Scripts:
 
@@ -71,90 +61,39 @@ npm run lint           # ESLint
 npm run lint:fix       # ESLint Auto-Fixes
 npm run format         # Prettier formatieren
 npm run format:check   # Prettier prüfen
-npm run build          # Produktionsbuild nach dist/client
+npm run build          # Produktionsbuild 
 npm test               # Vitest Unit-Tests
-npm run start          # Vite Preview auf Port 5544
+npm test:ui:headless   # Playwright-UI-Tests
 ```
 
-## Unit tests (Vitest)
+### UI tests (Playwright)
 
-Die Unit-Tests laufen mit Vitest und sind auf Dateien unter `src/**/*.test.ts(x)` begrenzt. Playwright-E2E-Tests liegen separat unter `tests/ui` und werden nicht vom Vitest-Runner eingesammelt.
+Es gibt UI-Tests mit Playwright, die die wichtigsten Spielabläufe abdecken. Sie laufen im Headless-Modus und können optional auch im Headed-Modus gestartet werden.
 
-Ausführen:
-
-```bash
-npm test
-```
-
-Gezielt eine einzelne Testdatei ausführen:
-
-```bash
-npx vitest run src/shared/roll.test.ts
-```
-
-## UI tests (Playwright)
-
-The project includes Playwright-based end-to-end UI tests. They run a preview server on port 5545 so they can execute in parallel to the dev server on 5544.
-
-Install and run:
 
 ```bash
 npm ci
 npm run build
 npx playwright install --with-deps
-npm run test:ui        # open Playwright UI runner
-npm run test:ui:headless
-npm run test:ui:headed # run Playwright headed for debugging
-npm run test:ui:debug  # run Playwright in debug mode
+npm run test:ui        # in der playwright-UI ausführen (super zum Entwickeln)
+npm run test:ui:headless # Headless ausführen (ohne Fenster)
+npm run test:ui:headed # Im Browser automatisch ausführen (Headed)
 ```
-
-Guidance for tests:
-
-- Tests use data-testid attributes for stable selectors (e.g. data-testid="consent-accept", data-testid="roll-button", data-testid="result-text").
-- Tests are in tests/ui and use descriptive test.step blocks to document test phases.
-- Avoid relying on translations; use data-ids or configuration ids where possible.
-
-Add test-related scripts to package.json and add data-testid attributes to key interactive elements to make tests stable.
-
-Docker-Dev-Modus:
-
-```bash
-docker compose -f docker-compose.dev.yml up --build
-```
-
-Der Container nutzt `npm ci` und startet den Vite-Dev-Server auf Port `5544`.
 
 ## Produktion
 
 Produktionsbuild lokal:
 
 ```bash
-npm ci
 npm run build
 ```
 
-Der Build landet in:
-
-```text
-dist/client/
-```
-
-Produktionscontainer bauen und starten:
+Via docker: Produktionscontainer bauen und starten. Es wird ein nginx-Container gestartet, der die statischen Dateien ausliefert.
 
 ```bash
 docker compose up --build
 ```
 
-Der Produktionscontainer verwendet einen Multi-Stage-Build:
-
-1. Node-Stage mit `npm ci` und `npm run build`.
-2. nginx-Stage, die `dist/client` statisch ausliefert.
-
-Die App ist danach erreichbar unter:
-
-```text
-http://localhost:8080
-```
 
 ## Konfiguration
 
@@ -163,21 +102,3 @@ Die Standardkonfiguration liegt in:
 ```text
 src/shared/defaults/configuration.ts
 ```
-
-Wichtige Felder:
-
-- `actions`: Aktionen für den Aktionswürfel.
-- `zones`: Körperbereiche/Zonen für den Zonenwürfel.
-- `moods`: Stimmungen, in denen ein Eintrag aktiv sein kann.
-- `enabled`: Ob ein Eintrag grundsätzlich aktiv ist.
-- `instructionTemplate`: Ergebnissatz mit Platzhaltern.
-- `zoneMode`: `required`, `optional` oder `ignore`.
-- `allowedZoneIds` / `blockedZoneIds`: optionale Kombinationsregeln.
-
-Die Runtime-Konfiguration wird im Browser unter dem Key `love-dice-config` gespeichert.
-
-## Hinweise
-
-- Es gibt aktuell keine Backend-Speicherung, keine Benutzerkonten und kein Tracking.
-- Die 3D-Szene nutzt WebGL; der visuelle Würfel ist nicht die einzige Informationsquelle, da das Ergebnis immer auch textlich angezeigt wird.
-- Der große JavaScript-Bundle-Hinweis beim Build kommt vor allem von Three.js. Das ist für die aktuelle Version akzeptiert; bei Bedarf kann später Code-Splitting für die 3D-Szene ergänzt werden.
