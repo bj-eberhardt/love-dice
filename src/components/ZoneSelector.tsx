@@ -25,17 +25,21 @@ export function ZoneSelector({
   useEffect(() => {
     if (!isOpen) return;
 
-    const onPointerDown = (event: PointerEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) setIsOpen(false);
+    const closeWhenOutside = (target: EventTarget | null) => {
+      if (!rootRef.current?.contains(target as Node | null)) setIsOpen(false);
     };
+    const onPointerDown = (event: PointerEvent) => closeWhenOutside(event.target);
+    const onFocusIn = (event: FocusEvent) => closeWhenOutside(event.target);
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") setIsOpen(false);
     };
 
     document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("focusin", onFocusIn);
     document.addEventListener("keydown", onKeyDown);
     return () => {
       document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("focusin", onFocusIn);
       document.removeEventListener("keydown", onKeyDown);
     };
   }, [isOpen]);
