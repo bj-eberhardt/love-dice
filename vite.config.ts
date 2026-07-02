@@ -37,6 +37,6 @@ export default defineConfig({
     reporters: [
       'default', 'json'
     ],
-    outputFile: 'test-results/test-output.json'
+    outputFile: 'test-results/test-results.json'
   }
 });

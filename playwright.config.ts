@@ -5,7 +5,7 @@ export default defineConfig({
   timeout: 45_000,
   expect: { timeout: 5000 },
   fullyParallel: true,
-  workers: 2,
+  workers: process.env.E2E_WORKERS ? Number(process.env.E2E_WORKERS) : 2,
   reporter: [["list"]],
   use: {
     headless: true,
