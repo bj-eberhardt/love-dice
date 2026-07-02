@@ -439,6 +439,9 @@ input {
   border: 1px solid #30384a;
   border-radius: 8px;
   padding: 16px;
+  flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: 150px;
 }
 
 .result-token span {
