@@ -2,14 +2,13 @@
 
 ![Teaser](docs/teaser.png)
 
-Eine Browser-App für ein einvernehmliches Paar-Würfelspiel mit zwei interaktiven 3D-Würfeln: 
-__Aktion__ und __Zone__. 
+Eine Browser-App für ein einvernehmliches Paar-Würfelspiel mit zwei interaktiven 3D-Würfeln:
+**Aktion** und **Zone**.
 
 Ihr sucht euch eine voreingestellte Stimmung oder erstellt eigene Würfel-Paare, danach
 würfelt ihr die Würfel und bekommt eine zufällige Kombination aus Aktion und Zone, z.B. `Massiere den Rücken`.
 
 Wenn Euch die gewürfelte Kombination nicht gefällt, könnt ihr jederzeit neu würfeln.
-
 
 ## Features
 
@@ -21,7 +20,6 @@ Wenn Euch die gewürfelte Kombination nicht gefällt, könnt ihr jederzeit neu w
 ## Architektur
 
 Die App ist bewusst frontend-only aufgebaut. Es werden keine Daten an einen Server geschickt, keine Registrierung benötigt und keine Tracking-Mechanismen eingesetzt. Alles passiert lokal im Browser.
-
 
 ## Entwicklung
 
@@ -44,6 +42,7 @@ npm run dev
 ```
 
 oder via docker:
+
 ```bash
 docker compose -f docker-compose.dev.yml up --build
 ```
@@ -61,7 +60,7 @@ npm run lint           # ESLint
 npm run lint:fix       # ESLint Auto-Fixes
 npm run format         # Prettier formatieren
 npm run format:check   # Prettier prüfen
-npm run build          # Produktionsbuild 
+npm run build          # Produktionsbuild
 npm test               # Vitest Unit-Tests
 npm test:ui:headless   # Playwright-UI-Tests
 ```
@@ -69,7 +68,6 @@ npm test:ui:headless   # Playwright-UI-Tests
 ### UI tests (Playwright)
 
 Es gibt UI-Tests mit Playwright, die die wichtigsten Spielabläufe abdecken. Sie laufen im Headless-Modus und können optional auch im Headed-Modus gestartet werden.
-
 
 ```bash
 npm ci
@@ -93,7 +91,6 @@ Via docker: Produktionscontainer bauen und starten. Es wird ein nginx-Container 
 ```bash
 docker compose up --build
 ```
-
 
 ## Konfiguration
 
