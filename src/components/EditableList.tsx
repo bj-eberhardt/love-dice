@@ -168,7 +168,7 @@ export function EditableList({
 
 function actionTextFromTemplate(template: string) {
   return template
-    .replaceAll("{zone.accusative}", "{ort}")
+    .replaceAll("{accusative}", "{ort}")
     .replaceAll("{zone.nominative}", "{ort}")
     .replaceAll("{zone.label}", "{ort}")
     .replace(/\s+/g, " ")

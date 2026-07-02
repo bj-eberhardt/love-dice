@@ -50,7 +50,7 @@ export function MixModal({ draft, saveError, onChange, onClose, onSave, onDelete
         {
           id,
           label: "Neue Aktion",
-          instructionTemplate: "Probiert {zone.accusative} nach Absprache aus.",
+          instructionTemplate: "Probiert {accusative} nach Absprache aus.",
           zoneMode: "optional",
           iconKey: "sparkle",
           enabled: true,
@@ -265,6 +265,6 @@ function templateFromActionText(text: string) {
   const cleanText = text.trim().replace(/[.]+$/, "");
   if (!cleanText) return "";
   return cleanText.includes("{ort}")
-    ? `${cleanText.replaceAll("{ort}", "{zone.accusative}")}.`
-    : `${cleanText} {zone.accusative}.`;
+    ? `${cleanText.replaceAll("{ort}", "{accusative}")}.`
+    : `${cleanText} {accusative}.`;
 }

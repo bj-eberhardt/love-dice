@@ -10,7 +10,7 @@ Eine lokale Browser-App für ein einvernehmliches Paar-Würfelspiel mit zwei int
 - Pro Runde werden sechs erlaubte Aktionen und sechs erlaubte Zonen zufällig auf die Würfel gelegt.
 - Die Würfelanimation landet deterministisch auf dem ausgewählten Ergebnis, damit Icon und Ergebnissatz zusammenpassen.
 - Regelbasierte Kombinationslogik mit `zoneMode`, erlaubten Zonen und blockierten Zonen.
-- Ergebnistext aus konfigurierbaren Templates, z. B. `Massiere {zone.accusative}.`.
+- Ergebnistext aus konfigurierbaren Templates, z. B. `Massiere {accusative}.`.
 - Konfigurationspanel zum Aktivieren/Deaktivieren von Aktionen und Zonen.
 - JSON-Export der aktuellen Konfiguration.
 - Dunkles, kontrastreiches responsive UI.

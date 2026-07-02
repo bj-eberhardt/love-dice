@@ -247,7 +247,7 @@ Beispiel für eine Aktion:
 {
   "id": "massage",
   "label": "Massieren",
-  "instructionTemplate": "Massiere {zone.accusative}.",
+  "instructionTemplate": "Massiere {accusative}.",
   "zoneMode": "required",
   "iconKey": "action-massage",
   "enabled": true,

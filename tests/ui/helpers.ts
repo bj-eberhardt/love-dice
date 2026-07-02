@@ -32,7 +32,7 @@ export async function createCustomMix(page: Page, name: string, mutate?: CustomM
     actions: Array.from({ length: 6 }).map((_, i) => ({
       id: `action-${i}`,
       label: `Action ${i + 1}`,
-      instructionTemplate: "Probiert {zone.accusative} nach Absprache aus.",
+      instructionTemplate: "Probiert {accusative} nach Absprache aus.",
       zoneMode: "optional" as const,
       iconKey: "sparkle",
       enabled: true,
