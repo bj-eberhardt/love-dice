@@ -446,7 +446,11 @@ export function App() {
                 </span>
               );
             })}
-            <button data-testid="open-mix-modal" className="primary sticky-add" onClick={openNewMix}>
+            <button
+              data-testid="open-mix-modal"
+              className="primary sticky-add"
+              onClick={openNewMix}
+            >
               <Plus size={18} /> Eigene Mischung
             </button>
           </div>
