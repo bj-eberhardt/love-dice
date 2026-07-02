@@ -1,4 +1,4 @@
-﻿import { configurationSchema, type DiceConfiguration } from "@/shared";
+﻿import { configurationSchema, derivePluralDative, type DiceConfiguration } from "@/shared";
 import { Download, Save, Trash2, Upload, X } from "lucide-react";
 import { type ChangeEvent, useRef, useState } from "react";
 import { EditableList } from "./EditableList";
@@ -71,7 +71,7 @@ export function MixModal({ draft, saveError, onChange, onClose, onSave, onDelete
         {
           id,
           label: "Neue Zone",
-          accusative: "die neue Zone",
+          text: { de: { accusative: "die neue Zone", dative: "" } },
           iconKey: "consent",
           enabled: true,
           moods: ["custom"],
@@ -98,10 +98,27 @@ export function MixModal({ draft, saveError, onChange, onClose, onSave, onDelete
     });
   };
 
-  const editZoneText = (id: string, value: string) => {
+  const editZoneText = (id: string, value: string, grammarCase: "accusative" | "dative") => {
     onChange({
       ...draft,
-      zones: draft.zones.map((item) => (item.id === id ? { ...item, accusative: value } : item))
+      zones: draft.zones.map((item) => {
+        if (item.id !== id) return item;
+        const nextGermanText = {
+          ...item.text.de,
+          [grammarCase]: value
+        };
+        if (grammarCase === "accusative" && !item.text.de.dative.trim()) {
+          nextGermanText.dative = derivePluralDative(value);
+        }
+        const nextText = {
+          ...item.text,
+          de: nextGermanText
+        };
+        return {
+          ...item,
+          text: nextText
+        };
+      })
     });
   };
   const editZoneRestrictions = (actionId: string, zoneIds: string[] | undefined) => {
@@ -264,7 +281,11 @@ function createId(prefix: string) {
 function templateFromActionText(text: string) {
   const cleanText = text.trim().replace(/[.]+$/, "");
   if (!cleanText) return "";
-  return cleanText.includes("{ort}")
-    ? `${cleanText.replaceAll("{ort}", "{accusative}")}.`
-    : `${cleanText} {accusative}.`;
+  const normalizedText = cleanText
+    .replaceAll("{ort|akkusativ}", "{accusative}")
+    .replaceAll("{ort|dativ}", "{dative}")
+    .replaceAll("{ort}", "{accusative}");
+  return normalizedText.includes("{accusative}") || normalizedText.includes("{dative}")
+    ? `${normalizedText}.`
+    : `${normalizedText} {accusative}.`;
 }

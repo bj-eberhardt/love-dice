@@ -1,4 +1,4 @@
-﻿import { z } from "zod";
+import { z } from "zod";
 
 export const moodSchema = z.enum(["romantic", "playful", "bold", "custom"]);
 export type Mood = z.infer<typeof moodSchema>;
@@ -52,8 +52,21 @@ export const diceEntrySchema = z.object({
   useInCustom: z.boolean().optional().default(true)
 });
 
+export const zoneTextSchema = z.object({
+  de: z.object({
+    accusative: nonEmptyString,
+    dative: nonEmptyString
+  }),
+  en: z
+    .object({
+      default: nonEmptyString
+    })
+    .optional()
+});
+export type ZoneText = z.infer<typeof zoneTextSchema>;
+
 export const zoneSchema = diceEntrySchema.extend({
-  accusative: nonEmptyString
+  text: zoneTextSchema
 });
 export type Zone = z.infer<typeof zoneSchema>;
 

@@ -55,7 +55,7 @@ test.describe("custom mixes", () => {
           await expect(name).toHaveValue(`Action ${i + 1}`);
 
           const description = card.getByTestId(`input-action-action-${i}`);
-          await expect(description).toHaveValue("Probiert {ort} nach Absprache aus");
+          await expect(description).toHaveValue("Probiert {ort|akkusativ} nach Absprache aus");
         });
       }
 
@@ -71,6 +71,8 @@ test.describe("custom mixes", () => {
 
           const description = card.getByTestId(`input-zone-zone-${i}`);
           await expect(description).toHaveValue(`die Zone ${i + 1}`);
+          const dative = card.getByTestId(`input-zone-dative-zone-${i}`);
+          await expect(dative).toHaveValue(`der Zone ${i + 1}`);
         });
       }
     });
@@ -155,6 +157,7 @@ test.describe("custom mixes", () => {
       await page.getByTestId("card-summary-zones-zone-0").click();
       await page.getByTestId("input-label-zones-zone-0").fill("E2E Zone Name");
       await page.getByTestId(`input-zone-zone-0`).fill("die E2E Zone");
+      await page.getByTestId(`input-zone-dative-zone-0`).fill("der E2E Zone");
     });
 
     await test.step("Remove second action", async () => {
@@ -189,7 +192,7 @@ test.describe("custom mixes", () => {
           "E2E Action Name"
         );
         await expect(page.getByTestId(`input-action-action-0`)).toHaveValue(
-          "E2E Action Description {ort}"
+          "E2E Action Description {ort|akkusativ}"
         );
       });
 
@@ -197,6 +200,7 @@ test.describe("custom mixes", () => {
         await page.getByTestId("card-summary-zones-zone-0").click();
         await expect(page.getByTestId(`input-label-zones-zone-0`)).toHaveValue("E2E Zone Name");
         await expect(page.getByTestId(`input-zone-zone-0`)).toHaveValue("die E2E Zone");
+        await expect(page.getByTestId(`input-zone-dative-zone-0`)).toHaveValue("der E2E Zone");
       });
 
       await test.step("Verify disabled zone", async () => {
@@ -481,6 +485,43 @@ test.describe("custom mixes", () => {
     });
   });
 
+  test("zone dative is required but auto-filled from accusative for new plural zones", async ({
+    page
+  }) => {
+    await openMixModal(page);
+
+    let newZoneId = "";
+    await test.step("Add zone with empty dative default", async () => {
+      await page.getByTestId("add-zones").click();
+      const newZoneCard = page.locator('[data-testid^="card-zones-"]').last();
+      const testId = await newZoneCard.getAttribute("data-testid");
+      newZoneId = testId?.replace("card-zones-", "") ?? "";
+      expect(newZoneId).toBeTruthy();
+      await expect(newZoneCard.getByTestId(`input-zone-dative-${newZoneId}`)).toHaveValue("");
+    });
+
+    await test.step("Fill accusative and verify plural dative suggestion", async () => {
+      const newZoneCard = page.getByTestId(`card-zones-${newZoneId}`);
+      await newZoneCard.getByTestId(`input-zone-${newZoneId}`).fill("die Testzonen");
+      await expect(newZoneCard.getByTestId(`input-zone-dative-${newZoneId}`)).toHaveValue(
+        "den Testzonen"
+      );
+    });
+
+    await test.step("Save and verify generated dative persisted", async () => {
+      await page.getByTestId("mix-save").click();
+      await expect(page.getByTestId("mix-modal")).toHaveCount(0);
+      const savedMix = await page.evaluate(() => {
+        const mixes = JSON.parse(localStorage.getItem("love-dice-custom-mixes") || "[]");
+        return mixes.find((mix: any) => mix.name === "Neue Mischung");
+      });
+      const savedZone = savedMix.zones.find((zone: any) => zone.id === newZoneId);
+      expect(savedZone.text.de).toEqual({ accusative: "die Testzonen", dative: "den Testzonen" });
+      expect(savedZone.accusative).toBeUndefined();
+      expect(savedZone.dative).toBeUndefined();
+    });
+  });
+
   test("validation: only-whitespace fields are treated as empty", async ({ page }) => {
     const name = `E2E Mix ${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
     const id = await createCustomMix(page, name);
@@ -699,7 +740,7 @@ test.describe("custom mixes", () => {
       mix.zones.push({
         id: "zone-extra",
         label: "Extra Zone",
-        accusative: "die Extra Zone",
+        text: { de: { accusative: "die Extra Zone", dative: "der Extra Zone" } },
         iconKey: "consent",
         enabled: true,
         moods: ["custom"]

@@ -4,7 +4,9 @@ import {
   builtInConfigurations,
   createRoll,
   fillTemplate,
+  configurationSchema,
   isPairAllowed,
+  withMissingDatives,
   type DiceAction,
   type DiceConfiguration,
   type Mood,
@@ -37,9 +39,9 @@ const expectedInstructions: Record<string, string> = {
   "romantic|stroke|shoulders": "Streichle die Schultern langsam und aufmerksam.",
   "romantic|stroke|ear": "Streichle das Ohr langsam und aufmerksam.",
   "romantic|stroke|anywhere": "Streichle überall nach Absprache langsam und aufmerksam.",
-  "romantic|whisper|neck": "Flüstere ein ehrliches Kompliment den Nacken.",
-  "romantic|whisper|ear": "Flüstere ein ehrliches Kompliment das Ohr.",
-  "romantic|whisper|anywhere": "Flüstere ein ehrliches Kompliment überall nach Absprache.",
+  "romantic|whisper|neck": "Flüstere ein ehrliches Kompliment an dem Nacken.",
+  "romantic|whisper|ear": "Flüstere ein ehrliches Kompliment an dem Ohr.",
+  "romantic|whisper|anywhere": "Flüstere ein ehrliches Kompliment an überall nach Absprache.",
   "romantic|wish|anywhere": "Erfülle einen gemeinsamen Wunsch nach Absprache.",
   "romantic|compliment|lips": "Sag etwas Schönes über die Lippen.",
   "romantic|compliment|neck": "Sag etwas Schönes über den Nacken.",
@@ -82,9 +84,9 @@ const expectedInstructions: Record<string, string> = {
   "playful|stroke|shoulders": "Streichle die Schultern langsam und aufmerksam.",
   "playful|stroke|ear": "Streichle das Ohr langsam und aufmerksam.",
   "playful|stroke|anywhere": "Streichle überall nach Absprache langsam und aufmerksam.",
-  "playful|whisper|neck": "Flüstere ein ehrliches Kompliment den Nacken.",
-  "playful|whisper|ear": "Flüstere ein ehrliches Kompliment das Ohr.",
-  "playful|whisper|anywhere": "Flüstere ein ehrliches Kompliment überall nach Absprache.",
+  "playful|whisper|neck": "Flüstere ein ehrliches Kompliment an dem Nacken.",
+  "playful|whisper|ear": "Flüstere ein ehrliches Kompliment an dem Ohr.",
+  "playful|whisper|anywhere": "Flüstere ein ehrliches Kompliment an überall nach Absprache.",
   "playful|surprise|lips": "Überrasche dein Gegenüber mit einer zärtlichen Idee für die Lippen.",
   "playful|surprise|neck": "Überrasche dein Gegenüber mit einer zärtlichen Idee für den Nacken.",
   "playful|surprise|back": "Überrasche dein Gegenüber mit einer zärtlichen Idee für den Rücken.",
@@ -169,16 +171,16 @@ const expectedInstructions: Record<string, string> = {
   "bold|surprise|butt": "Überrasche dein Gegenüber mit einer zärtlichen Idee für den Po.",
   "bold|surprise|anywhere":
     "Überrasche dein Gegenüber mit einer zärtlichen Idee für überall nach Absprache.",
-  "bold|rub|neck": "Reibe den Nacken langsam nach Absprache.",
-  "bold|rub|back": "Reibe den Rücken langsam nach Absprache.",
-  "bold|rub|hands": "Reibe die Hände langsam nach Absprache.",
-  "bold|rub|legs": "Reibe die Beine langsam nach Absprache.",
-  "bold|rub|thighs": "Reibe die Schenkel langsam nach Absprache.",
-  "bold|rub|breasts": "Reibe die Brüste langsam nach Absprache.",
-  "bold|rub|genitals": "Reibe das Geschlechtsteil langsam nach Absprache.",
-  "bold|rub|nipple": "Reibe den Nippel langsam nach Absprache.",
-  "bold|rub|butt": "Reibe den Po langsam nach Absprache.",
-  "bold|rub|anywhere": "Reibe überall nach Absprache langsam nach Absprache.",
+  "bold|rub|neck": "Reibe an dem Nacken",
+  "bold|rub|back": "Reibe an dem Rücken",
+  "bold|rub|hands": "Reibe an den Händen",
+  "bold|rub|legs": "Reibe an den Beinen",
+  "bold|rub|thighs": "Reibe an den Schenkeln",
+  "bold|rub|breasts": "Reibe an den Brüsten",
+  "bold|rub|genitals": "Reibe an dem Geschlechtsteil",
+  "bold|rub|nipple": "Reibe an dem Nippel",
+  "bold|rub|butt": "Reibe an dem Po",
+  "bold|rub|anywhere": "Reibe an überall nach Absprache",
   "bold|seduce|lips": "Verführe dein Gegenüber mit Fokus auf die Lippen.",
   "bold|seduce|neck": "Verführe dein Gegenüber mit Fokus auf den Nacken.",
   "bold|seduce|ear": "Verführe dein Gegenüber mit Fokus auf das Ohr.",
@@ -188,22 +190,22 @@ const expectedInstructions: Record<string, string> = {
   "bold|seduce|genitals": "Verführe dein Gegenüber mit Fokus auf das Geschlechtsteil.",
   "bold|seduce|butt": "Verführe dein Gegenüber mit Fokus auf den Po.",
   "bold|seduce|anywhere": "Verführe dein Gegenüber mit Fokus auf überall nach Absprache.",
-  "bold|smell|lips": "Rieche aufmerksam. Konzentration auf die Lippen.",
-  "bold|smell|neck": "Rieche aufmerksam. Konzentration auf den Nacken.",
-  "bold|smell|hands": "Rieche aufmerksam. Konzentration auf die Hände.",
-  "bold|smell|ear": "Rieche aufmerksam. Konzentration auf das Ohr.",
-  "bold|smell|nipple": "Rieche aufmerksam. Konzentration auf den Nippel.",
-  "bold|smell|thighs": "Rieche aufmerksam. Konzentration auf die Schenkel.",
-  "bold|smell|breasts": "Rieche aufmerksam. Konzentration auf die Brüste.",
-  "bold|smell|butt": "Rieche aufmerksam. Konzentration auf den Po.",
-  "bold|smell|anywhere": "Rieche aufmerksam. Konzentration auf überall nach Absprache.",
-  "bold|suck|lips": "Sauge sanft an die Lippen, wenn es für euch beide passt.",
-  "bold|suck|nipple": "Sauge sanft an den Nippel, wenn es für euch beide passt.",
-  "bold|suck|breasts": "Sauge sanft an die Brüste, wenn es für euch beide passt.",
-  "bold|suck|genitals": "Sauge sanft an das Geschlechtsteil, wenn es für euch beide passt.",
-  "bold|suck|ear": "Sauge sanft an das Ohr, wenn es für euch beide passt.",
-  "bold|suck|thighs": "Sauge sanft an die Schenkel, wenn es für euch beide passt.",
-  "bold|suck|anywhere": "Sauge sanft an überall nach Absprache, wenn es für euch beide passt.",
+  "bold|smell|lips": "Rieche aufmerksam an den Lippen.",
+  "bold|smell|neck": "Rieche aufmerksam an dem Nacken.",
+  "bold|smell|hands": "Rieche aufmerksam an den Händen.",
+  "bold|smell|ear": "Rieche aufmerksam an dem Ohr.",
+  "bold|smell|nipple": "Rieche aufmerksam an dem Nippel.",
+  "bold|smell|thighs": "Rieche aufmerksam an den Schenkeln.",
+  "bold|smell|breasts": "Rieche aufmerksam an den Brüsten.",
+  "bold|smell|butt": "Rieche aufmerksam an dem Po.",
+  "bold|smell|anywhere": "Rieche aufmerksam an überall nach Absprache.",
+  "bold|suck|lips": "Sauge sanft an den Lippen",
+  "bold|suck|nipple": "Sauge sanft an dem Nippel",
+  "bold|suck|breasts": "Sauge sanft an den Brüsten",
+  "bold|suck|genitals": "Sauge sanft an dem Geschlechtsteil",
+  "bold|suck|ear": "Sauge sanft an dem Ohr",
+  "bold|suck|thighs": "Sauge sanft an den Schenkeln",
+  "bold|suck|anywhere": "Sauge sanft an überall nach Absprache",
   "bold|pause|anywhere": "Haltet kurz inne und fragt einander, was gerade gut tut."
 };
 
@@ -276,6 +278,89 @@ describe("createRoll built-in mood combinations", () => {
   }
 });
 
+describe("fillTemplate grammar placeholders", () => {
+  test("uses accusative by default and supports explicit dative", () => {
+    const action: DiceAction = {
+      id: "grammar",
+      label: "Grammar",
+      instructionTemplate: "Teste {ort}, {accusative} und {dative}.",
+      zoneMode: "required",
+      iconKey: "sparkle",
+      enabled: true,
+      moods: ["custom"],
+      useInCustom: true
+    };
+    const zone: Zone = {
+      id: "neck",
+      label: "Nacken",
+      text: { de: { accusative: "den Nacken", dative: "dem Nacken" } },
+      iconKey: "neck",
+      enabled: true,
+      moods: ["custom"],
+      useInCustom: true
+    };
+
+    expect(fillTemplate(action, zone)).toBe("Teste den Nacken, den Nacken und dem Nacken.");
+  });
+
+  test("fills a missing German dative as plural before schema validation", () => {
+    const config: DiceConfiguration = {
+      id: "grammar-config",
+      name: "Grammar Config",
+      updatedAt: new Date(0).toISOString(),
+      actions: [
+        {
+          id: "grammar",
+          label: "Grammar",
+          instructionTemplate: "Teste {dative}.",
+          zoneMode: "required",
+          iconKey: "sparkle",
+          enabled: true,
+          moods: ["custom"],
+          useInCustom: true
+        }
+      ],
+      zones: [
+        {
+          id: "test-zones",
+          label: "Testzonen",
+          text: { de: { accusative: "die Testzonen", dative: "" } },
+          iconKey: "consent",
+          enabled: true,
+          moods: ["custom"],
+          useInCustom: true
+        }
+      ]
+    };
+
+    const normalized = withMissingDatives(config);
+
+    expect(configurationSchema.parse(normalized).zones[0].text.de.dative).toBe("den Testzonen");
+  });
+
+  test("requires German accusative and dative forms", () => {
+    expect(() =>
+      configurationSchema.parse({
+        id: "grammar-config",
+        name: "Grammar Config",
+        updatedAt: new Date(0).toISOString(),
+        actions: [],
+        zones: [
+          {
+            id: "test-zones",
+            label: "Testzonen",
+            text: { de: { accusative: "die Testzonen", dative: "" } },
+            iconKey: "consent",
+            enabled: true,
+            moods: ["custom"],
+            useInCustom: true
+          }
+        ]
+      })
+    ).toThrow();
+  });
+});
+
 const rollKey = (roll: { action: DiceAction; zone: Zone }) => `${roll.action.id}::${roll.zone.id}`;
 
 describe("createRoll history weighting", () => {
@@ -303,16 +388,15 @@ describe("createRoll history weighting", () => {
       config.zones.filter((zone) => isPairAllowed(action, zone)).map((zone) => ({ action, zone }))
     );
     const overloadedPair = validPairs[0];
-    const history = [
-      ...validPairs,
-      ...Array.from({ length: 8 }, () => overloadedPair)
-    ].map(({ action, zone }) => ({
-      action: { ...action, faceIndex: 0 },
-      zone: { ...zone, faceIndex: 0 },
-      actionFaces: [],
-      zoneFaces: [],
-      instruction: fillTemplate(action, zone)
-    }));
+    const history = [...validPairs, ...Array.from({ length: 8 }, () => overloadedPair)].map(
+      ({ action, zone }) => ({
+        action: { ...action, faceIndex: 0 },
+        zone: { ...zone, faceIndex: 0 },
+        actionFaces: [],
+        zoneFaces: [],
+        instruction: fillTemplate(action, zone)
+      })
+    );
 
     const roll = createRoll(config, "romantic", () => 0, { history });
 

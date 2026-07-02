@@ -1,4 +1,5 @@
 import type { Page } from "@playwright/test";
+import { createGermanZoneText } from "../../src/shared/grammar";
 import type { DiceConfiguration } from "../../src/shared/schemas/configuration";
 
 type CustomMixMutator = (mix: DiceConfiguration) => void;
@@ -41,7 +42,7 @@ export async function createCustomMix(page: Page, name: string, mutate?: CustomM
     zones: Array.from({ length: 6 }).map((_, i) => ({
       id: `zone-${i}`,
       label: `Zone ${i + 1}`,
-      accusative: `die Zone ${i + 1}`,
+      text: createGermanZoneText(`die Zone ${i + 1}`, `der Zone ${i + 1}`),
       iconKey: "consent",
       enabled: true,
       moods: ["custom"] as const

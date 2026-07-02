@@ -2,6 +2,7 @@
   actionsById,
   configurationSchema,
   isPairAllowed,
+  withMissingDatives,
   zonesById,
   type DiceConfiguration
 } from "@/shared";

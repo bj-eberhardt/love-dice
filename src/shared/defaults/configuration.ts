@@ -1,11 +1,16 @@
-﻿import type { DiceAction, DiceConfiguration, Mood, Zone } from "@/shared";
+﻿import { createGermanZoneText } from "../grammar.js";
+import type { DiceAction, DiceConfiguration, Mood, Zone } from "@/shared";
 
 const allMoods: Mood[] = ["romantic", "playful", "bold", "custom"];
 
 type ActionInput = Omit<DiceAction, "enabled" | "moods" | "useInCustom"> & {
   useInCustom?: boolean;
 };
-type ZoneInput = Omit<Zone, "enabled" | "moods" | "useInCustom"> & { useInCustom?: boolean };
+type ZoneInput = Omit<Zone, "enabled" | "moods" | "useInCustom" | "text"> & {
+  accusative: string;
+  dative?: string;
+  useInCustom?: boolean;
+};
 
 const action = (entry: ActionInput): DiceAction => ({
   ...entry,
@@ -14,18 +19,23 @@ const action = (entry: ActionInput): DiceAction => ({
   useInCustom: entry.useInCustom ?? true
 });
 
-const zone = (entry: ZoneInput): Zone => ({
-  ...entry,
-  enabled: true,
-  moods: allMoods,
-  useInCustom: entry.useInCustom ?? true
-});
+const zone = (entry: ZoneInput): Zone => {
+  const text = createGermanZoneText(entry.accusative, entry.dative);
+  const { accusative: _accusative, dative: _dative, ...rest } = entry;
+  return {
+    ...rest,
+    text,
+    enabled: true,
+    moods: allMoods,
+    useInCustom: entry.useInCustom ?? true
+  };
+};
 
 export const actionsById = {
   kiss: action({
     id: "kiss",
     label: "Küssen",
-    instructionTemplate: "Küsse {zone.accusative}.",
+    instructionTemplate: "Küsse {accusative}.",
     zoneMode: "required",
     iconKey: "kiss",
     allowedZoneIds: [
@@ -47,7 +57,7 @@ export const actionsById = {
   bite: action({
     id: "bite",
     label: "Beißen",
-    instructionTemplate: "Beiße vorsichtig in {zone.accusative}.",
+    instructionTemplate: "Beiße vorsichtig in {accusative}.",
     zoneMode: "required",
     iconKey: "bite",
     allowedZoneIds: [
@@ -68,7 +78,7 @@ export const actionsById = {
   massage: action({
     id: "massage",
     label: "Massieren",
-    instructionTemplate: "Massiere {zone.accusative}.",
+    instructionTemplate: "Massiere {accusative}.",
     zoneMode: "required",
     iconKey: "massage",
     allowedZoneIds: [
@@ -87,7 +97,7 @@ export const actionsById = {
   stroke: action({
     id: "stroke",
     label: "Streicheln",
-    instructionTemplate: "Streichle {zone.accusative} langsam und aufmerksam.",
+    instructionTemplate: "Streichle {accusative} langsam und aufmerksam.",
     zoneMode: "required",
     iconKey: "touch",
     allowedZoneIds: [
@@ -109,7 +119,7 @@ export const actionsById = {
   whisper: action({
     id: "whisper",
     label: "Flüstern",
-    instructionTemplate: "Flüstere ein ehrliches Kompliment {zone.accusative}.",
+    instructionTemplate: "Flüstere ein ehrliches Kompliment an {dative}.",
     zoneMode: "optional",
     iconKey: "whisper",
     allowedZoneIds: ["ear", "neck", "anywhere"]
@@ -117,8 +127,7 @@ export const actionsById = {
   surprise: action({
     id: "surprise",
     label: "Überraschen",
-    instructionTemplate:
-      "Überrasche dein Gegenüber mit einer zärtlichen Idee für {zone.accusative}.",
+    instructionTemplate: "Überrasche dein Gegenüber mit einer zärtlichen Idee für {accusative}.",
     zoneMode: "optional",
     iconKey: "sparkle"
   }),
@@ -133,7 +142,7 @@ export const actionsById = {
   compliment: action({
     id: "compliment",
     label: "Kompliment",
-    instructionTemplate: "Sag etwas Schönes über {zone.accusative}.",
+    instructionTemplate: "Sag etwas Schönes über {accusative}.",
     zoneMode: "optional",
     iconKey: "heart"
   }),
@@ -148,7 +157,7 @@ export const actionsById = {
   tickle: action({
     id: "tickle",
     label: "Kitzeln",
-    instructionTemplate: "Kitzle {zone.accusative} spielerisch.",
+    instructionTemplate: "Kitzle {accusative} spielerisch.",
     zoneMode: "required",
     iconKey: "tickle",
     allowedZoneIds: [
@@ -166,7 +175,7 @@ export const actionsById = {
   rub: action({
     id: "rub",
     label: "Reiben",
-    instructionTemplate: "Reibe {zone.accusative} langsam nach Absprache.",
+    instructionTemplate: "Reibe an {dative}",
     zoneMode: "required",
     iconKey: "rub",
     useInCustom: false,
@@ -186,7 +195,7 @@ export const actionsById = {
   seduce: action({
     id: "seduce",
     label: "Verführen",
-    instructionTemplate: "Verführe dein Gegenüber mit Fokus auf {zone.accusative}.",
+    instructionTemplate: "Verführe dein Gegenüber mit Fokus auf {accusative}.",
     zoneMode: "optional",
     iconKey: "seduce",
     allowedZoneIds: [
@@ -204,7 +213,7 @@ export const actionsById = {
   smell: action({
     id: "smell",
     label: "Riechen",
-    instructionTemplate: "Rieche aufmerksam. Konzentration auf {zone.accusative}.",
+    instructionTemplate: "Rieche aufmerksam an {dative}.",
     zoneMode: "required",
     iconKey: "smell",
     allowedZoneIds: [
@@ -222,32 +231,43 @@ export const actionsById = {
   suck: action({
     id: "suck",
     label: "Saugen",
-    instructionTemplate: "Sauge sanft an {zone.accusative}, wenn es für euch beide passt.",
+    instructionTemplate: "Sauge sanft an {dative}",
     zoneMode: "required",
     iconKey: "suck",
     useInCustom: false,
-    allowedZoneIds: [
-      "lips",
-      "nipple",
-      "breasts",
-      "genitals",
-      "ear",
-      "thighs",
-      "anywhere"
-    ]
+    allowedZoneIds: ["lips", "nipple", "breasts", "genitals", "ear", "thighs", "anywhere"]
   })
 } satisfies Record<string, DiceAction>;
 
 export const zonesById = {
-  lips: zone({ id: "lips", label: "Lippen", accusative: "die Lippen", iconKey: "lips" }),
-  neck: zone({ id: "neck", label: "Nacken", accusative: "den Nacken", iconKey: "neck" }),
-  back: zone({ id: "back", label: "Rücken", accusative: "den Rücken", iconKey: "back" }),
+  lips: zone({
+    id: "lips",
+    label: "Lippen",
+    accusative: "die Lippen",
+    dative: "den Lippen",
+    iconKey: "lips"
+  }),
+  neck: zone({
+    id: "neck",
+    label: "Nacken",
+    accusative: "den Nacken",
+    dative: "dem Nacken",
+    iconKey: "neck"
+  }),
+  back: zone({ id: "back", label: "Rücken", accusative: "den Rücken", dative: "dem Rücken", iconKey: "back" }),
   hands: zone({ id: "hands", label: "Hände", accusative: "die Hände", iconKey: "hands" }),
-  legs: zone({ id: "legs", label: "Beine", accusative: "die Beine", iconKey: "legs" }),
+  legs: zone({
+    id: "legs",
+    label: "Beine",
+    accusative: "die Beine",
+    dative: "den Beinen",
+    iconKey: "legs"
+  }),
   shoulders: zone({
     id: "shoulders",
     label: "Schultern",
     accusative: "die Schultern",
+    dative: "den Schultern",
     iconKey: "shoulders"
   }),
   anywhere: zone({
@@ -256,11 +276,12 @@ export const zonesById = {
     accusative: "überall nach Absprache",
     iconKey: "consent"
   }),
-  ear: zone({ id: "ear", label: "Ohr", accusative: "das Ohr", iconKey: "ear" }),
+  ear: zone({ id: "ear", label: "Ohr", accusative: "das Ohr", dative: "dem Ohr", iconKey: "ear" }),
   nipple: zone({
     id: "nipple",
     label: "Nippel",
     accusative: "den Nippel",
+    dative: "dem Nippel",
     iconKey: "nipple",
     useInCustom: false
   }),
@@ -268,24 +289,28 @@ export const zonesById = {
     id: "thighs",
     label: "Schenkel",
     accusative: "die Schenkel",
+    dative: "den Schenkeln",
     iconKey: "thighs"
   }),
   breasts: zone({
     id: "breasts",
     label: "Brüste",
     accusative: "die Brüste",
+    dative: "den Brüsten",
     iconKey: "breasts"
   }),
   genitals: zone({
     id: "genitals",
     label: "Geschlechtsteil",
     accusative: "das Geschlechtsteil",
+    dative: "dem Geschlechtsteil",
     iconKey: "genitals"
   }),
   butt: zone({
     id: "butt",
     label: "Hintern",
     accusative: "den Po",
+    dative: "dem Po",
     iconKey: "butt",
     useInCustom: false
   })

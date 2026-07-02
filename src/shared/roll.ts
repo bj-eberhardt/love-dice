@@ -35,11 +35,14 @@ export const isPairAllowed = (action: DiceAction, zone: Zone) => {
   return true;
 };
 
-export const fillTemplate = (action: DiceAction, zone: Zone) =>
-  action.instructionTemplate
-    .replaceAll("{accusative}", accusative)
+export const fillTemplate = (action: DiceAction, zone: Zone) => {
+  const germanText = zone.text.de;
+  return action.instructionTemplate
+    .replaceAll("{accusative}", germanText.accusative)
+    .replaceAll("{dative}", germanText.dative)
     .replaceAll("{zone.label}", zone.label)
-    .replaceAll("{ort}", accusative);
+    .replaceAll("{ort}", germanText.accusative);
+};
 
 export const createRoll = (
   configuration: DiceConfiguration,

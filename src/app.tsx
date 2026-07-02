@@ -9,7 +9,8 @@
   type RollFace,
   type RollHistoryEntry,
   type RollResult,
-  type Zone
+  type Zone,
+  withMissingDatives
 } from "@/shared";
 import {
   ChevronLeft,
@@ -274,11 +275,13 @@ export function App() {
     }
 
     try {
-      const cleanedDraft = cleanupOrphanedZoneIds({
-        ...draft,
-        name,
-        updatedAt: new Date().toISOString()
-      });
+      const cleanedDraft = cleanupOrphanedZoneIds(
+        withMissingDatives({
+          ...draft,
+          name,
+          updatedAt: new Date().toISOString()
+        })
+      );
       const parsed = configurationSchema.parse(cleanedDraft);
       const nextMixes = customMixes.some((mix) => mix.id === parsed.id)
         ? customMixes.map((mix) => (mix.id === parsed.id ? parsed : mix))
@@ -529,6 +532,3 @@ export function App() {
     </main>
   );
 }
-
-
-

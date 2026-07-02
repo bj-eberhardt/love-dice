@@ -15,7 +15,7 @@ interface EditableListProps {
   expandedIds: Set<string>;
   onExpandedChange: React.Dispatch<React.SetStateAction<Set<string>>>;
   onActionText?: (id: string, text: string) => void;
-  onZoneText?: (id: string, text: string) => void;
+  onZoneText?: (id: string, text: string, grammarCase: "accusative" | "dative") => void;
   availableZones?: Zone[];
   onZoneRestrictionChange?: (id: string, zoneIds: string[] | undefined) => void;
 }
@@ -93,11 +93,11 @@ export function EditableList({
                 <Trash2 size={17} />
               </button>
               <button
-                  data-testid={`collapse-${kind}-${item.id}`}
-                  className="expand-icon"
-                  type="button"
-                  aria-label={`${item.label} ausklappen/einklappen`}
-                  onClick={toggleExpanded}
+                data-testid={`collapse-${kind}-${item.id}`}
+                className="expand-icon"
+                type="button"
+                aria-label={`${item.label} ausklappen/einklappen`}
+                onClick={toggleExpanded}
               >
                 {!isExpanded ? <ChevronDown size={17} /> : <ChevronUp size={17} />}
               </button>
@@ -126,8 +126,9 @@ export function EditableList({
                         onChange={(event) => onActionText(item.id, event.target.value)}
                       />
                       <small>
-                        Der gewürfelte Ort wird automatisch ergänzt. Schreibe optional{" "}
-                        <code>{"{ort}"}</code> an die gewünschte Stelle im Satz.
+                        Der gewürfelte Ort wird automatisch ergänzt. Nutze optional{" "}
+                        <code>{"{ort|akkusativ}"}</code> oder <code>{"{ort|dativ}"}</code>;{" "}
+                        <code>{"{ort}"}</code> nutzt Akkusativ.
                       </small>
                     </label>
                     {onZoneRestrictionChange ? (
@@ -143,19 +144,35 @@ export function EditableList({
                     ) : null}
                   </>
                 ) : null}
-                {"accusative" in item && onZoneText ? (
-                  <label className="field full-field">
-                    <span>Ort im Ergebnistext</span>
-                    <input
-                      data-testid={`input-zone-${item.id}`}
-                      required
-                      value={item.accusative}
-                      onChange={(event) => onZoneText(item.id, event.target.value)}
-                    />
-                    <small>
-                      So erscheint der Ort im Satz, z. B. „den Nacken" oder „die Hände".
-                    </small>
-                  </label>
+                {"text" in item && onZoneText ? (
+                  <>
+                    <label className="field full-field">
+                      <span>Ort im Ergebnistext (Akkusativ)</span>
+                      <input
+                        data-testid={`input-zone-${item.id}`}
+                        required
+                        value={item.text.de.accusative}
+                        onChange={(event) => onZoneText(item.id, event.target.value, "accusative")}
+                      />
+                      <small>
+                        So erscheint der Ort nach direkten Aktionen, z. B. „den Nacken" oder „die
+                        Hände".
+                      </small>
+                    </label>
+                    <label className="field full-field">
+                      <span>Ort im Ergebnistext (Dativ)</span>
+                      <input
+                        data-testid={`input-zone-dative-${item.id}`}
+                        required
+                        value={item.text.de.dative}
+                        onChange={(event) => onZoneText(item.id, event.target.value, "dative")}
+                      />
+                      <small>
+                        So erscheint der Ort nach Dativ-Präpositionen, z. B. „dem Nacken" oder „den
+                        Händen".
+                      </small>
+                    </label>
+                  </>
                 ) : null}
               </div>
             ) : null}
@@ -168,7 +185,8 @@ export function EditableList({
 
 function actionTextFromTemplate(template: string) {
   return template
-    .replaceAll("{accusative}", "{ort}")
+    .replaceAll("{accusative}", "{ort|akkusativ}")
+    .replaceAll("{dative}", "{ort|dativ}")
     .replaceAll("{zone.nominative}", "{ort}")
     .replaceAll("{zone.label}", "{ort}")
     .replace(/\s+/g, " ")
