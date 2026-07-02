@@ -138,7 +138,7 @@ export function ZoneSelector({
                 emitSelection(availableZones.map((zone) => zone.id));
               }}
             >
-              Alle ausw‰hlen
+              Alle ausw√§hlen
             </button>
           </div>
           {availableZones.map((zone) => {

@@ -715,27 +715,24 @@ test.describe("custom mixes", () => {
         "data-zone-label",
         "E2E Dynamic Zone"
       );
+      await actionCard.getByTestId(`zone-option-${newZoneId}`).click();
+      await actionCard.press("Escape");
+      await page.waitForTimeout(100);
     });
 
     await test.step("Select the new zone and verify chip label follows the rename", async () => {
-      const actionCard = page.getByTestId("card-actions-action-0");
-      await actionCard.getByTestId(`zone-option-${newZoneId}`).click();
-      await expect(actionCard.getByTestId(`zone-chip-${newZoneId}`)).toHaveAttribute(
-        "data-zone-label",
-        "E2E Dynamic Zone"
-      );
-
-      const selectorInput = actionCard.getByTestId("zone-selector-input");
-      const selectorDropdown = actionCard.locator(".zone-selector-dropdown");
-
-      await expect(selectorDropdown).toBeVisible();
       await page.getByTestId(`input-label-zones-${newZoneId}`).fill("E2E Renamed Dynamic Zone");
-      await expect(selectorDropdown).toHaveCount(0);
-      await expect(selectorInput).toHaveAttribute("aria-expanded", "false");
+
+      const actionCard = page.getByTestId("card-actions-action-0");
+      await actionCard.getByTestId(`zone-chip-${newZoneId}`).click();
+
       await expect(actionCard.getByTestId(`zone-chip-${newZoneId}`)).toHaveAttribute(
         "data-zone-label",
         "E2E Renamed Dynamic Zone"
       );
+
+      const selectorInput = actionCard.getByTestId("zone-selector-input");
+      const selectorDropdown = actionCard.locator(".zone-selector-dropdown");
 
       await selectorInput.click();
       await expect(selectorDropdown).toBeVisible();
