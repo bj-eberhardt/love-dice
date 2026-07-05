@@ -86,7 +86,7 @@ jobs:
         with:
           path: ./dist/client
           
- deploy-pages:
+  deploy-pages:
     needs: release
     runs-on: ubuntu-latest
 
