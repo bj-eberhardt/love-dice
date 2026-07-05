@@ -17,6 +17,7 @@ export default defineConfig({
   },
   publicDir: "public",
   build: {
+    manifest: true,
     outDir: "dist/client",
     copyPublicDir: true,
     emptyOutDir: true,
@@ -25,19 +26,10 @@ export default defineConfig({
         codeSplitting: {
           groups: [
             {
-              name: "react-three",
-              test: (id) => isNodeModule(id) && id.includes("@react-three/fiber"),
-              priority: 30
-            },
-            {
               name: "three",
-              test: (id) => isNodeModule(id) && id.includes("three"),
+              test: (id) =>
+                isNodeModule(id) && id.includes("three/") && !id.includes("@react-three"),
               priority: 20
-            },
-            {
-              name: "react-vendor",
-              test: (id) => isNodeModule(id) && (id.includes("react") || id.includes("react-dom")),
-              priority: 10
             }
           ]
         }
