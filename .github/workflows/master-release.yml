@@ -8,6 +8,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 concurrency:
   group: master-release
@@ -78,3 +80,21 @@ jobs:
           files: dist.tar.gz
           generate_release_notes: true
           name: "Release ${{ steps.get-version.outputs.version }}"
+
+      - name: Upload GitHub-Pages artefact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: ./dist/client
+          
+ deploy-pages:
+    needs: release
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy at GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
