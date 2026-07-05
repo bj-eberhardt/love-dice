@@ -11,14 +11,7 @@
   type RollResult,
   type Zone
 } from "@/shared";
-import {
-  ChevronLeft,
-  ChevronRight,
-  MoreHorizontal,
-  Plus,
-  ShieldCheck,
-  Shuffle
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, MoreHorizontal, Plus, Shuffle } from "lucide-react";
 import { Suspense, lazy, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { ResultToken } from "./components/ResultToken";
 import { MixModal } from "./components/MixModal";
@@ -32,6 +25,7 @@ import {
   createId
 } from "./utils/mixUtils";
 import { formatZodError } from "./utils/validationUtils";
+import { ConsentPage } from "@/components/ConsentPage";
 
 const builtInModes: { id: BuiltInMood; label: string }[] = [
   { id: "romantic", label: "Romantisch" },
@@ -319,31 +313,9 @@ export function App() {
       onConfirm: () => deleteMix(mix.id)
     });
   };
+
   if (!consent) {
-    return (
-      <main className="consent-screen">
-        <section className="hero">
-          <picture className="hero-asset" aria-hidden="true">
-            <source media="(max-width: 720px)" srcSet="/assets/hero-dice-mobile.png" />
-            <img data-testid="consent-hero-image" src="/assets/hero-dice-desktop.png" alt="" />
-          </picture>
-          <div className="hero-content">
-            <p className="eyebrow">Würfel & Wünsche</p>
-            <h1>Lust auf Würfel?</h1>
-            <p className="lead">
-              Drei Stimmungen, zwei Würfel und klare Zustimmung für intime Paarmomente.
-            </p>
-            <button
-              data-testid="consent-accept"
-              className="primary"
-              onClick={() => setConsent(true)}
-            >
-              <ShieldCheck size={20} /> Volljährigkeit und Zustimmung bestätigen
-            </button>
-          </div>
-        </section>
-      </main>
-    );
+    return ConsentPage({ onConsentClick: () => setConsent(true) });
   }
 
   return (
