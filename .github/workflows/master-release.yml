@@ -81,10 +81,16 @@ jobs:
           generate_release_notes: true
           name: "Release ${{ steps.get-version.outputs.version }}"
 
+      - name: GitHub-Pages-Build erzeugen
+        run: |
+          npm run build -- \
+          --base="/${{ github.event.repository.name }}/" \
+          --outDir=dist-pages    
+
       - name: Upload GitHub-Pages artefact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: ./dist/client
+          path: ./dist-pages/client
           
   deploy-pages:
     needs: release
