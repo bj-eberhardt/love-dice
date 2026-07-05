@@ -1,17 +1,17 @@
 import { ShieldCheck } from "lucide-react";
 
-// @ts-expect-error
+// @ts-expect-error responsive image load
 import desktopAvif from "@/assets/big-hero-dice-desktop.png?w=720;1280;1600;1920&format=avif&quality=55&as=srcset";
-// @ts-expect-error
+// @ts-expect-error responsive image load
 import desktopWebp from "@/assets/big-hero-dice-desktop.png?w=720;1280;1600;1920&format=webp&quality=78&as=srcset";
-// @ts-expect-error
+// @ts-expect-error responsive image load
 import desktopFallback from "@/assets/big-hero-dice-desktop.png?w=1600&format=png";
 
-// @ts-expect-error
+// @ts-expect-error responsive image load
 import mobileAvif from "@/assets/big-hero-dice-mobile.png?w=720;1280;1600;1920&format=avif&quality=55&as=srcset";
-// @ts-expect-error
+// @ts-expect-error responsive image load
 import mobileWebp from "@/assets/big-hero-dice-mobile.png?w=720;1280;1600;1920&format=webp&quality=78&as=srcset";
-// @ts-expect-error
+// @ts-expect-error responsive image load
 import mobileFallback from "@/assets/big-hero-dice-mobile.png?w=1600&format=png";
 
 interface ConsentPageProps {

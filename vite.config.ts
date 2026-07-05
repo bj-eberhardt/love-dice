@@ -9,7 +9,7 @@ const packageJson = JSON.parse(readFileSync(resolve(__dirname, "package.json"), 
 };
 
 export default defineConfig({
-  plugins: [react(), imagetools(), ,],
+  plugins: [react(), imagetools(),],
   define: {
     __APP_VERSION__: JSON.stringify(packageJson.version)
   },

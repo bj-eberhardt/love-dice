@@ -16,7 +16,6 @@ import {
   ChevronRight,
   MoreHorizontal,
   Plus,
-  ShieldCheck,
   Shuffle
 } from "lucide-react";
 import { Suspense, lazy, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
