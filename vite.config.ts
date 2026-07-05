@@ -8,6 +8,8 @@ const packageJson = JSON.parse(readFileSync(resolve(__dirname, "package.json"), 
   version: string;
 };
 
+const isNodeModule = (id: string) => /node_modules[\\/]/.test(id);
+
 export default defineConfig({
   plugins: [react(), imagetools()],
   define: {
@@ -15,16 +17,21 @@ export default defineConfig({
   },
   publicDir: "public",
   build: {
+    manifest: true,
     outDir: "dist/client",
     copyPublicDir: true,
     emptyOutDir: true,
-    rollupOptions: {
+    rolldownOptions: {
       output: {
-        manualChunks(id) {
-          if (!id.includes("node_modules")) return;
-          if (id.includes("@react-three/fiber")) return "react-three";
-          if (id.includes("three")) return "three";
-          if (id.includes("react") || id.includes("react-dom")) return "react-vendor";
+        codeSplitting: {
+          groups: [
+            {
+              name: "three",
+              test: (id) =>
+                isNodeModule(id) && id.includes("three/") && !id.includes("@react-three"),
+              priority: 20
+            }
+          ]
         }
       }
     }
