@@ -10,7 +10,7 @@ test("consent flow at start screen", async ({ page }) => {
   await test.step("Hero image is loaded and visible", async () => {
     const heroImage = page.getByTestId("consent-hero-image");
     await expect(heroImage).toBeVisible();
-    await expect(heroImage).toHaveAttribute("src", "/assets/hero-dice-desktop.png");
+    await expect(heroImage).toHaveAttribute("src", /\/assets\/big-hero-dice-desktop-.*\.png$/);
     await expect
       .poll(async () =>
         heroImage.evaluate(

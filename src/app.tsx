@@ -11,13 +11,7 @@
   type RollResult,
   type Zone
 } from "@/shared";
-import {
-  ChevronLeft,
-  ChevronRight,
-  MoreHorizontal,
-  Plus,
-  Shuffle
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, MoreHorizontal, Plus, Shuffle } from "lucide-react";
 import { Suspense, lazy, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { ResultToken } from "./components/ResultToken";
 import { MixModal } from "./components/MixModal";
