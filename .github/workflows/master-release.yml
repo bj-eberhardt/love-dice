@@ -85,13 +85,13 @@ jobs:
         run: |
           npm run build -- \
           --base="/${{ github.event.repository.name }}/" \
-          --outDir=dist-pages    
+          --outDir=dist-pages
 
       - name: Upload GitHub-Pages artefact
         uses: actions/upload-pages-artifact@v4
         with:
           path: ./dist-pages
-          
+
   deploy-pages:
     needs: release
     runs-on: ubuntu-latest
