@@ -117,3 +117,5 @@ docker compose up --build
 - Es dürfen nur Mischungen gespeichert werden, wo mindestens 6 Orte und mindestens 6 Aktionen gewhält wurden, die aktiv sind.
 - Aufgaben-Platzhalter unterstuetzen {ort|akkusativ} und {ort|dativ}; {ort} bleibt Akkusativ. Zonen speichern deutsche Textformen nur noch unter text.de.accusative/text.de.dative; beide Felder sind im Zod-Schema Pflichtfelder. Das Modal schlaegt den Dativ nur beim Bearbeiten des Akkusativs nach einer einfachen Pluralregel vor; ein leerer Dativ blockiert das Speichern mit Formularfehler.
 - Mix-Dialog-Footer angepasst: JSON-Export steht über der Aktionszeile; Löschen und Speichern liegen in derselben Zeile.
+- `formatZodError` ist durch Unit-Tests abgedeckt: Custom-Issues, Pflichtfelder, sonstige Zod-Meldungen, mehrere/doppelte Fehler, leere ZodErrors, Error-Objekte und unbekannte Fehlerwerte.
+- `grammar.ts` ist durch Unit-Tests abgedeckt: Plural-Dativ-Ableitung, Whitespace-Normalisierung, explizite Dative, Fallbacks und immutables Auffüllen fehlender Dative.
