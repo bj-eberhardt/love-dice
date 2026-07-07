@@ -1,4 +1,4 @@
-﻿# AGENT.md
+# AGENT.md
 
 ## Projektüberblick
 
@@ -116,3 +116,4 @@ docker compose up --build
 - Eigene Mischungen können über das aktive …-Menü kopiert werden. Kopien erhalten automatisch eindeutige Namen nach dem Muster Name Kopie, Name Kopie 2 usw.; beim Speichern blockiert das Modal leere oder doppelte Mischungsnamen mit einer sichtbaren Warnung.
 - Es dürfen nur Mischungen gespeichert werden, wo mindestens 6 Orte und mindestens 6 Aktionen gewhält wurden, die aktiv sind.
 - Aufgaben-Platzhalter unterstuetzen {ort|akkusativ} und {ort|dativ}; {ort} bleibt Akkusativ. Zonen speichern deutsche Textformen nur noch unter text.de.accusative/text.de.dative; beide Felder sind im Zod-Schema Pflichtfelder. Das Modal schlaegt den Dativ nur beim Bearbeiten des Akkusativs nach einer einfachen Pluralregel vor; ein leerer Dativ blockiert das Speichern mit Formularfehler.
+- Mix-Dialog-Footer angepasst: JSON-Export steht über der Aktionszeile; Löschen und Speichern liegen in derselben Zeile.
