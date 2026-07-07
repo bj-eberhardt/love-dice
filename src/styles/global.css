@@ -566,12 +566,30 @@ input {
 
 @media screen and (min-width: 860px) {
   .modal-footer {
-    grid-template-columns: 1fr auto auto;
+    grid-template-columns: 1fr auto;
   }
 }
 
 .modal-footer > p {
   justify-self: start;
+}
+
+.modal-footer-actions {
+  display: grid;
+  gap: 12px;
+  justify-items: stretch;
+}
+
+.modal-export-button {
+  justify-content: center;
+  width: 100%;
+}
+
+.modal-save-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: flex-end;
 }
 
 .modal-actions,

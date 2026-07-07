@@ -1,4 +1,4 @@
-﻿import { configurationSchema, derivePluralDative, type DiceConfiguration } from "@/shared";
+import { configurationSchema, derivePluralDative, type DiceConfiguration } from "@/shared";
 import { Download, Save, Trash2, Upload, X } from "lucide-react";
 import { type ChangeEvent, type FormEvent, type InvalidEvent, useRef, useState } from "react";
 import { EditableList } from "./EditableList";
@@ -276,21 +276,23 @@ export function MixModal({ draft, saveError, onChange, onClose, onSave, onDelete
             {draft.zones.filter((item) => item.enabled).length} Orte aktiv. Für Würfe braucht es
             jeweils mindestens sechs.
           </p>
-          <button data-testid="mix-delete" className="danger" type="button" onClick={onDelete}>
-            <Trash2 size={17} /> Mischung löschen
-          </button>
           <div className="modal-footer-actions">
             <button
               data-testid="mix-export"
-              className="secondary"
+              className="secondary modal-export-button"
               type="button"
               onClick={exportDraft}
             >
               <Download size={17} /> JSON exportieren
             </button>
-            <button data-testid="mix-save" className="primary" type="submit">
-              <Save size={18} /> Mischung speichern
-            </button>
+            <div className="modal-save-row">
+              <button data-testid="mix-delete" className="danger" type="button" onClick={onDelete}>
+                <Trash2 size={17} /> Mischung löschen
+              </button>
+              <button data-testid="mix-save" className="primary" type="submit">
+                <Save size={18} /> Mischung speichern
+              </button>
+            </div>
           </div>
         </div>
       </form>
