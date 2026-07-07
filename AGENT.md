@@ -119,3 +119,4 @@ docker compose up --build
 - Mix-Dialog-Footer angepasst: JSON-Export steht über der Aktionszeile; Löschen und Speichern liegen in derselben Zeile.
 - `formatZodError` ist durch Unit-Tests abgedeckt: Custom-Issues, Pflichtfelder, sonstige Zod-Meldungen, mehrere/doppelte Fehler, leere ZodErrors, Error-Objekte und unbekannte Fehlerwerte.
 - `grammar.ts` ist durch Unit-Tests abgedeckt: Plural-Dativ-Ableitung, Whitespace-Normalisierung, explizite Dative, Fallbacks und immutables Auffüllen fehlender Dative.
+- `src/features/game/icons.tsx` nutzt differenziertere Lucide-Icons je IconKey, z. B. ShieldCheck für Zustimmung, AudioLines für Flüstern, WandSparkles für Wunsch und MapPin für überall.
