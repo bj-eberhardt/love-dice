@@ -1,14 +1,23 @@
-﻿import {
+import {
+  AudioLines,
   BadgeQuestionMark,
+  BicepsFlexed,
+  CircleDot,
   Ear,
   Flame,
+  Footprints,
   Hand,
+  HandHeart,
   Heart,
-  LockKeyhole,
-  MessageCircle,
+  HeartPlus,
+  Laugh,
+  MapPin,
   Pause,
-  Smile,
+  ScanHeart,
+  ShieldCheck,
   Sparkles,
+  WandSparkles,
+  Waves,
   Wind
 } from "lucide-react";
 import type { IconKey } from "@/shared";
@@ -19,30 +28,37 @@ export const iconFor = (key: IconKey, className = "icon"): ReactNode => {
   switch (key) {
     case "kiss":
     case "lips":
+      return <HeartPlus {...props} />;
     case "heart":
-    case "suck":
       return <Heart {...props} />;
+    case "suck":
+      return <CircleDot {...props} />;
     case "massage":
+      return <HandHeart {...props} />;
     case "hands":
+    case "touch":
+      return <Hand {...props} />;
     case "rub":
+      return <Waves {...props} />;
     case "back":
     case "shoulders":
+      return <BicepsFlexed {...props} />;
     case "legs":
     case "thighs":
+      return <Footprints {...props} />;
     case "breasts":
     case "butt":
-      return <Hand {...props} />;
-    case "touch":
-    case "neck":
     case "nipple":
     case "genitals":
-      return <Hand {...props} />;
+      return <ScanHeart {...props} />;
+    case "neck":
+      return <CircleDot {...props} />;
     case "ear":
       return <Ear {...props} />;
     case "whisper":
-      return <MessageCircle {...props} />;
+      return <AudioLines {...props} />;
     case "tickle":
-      return <Smile {...props} />;
+      return <Laugh {...props} />;
     case "seduce":
       return <Flame {...props} />;
     case "smell":
@@ -50,13 +66,15 @@ export const iconFor = (key: IconKey, className = "icon"): ReactNode => {
     case "bite":
       return <BadgeQuestionMark {...props} />;
     case "sparkle":
-    case "wish":
-    case "anywhere":
       return <Sparkles {...props} />;
+    case "wish":
+      return <WandSparkles {...props} />;
+    case "anywhere":
+      return <MapPin {...props} />;
     case "pause":
       return <Pause {...props} />;
     case "consent":
-      return <LockKeyhole {...props} />;
+      return <ShieldCheck {...props} />;
     default:
       return assertNever(key);
   }
