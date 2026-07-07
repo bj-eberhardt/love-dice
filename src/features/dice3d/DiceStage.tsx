@@ -1,5 +1,6 @@
-﻿import { Canvas } from "@react-three/fiber";
+import { Canvas } from "@react-three/fiber";
 import type { DiceAction, IconKey, RollFace, Zone } from "@/shared";
+import { useMediaQuery } from "@/hook/useMediaQuery";
 import { Suspense, useEffect, useMemo, useRef } from "react";
 import {
   CanvasTexture,
@@ -23,6 +24,42 @@ const frontRotations: [number, number, number][] = [
   [0, 0, 0],
   [0, Math.PI, 0]
 ];
+const diceSceneConfig = {
+  camera: {
+    position: [0, 2.25, 6.25] as [number, number, number],
+    fov: 41
+  },
+  dice: {
+    size: 1.82,
+    xOffset: 1.62,
+    y: 0.25,
+    actionPosition: [-1.62, 0.25, 0] as [number, number, number],
+    zonePosition: [1.62, 0.25, 0] as [number, number, number],
+    compactActionPosition: [-1.38, 0.25, 0] as [number, number, number],
+    compactZonePosition: [1.38, 0.25, 0] as [number, number, number],
+    rollLift: 0.7,
+    material: {
+      roughness: 0.52,
+      metalness: 0.04
+    }
+  },
+  face: {
+    backgroundStops: ["#303746", "#202839", "#171d2b"],
+    edgeStrokeOpacity: "d6",
+    innerStroke: "rgba(255, 255, 255, 0.12)",
+    maxLabelWidth: 438,
+    maxLabelLines: 2,
+    maxLabelFontSize: 92,
+    minLabelFontSize: 30,
+    labelBaselineY: 362,
+    iconY: 166
+  },
+  table: {
+    radius: 2.96,
+    scale: [1.42, 0.62, 1] as [number, number, number],
+    position: [0, -0.88, 0] as [number, number, number]
+  }
+} as const;
 
 const drawHeart = (ctx: CanvasRenderingContext2D, x: number, y: number, size: number) => {
   ctx.beginPath();
@@ -155,14 +192,22 @@ const drawGenderSymbol = (ctx: CanvasRenderingContext2D) => {
 
 const diceLabelFont = (size: number) => `700 ${size}px Inter, Arial`;
 
+const fullTurn = Math.PI * 2;
+
+const rotationTargetWithTurns = (current: number, target: number, minimumTurns: number) => {
+  const minimumDistance = minimumTurns * fullTurn;
+  const turns = Math.ceil((current + minimumDistance - target) / fullTurn);
+  return target + Math.max(turns, minimumTurns) * fullTurn;
+};
+
 const ellipsizeToWidth = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number) => {
   if (ctx.measureText(text).width <= maxWidth) return text;
 
   let trimmed = text.trim();
-  while (trimmed.length > 1 && ctx.measureText(`${trimmed}…`).width > maxWidth) {
+  while (trimmed.length > 1 && ctx.measureText(`${trimmed}...`).width > maxWidth) {
     trimmed = trimmed.slice(0, -1).trimEnd();
   }
-  return trimmed.length > 0 ? `${trimmed}…` : "…";
+  return trimmed.length > 0 ? `${trimmed}...` : "...";
 };
 
 const wrapText = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number) => {
@@ -171,7 +216,7 @@ const wrapText = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number)
 
   for (const word of words) {
     if (lines.length === 0) {
-      lines.push(ellipsizeToWidth(ctx, word, maxWidth));
+      lines.push(word);
       continue;
     }
 
@@ -179,12 +224,15 @@ const wrapText = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number)
     if (ctx.measureText(nextLine).width <= maxWidth) {
       lines[lines.length - 1] = nextLine;
     } else {
-      lines.push(ellipsizeToWidth(ctx, word, maxWidth));
+      lines.push(word);
     }
   }
 
   return lines.length > 0 ? lines : [""];
 };
+
+const labelLinesFit = (ctx: CanvasRenderingContext2D, lines: string[], maxWidth: number) =>
+  lines.every((line) => ctx.measureText(line).width <= maxWidth);
 
 const fitLabelLines = (
   ctx: CanvasRenderingContext2D,
@@ -199,7 +247,7 @@ const fitLabelLines = (
   for (let fontSize = maxFontSize; fontSize >= minFontSize; fontSize -= 1) {
     ctx.font = diceLabelFont(fontSize);
     const lines = wrapText(ctx, cleanLabel, maxWidth);
-    if (lines.length <= maxLines) return { lines, fontSize };
+    if (lines.length <= maxLines && labelLinesFit(ctx, lines, maxWidth)) return { lines, fontSize };
   }
 
   ctx.font = diceLabelFont(minFontSize);
@@ -210,11 +258,18 @@ const fitLabelLines = (
 };
 
 const drawLabel = (ctx: CanvasRenderingContext2D, label: string, color: string) => {
-  const maxWidth = 410;
-  const { lines, fontSize } = fitLabelLines(ctx, label, maxWidth, 2, 40, 24);
+  const maxWidth = diceSceneConfig.face.maxLabelWidth;
+  const { lines, fontSize } = fitLabelLines(
+    ctx,
+    label,
+    maxWidth,
+    diceSceneConfig.face.maxLabelLines,
+    diceSceneConfig.face.maxLabelFontSize,
+    diceSceneConfig.face.minLabelFontSize
+  );
   const lineHeight = Math.round(fontSize * 1.15);
   const blockHeight = lineHeight * lines.length;
-  const firstBaseline = 356 - blockHeight / 2 + lineHeight / 2;
+  const firstBaseline = diceSceneConfig.face.labelBaselineY - blockHeight / 2 + lineHeight / 2;
 
   ctx.save();
   ctx.fillStyle = color;
@@ -231,7 +286,7 @@ const drawIcon = (ctx: CanvasRenderingContext2D, iconKey: IconKey, color: string
   ctx.save();
   ctx.strokeStyle = color;
   ctx.fillStyle = color;
-  ctx.translate(256, 178);
+  ctx.translate(256, diceSceneConfig.face.iconY);
 
   switch (iconKey) {
     case "kiss":
@@ -444,9 +499,9 @@ const drawRoundedRect = (
 
 const drawFaceBackground = (ctx: CanvasRenderingContext2D, color: string) => {
   const baseGradient = ctx.createLinearGradient(0, 0, 512, 512);
-  baseGradient.addColorStop(0, "#242838");
-  baseGradient.addColorStop(0.46, "#181c2a");
-  baseGradient.addColorStop(1, "#10141f");
+  baseGradient.addColorStop(0, diceSceneConfig.face.backgroundStops[0]);
+  baseGradient.addColorStop(0.46, diceSceneConfig.face.backgroundStops[1]);
+  baseGradient.addColorStop(1, diceSceneConfig.face.backgroundStops[2]);
   ctx.fillStyle = baseGradient;
   ctx.fillRect(0, 0, 512, 512);
 
@@ -459,7 +514,7 @@ const drawFaceBackground = (ctx: CanvasRenderingContext2D, color: string) => {
 
   ctx.save();
   drawRoundedRect(ctx, 28, 28, 456, 456, 42);
-  ctx.strokeStyle = `${color}a8`;
+  ctx.strokeStyle = `${color}${diceSceneConfig.face.edgeStrokeOpacity}`;
   ctx.lineWidth = 14;
   ctx.shadowColor = color;
   ctx.shadowBlur = 10;
@@ -468,7 +523,7 @@ const drawFaceBackground = (ctx: CanvasRenderingContext2D, color: string) => {
 
   ctx.save();
   drawRoundedRect(ctx, 48, 48, 416, 416, 30);
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.075)";
+  ctx.strokeStyle = diceSceneConfig.face.innerStroke;
   ctx.lineWidth = 3;
   ctx.stroke();
   ctx.restore();
@@ -576,8 +631,8 @@ function Die({
         (face) =>
           new MeshStandardMaterial({
             map: makeTexture(face.label, face.iconKey, color),
-            roughness: 0.56,
-            metalness: 0.04
+            roughness: diceSceneConfig.dice.material.roughness,
+            metalness: diceSceneConfig.dice.material.metalness
           })
       ),
     [color, faces]
@@ -592,9 +647,9 @@ function Die({
     const duration = 2450;
     const initial = ref.current.rotation.clone();
     const spin = new Euler(
-      target[0] + Math.PI * 8,
-      target[1] + Math.PI * 10,
-      target[2] + Math.PI * 8
+      rotationTargetWithTurns(initial.x, target[0], 4),
+      rotationTargetWithTurns(initial.y, target[1], 5),
+      rotationTargetWithTurns(initial.z, target[2], 4)
     );
 
     const animate = (now: number) => {
@@ -603,7 +658,8 @@ function Die({
       ref.current!.rotation.x = MathUtils.lerp(initial.x, spin.x, ease);
       ref.current!.rotation.y = MathUtils.lerp(initial.y, spin.y, ease);
       ref.current!.rotation.z = MathUtils.lerp(initial.z, spin.z, ease);
-      ref.current!.position.y = position[1] + Math.sin(progress * Math.PI) * 0.7;
+      ref.current!.position.y =
+        position[1] + Math.sin(progress * Math.PI) * diceSceneConfig.dice.rollLift;
 
       if (progress < 1) {
         animationRef.current = requestAnimationFrame(animate);
@@ -622,7 +678,16 @@ function Die({
 
   return (
     <mesh ref={ref} position={position} castShadow>
-      <boxGeometry args={[1.6, 1.6, 1.6, 6, 6, 6]} />
+      <boxGeometry
+        args={[
+          diceSceneConfig.dice.size,
+          diceSceneConfig.dice.size,
+          diceSceneConfig.dice.size,
+          6,
+          6,
+          6
+        ]}
+      />
       {materials.map((material, index) => (
         <primitive key={index} object={material} attach={`material-${index}`} />
       ))}
@@ -644,10 +709,17 @@ export function DiceStage({
   rollingKey: number;
 }) {
   const tableTexture = useMemo(makeTableTexture, []);
+  const isNarrowViewport = useMediaQuery("(max-width: 420px)");
+  const actionPosition = isNarrowViewport
+    ? diceSceneConfig.dice.compactActionPosition
+    : diceSceneConfig.dice.actionPosition;
+  const zonePosition = isNarrowViewport
+    ? diceSceneConfig.dice.compactZonePosition
+    : diceSceneConfig.dice.zonePosition;
 
   return (
     <div className="dice-stage" aria-label="3D-Würfelbereich">
-      <Canvas shadows camera={{ position: [0, 2.2, 6], fov: 44 }}>
+      <Canvas shadows camera={diceSceneConfig.camera}>
         <Suspense fallback={null}>
           <ambientLight intensity={0.66} />
           <pointLight position={[-3.2, 1.6, 2.8]} color="#ff7bb7" intensity={0.42} />
@@ -667,19 +739,23 @@ export function DiceStage({
             faces={actionFaces}
             resultFace={actionResult}
             color="#ff7bb7"
-            position={[-1.45, 0.25, 0]}
+            position={actionPosition}
             rollingKey={rollingKey}
           />
           <Die
             faces={zoneFaces}
             resultFace={zoneResult}
             color="#66e0d1"
-            position={[1.45, 0.25, 0]}
+            position={zonePosition}
             rollingKey={rollingKey}
           />
-          <group rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.8, 0]} scale={[1.42, 0.62, 1]}>
+          <group
+            rotation={[-Math.PI / 2, 0, 0]}
+            position={diceSceneConfig.table.position}
+            scale={diceSceneConfig.table.scale}
+          >
             <mesh receiveShadow>
-              <circleGeometry args={[2.72, 96]} />
+              <circleGeometry args={[diceSceneConfig.table.radius, 96]} />
               <meshStandardMaterial
                 map={tableTexture}
                 color="#f7f8fc"
@@ -690,7 +766,7 @@ export function DiceStage({
               />
             </mesh>
             <mesh position={[0, 0, -0.012]}>
-              <circleGeometry args={[3.15, 96]} />
+              <circleGeometry args={[diceSceneConfig.table.radius + 0.43, 96]} />
               <meshBasicMaterial color="#090b12" transparent opacity={0.34} depthWrite={false} />
             </mesh>
           </group>
