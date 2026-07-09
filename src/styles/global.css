@@ -512,6 +512,38 @@ input {
   position: relative;
   width: min(100%, 1040px);
 }
+@media screen and (max-width: 859px) {
+  .mix-modal-backdrop {
+    padding-inline: 0;
+  }
+
+  .mix-modal-backdrop .modal {
+    max-height: calc(100dvh - 44px);
+    max-width: none;
+    width: 100vw;
+  }
+
+  .mix-modal-backdrop .modal-grid {
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .mix-modal-backdrop .editable-list {
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .mix-modal-backdrop .modal-export-button {
+    justify-self: end;
+    width: auto;
+  }
+}
+
+@media screen and (max-width: 499px) {
+  .mix-modal-backdrop .modal {
+    padding: 10px;
+  }
+}
 
 .modal-head,
 .panel-head,

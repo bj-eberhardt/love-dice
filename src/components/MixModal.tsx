@@ -174,7 +174,7 @@ export function MixModal({ draft, saveError, onChange, onClose, onSave, onDelete
   };
 
   return (
-    <div className="modal-backdrop" role="presentation">
+    <div className="modal-backdrop mix-modal-backdrop" role="presentation">
       <form
         data-testid="mix-modal"
         className="modal"
