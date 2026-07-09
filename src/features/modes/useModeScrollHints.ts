@@ -1,5 +1,13 @@
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 
+function getScrollHints(element: HTMLDivElement) {
+  const hasOverflow = element.scrollWidth > element.clientWidth + 1;
+  return {
+    left: hasOverflow && element.scrollLeft > 1,
+    right: hasOverflow && element.scrollLeft + element.clientWidth < element.scrollWidth - 1
+  };
+}
+
 export function useModeScrollHints(observedItemsCount: number) {
   const modeScrollRef = useRef<HTMLDivElement>(null);
   const [scrollHints, setScrollHints] = useState({ left: false, right: false });
@@ -9,15 +17,17 @@ export function useModeScrollHints(observedItemsCount: number) {
   const updateScrollHints = useCallback(() => {
     const element = modeScrollRef.current;
     if (!element) {
-      setTimeout(updateScrollHints, 100);
+      const timeoutId = window.setTimeout(() => {
+        const delayedElement = modeScrollRef.current;
+        if (delayedElement) {
+          setScrollHints(getScrollHints(delayedElement));
+        }
+      }, 100);
+      scrollMeasureTimeoutRefs.current.push(timeoutId);
       return;
     }
 
-    const hasOverflow = element.scrollWidth > element.clientWidth + 1;
-    setScrollHints({
-      left: hasOverflow && element.scrollLeft > 1,
-      right: hasOverflow && element.scrollLeft + element.clientWidth < element.scrollWidth - 1
-    });
+    setScrollHints(getScrollHints(element));
   }, []);
 
   const clearScheduledScrollHintUpdates = useCallback(() => {

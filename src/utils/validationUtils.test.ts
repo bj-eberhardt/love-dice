@@ -29,7 +29,9 @@ describe("formatZodError", () => {
 
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(formatZodError(result.error)).toBe("amount: Invalid input: expected number, received string");
+      expect(formatZodError(result.error)).toBe(
+        "amount: Invalid input: expected number, received string"
+      );
     }
   });
 
