@@ -669,8 +669,7 @@ function Die({
       ref.current!.rotation.x = MathUtils.lerp(initial.x, spin.x, ease);
       ref.current!.rotation.y = MathUtils.lerp(initial.y, spin.y, ease);
       ref.current!.rotation.z = MathUtils.lerp(initial.z, spin.z, ease);
-      ref.current!.position.y =
-        position[1] + Math.sin(progress * Math.PI) * rollLift;
+      ref.current!.position.y = position[1] + Math.sin(progress * Math.PI) * rollLift;
 
       if (progress < 1) {
         animationRef.current = requestAnimationFrame(animate);
@@ -689,16 +688,7 @@ function Die({
 
   return (
     <mesh ref={ref} position={position} castShadow>
-      <boxGeometry
-        args={[
-          size,
-          size,
-          size,
-          6,
-          6,
-          6
-        ]}
-      />
+      <boxGeometry args={[size, size, size, 6, 6, 6]} />
       {materials.map((material, index) => (
         <primitive key={index} object={material} attach={`material-${index}`} />
       ))}
@@ -737,14 +727,18 @@ export function DiceStage({
       ? diceSceneConfig.dice.compactZonePosition
       : diceSceneConfig.dice.zonePosition;
   const diceSize = isTinyViewport ? diceSceneConfig.dice.tinySize : diceSceneConfig.dice.size;
-  const rollLift = isTinyViewport ? diceSceneConfig.dice.tinyRollLift : diceSceneConfig.dice.rollLift;
+  const rollLift = isTinyViewport
+    ? diceSceneConfig.dice.tinyRollLift
+    : diceSceneConfig.dice.rollLift;
   const shouldFocusResult = focusResult && isMobileViewport && canFocusResult;
   const diceGroupScale = shouldFocusResult
     ? isTinyViewport
       ? diceSceneConfig.dice.tinyFocusScale
       : diceSceneConfig.dice.focusScale
     : 1;
-  const diceGroupPosition = shouldFocusResult ? diceSceneConfig.dice.focusPosition : ([0, 0, 0] as const);
+  const diceGroupPosition = shouldFocusResult
+    ? diceSceneConfig.dice.focusPosition
+    : ([0, 0, 0] as const);
 
   return (
     <div className="dice-stage" aria-label="3D-Würfelbereich">
