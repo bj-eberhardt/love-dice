@@ -10,6 +10,10 @@ würfelt ihr die Würfel und bekommt eine zufällige Kombination aus Aktion und 
 
 Wenn Euch die gewürfelte Kombination nicht gefällt, könnt ihr jederzeit neu würfeln.
 
+Live-Preview auf github: [https://bj-eberhardt.github.io/love-dice/](https://bj-eberhardt.github.io/love-dice/)
+
+Weitere Spiele von uns findet ihr auf [https://love-games.app](https://love-games.app).
+
 ## Features
 
 - alles wird lokal im eigenen Browser gespeichert, keine Registrierung, kein Tracking.
