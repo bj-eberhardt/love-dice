@@ -36,17 +36,24 @@ const diceSceneConfig = {
     actionPosition: [-1.62, 0.25, 0] as [number, number, number],
     zonePosition: [1.62, 0.25, 0] as [number, number, number],
     compactActionPosition: [-1.38, 0.25, 0] as [number, number, number],
+    tinyActionPosition: [-1.06, 0.2, 0] as [number, number, number],
     compactZonePosition: [1.38, 0.25, 0] as [number, number, number],
+    tinyZonePosition: [1.06, 0.2, 0] as [number, number, number],
     rollLift: 0.7,
+    tinySize: 1.46,
+    tinyRollLift: 0.5,
+    focusScale: 1.18,
+    tinyFocusScale: 1.08,
+    focusPosition: [0, 0.12, 0.38] as [number, number, number],
     material: {
       roughness: 0.52,
       metalness: 0.04
     }
   },
   face: {
-    backgroundStops: ["#303746", "#202839", "#171d2b"],
-    edgeStrokeOpacity: "d6",
-    innerStroke: "rgba(255, 255, 255, 0.12)",
+    backgroundStops: ["#435066", "#2d384d", "#20283a"],
+    edgeStrokeOpacity: "f0",
+    innerStroke: "rgba(255, 255, 255, 0.2)",
     maxLabelWidth: 438,
     maxLabelLines: 2,
     maxLabelFontSize: 92,
@@ -506,8 +513,8 @@ const drawFaceBackground = (ctx: CanvasRenderingContext2D, color: string) => {
   ctx.fillRect(0, 0, 512, 512);
 
   const focusGradient = ctx.createRadialGradient(222, 156, 24, 222, 156, 330);
-  focusGradient.addColorStop(0, `${color}26`);
-  focusGradient.addColorStop(0.46, "rgba(255, 255, 255, 0.035)");
+  focusGradient.addColorStop(0, `${color}38`);
+  focusGradient.addColorStop(0.46, "rgba(255, 255, 255, 0.07)");
   focusGradient.addColorStop(1, "rgba(8, 10, 16, 0)");
   ctx.fillStyle = focusGradient;
   ctx.fillRect(0, 0, 512, 512);
@@ -517,7 +524,7 @@ const drawFaceBackground = (ctx: CanvasRenderingContext2D, color: string) => {
   ctx.strokeStyle = `${color}${diceSceneConfig.face.edgeStrokeOpacity}`;
   ctx.lineWidth = 14;
   ctx.shadowColor = color;
-  ctx.shadowBlur = 10;
+  ctx.shadowBlur = 14;
   ctx.stroke();
   ctx.restore();
 
@@ -540,13 +547,13 @@ const makeTexture = (label: string, iconKey: IconKey, color: string) => {
 
   ctx.save();
   ctx.shadowColor = color;
-  ctx.shadowBlur = 6;
+  ctx.shadowBlur = 10;
   drawIcon(ctx, iconKey, color);
   ctx.restore();
 
   ctx.save();
-  ctx.shadowColor = "rgba(0, 0, 0, 0.45)";
-  ctx.shadowBlur = 2;
+  ctx.shadowColor = "rgba(0, 0, 0, 0.55)";
+  ctx.shadowBlur = 3;
   ctx.shadowOffsetY = 1;
   drawLabel(ctx, label, color);
   ctx.restore();
@@ -615,13 +622,17 @@ function Die({
   resultFace,
   color,
   position,
-  rollingKey
+  rollingKey,
+  size,
+  rollLift
 }: {
   faces: RollFace<DiceAction | Zone>[];
   resultFace?: RollFace<DiceAction | Zone>;
   color: string;
   position: [number, number, number];
   rollingKey: number;
+  size: number;
+  rollLift: number;
 }) {
   const ref = useRef<Mesh>(null);
   const animationRef = useRef<number | null>(null);
@@ -659,7 +670,7 @@ function Die({
       ref.current!.rotation.y = MathUtils.lerp(initial.y, spin.y, ease);
       ref.current!.rotation.z = MathUtils.lerp(initial.z, spin.z, ease);
       ref.current!.position.y =
-        position[1] + Math.sin(progress * Math.PI) * diceSceneConfig.dice.rollLift;
+        position[1] + Math.sin(progress * Math.PI) * rollLift;
 
       if (progress < 1) {
         animationRef.current = requestAnimationFrame(animate);
@@ -674,15 +685,15 @@ function Die({
     return () => {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
-  }, [position, resultFace, rollingKey]);
+  }, [position, resultFace, rollLift, rollingKey]);
 
   return (
     <mesh ref={ref} position={position} castShadow>
       <boxGeometry
         args={[
-          diceSceneConfig.dice.size,
-          diceSceneConfig.dice.size,
-          diceSceneConfig.dice.size,
+          size,
+          size,
+          size,
           6,
           6,
           6
@@ -700,55 +711,87 @@ export function DiceStage({
   zoneFaces,
   actionResult,
   zoneResult,
-  rollingKey
+  rollingKey,
+  focusResult = false
 }: {
   actionFaces: RollFace<DiceAction>[];
   zoneFaces: RollFace<Zone>[];
   actionResult?: RollFace<DiceAction>;
   zoneResult?: RollFace<Zone>;
   rollingKey: number;
+  focusResult?: boolean;
 }) {
   const tableTexture = useMemo(makeTableTexture, []);
+  const isTinyViewport = useMediaQuery("(max-width: 450px)");
+  const canFocusResult = useMediaQuery("(max-width: 449px)");
   const isNarrowViewport = useMediaQuery("(max-width: 420px)");
-  const actionPosition = isNarrowViewport
-    ? diceSceneConfig.dice.compactActionPosition
-    : diceSceneConfig.dice.actionPosition;
-  const zonePosition = isNarrowViewport
-    ? diceSceneConfig.dice.compactZonePosition
-    : diceSceneConfig.dice.zonePosition;
+  const isMobileViewport = useMediaQuery("(max-width: 860px)");
+  const actionPosition = isTinyViewport
+    ? diceSceneConfig.dice.tinyActionPosition
+    : isNarrowViewport
+      ? diceSceneConfig.dice.compactActionPosition
+      : diceSceneConfig.dice.actionPosition;
+  const zonePosition = isTinyViewport
+    ? diceSceneConfig.dice.tinyZonePosition
+    : isNarrowViewport
+      ? diceSceneConfig.dice.compactZonePosition
+      : diceSceneConfig.dice.zonePosition;
+  const diceSize = isTinyViewport ? diceSceneConfig.dice.tinySize : diceSceneConfig.dice.size;
+  const rollLift = isTinyViewport ? diceSceneConfig.dice.tinyRollLift : diceSceneConfig.dice.rollLift;
+  const shouldFocusResult = focusResult && isMobileViewport && canFocusResult;
+  const diceGroupScale = shouldFocusResult
+    ? isTinyViewport
+      ? diceSceneConfig.dice.tinyFocusScale
+      : diceSceneConfig.dice.focusScale
+    : 1;
+  const diceGroupPosition = shouldFocusResult ? diceSceneConfig.dice.focusPosition : ([0, 0, 0] as const);
 
   return (
     <div className="dice-stage" aria-label="3D-Würfelbereich">
       <Canvas shadows camera={diceSceneConfig.camera}>
         <Suspense fallback={null}>
-          <ambientLight intensity={0.66} />
-          <pointLight position={[-3.2, 1.6, 2.8]} color="#ff7bb7" intensity={0.42} />
-          <pointLight position={[3.2, 1.6, 2.8]} color="#66e0d1" intensity={0.38} />
+          <ambientLight intensity={isMobileViewport ? 0.92 : 0.74} />
+          <pointLight
+            position={[-3.2, 1.6, 2.8]}
+            color="#ff7bb7"
+            intensity={isMobileViewport ? 0.56 : 0.46}
+          />
+          <pointLight
+            position={[3.2, 1.6, 2.8]}
+            color="#66e0d1"
+            intensity={isMobileViewport ? 0.52 : 0.42}
+          />
           <spotLight
             position={[0, 6.4, 4.4]}
             angle={0.58}
             penumbra={0.92}
-            intensity={3.7}
+            intensity={isMobileViewport ? 4.5 : 3.9}
             castShadow
             shadow-mapSize-width={1024}
             shadow-mapSize-height={1024}
             shadow-bias={-0.0008}
             shadow-radius={6}
           />
-          <Die
-            faces={actionFaces}
-            resultFace={actionResult}
-            color="#ff7bb7"
-            position={actionPosition}
-            rollingKey={rollingKey}
-          />
-          <Die
-            faces={zoneFaces}
-            resultFace={zoneResult}
-            color="#66e0d1"
-            position={zonePosition}
-            rollingKey={rollingKey}
-          />
+          <group position={diceGroupPosition} scale={diceGroupScale}>
+            <Die
+              faces={actionFaces}
+              resultFace={actionResult}
+              color="#ff7bb7"
+              position={actionPosition}
+              rollingKey={rollingKey}
+              size={diceSize}
+              rollLift={rollLift}
+            />
+            <Die
+              faces={zoneFaces}
+              resultFace={zoneResult}
+              color="#66e0d1"
+              position={zonePosition}
+              rollingKey={rollingKey}
+              size={diceSize}
+              rollLift={rollLift}
+            />
+          </group>
           <group
             rotation={[-Math.PI / 2, 0, 0]}
             position={diceSceneConfig.table.position}
@@ -762,12 +805,17 @@ export function DiceStage({
                 roughness={0.86}
                 metalness={0.02}
                 transparent
-                opacity={0.82}
+                opacity={isMobileViewport ? 0.92 : 0.84}
               />
             </mesh>
             <mesh position={[0, 0, -0.012]}>
               <circleGeometry args={[diceSceneConfig.table.radius + 0.43, 96]} />
-              <meshBasicMaterial color="#090b12" transparent opacity={0.34} depthWrite={false} />
+              <meshBasicMaterial
+                color="#090b12"
+                transparent
+                opacity={isMobileViewport ? 0.2 : 0.32}
+                depthWrite={false}
+              />
             </mesh>
           </group>
         </Suspense>
