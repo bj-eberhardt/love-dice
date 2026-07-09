@@ -4,7 +4,7 @@ export function formatZodError(error: unknown): string {
   if (error instanceof ZodError) {
     const messages = new Set<string>();
 
-    error.errors.forEach((err) => {
+    error.issues.forEach((err) => {
       const path = err.path.join(" -> ");
 
       if (err.code === "custom") {

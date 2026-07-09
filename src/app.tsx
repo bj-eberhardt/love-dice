@@ -1,5 +1,5 @@
 import { builtInConfigurations, defaultConfiguration, type DiceConfiguration } from "@/shared";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ConfirmDialog } from "./components/ConfirmDialog";
 import { ConsentPage } from "@/components/ConsentPage";
 import { MixModal } from "./components/MixModal";
@@ -39,9 +39,11 @@ export function App() {
   const activeMood = activeMode.type === "builtin" ? activeMode.mood : "custom";
   const rollController = useRollController({ activeConfig, activeMood });
 
-  resetRollRef.current = rollController.resetRoll;
-  clearRollErrorRef.current = () => rollController.setError("");
-  scheduleScrollHintUpdateRef.current = modeScroll.scheduleScrollHintUpdate;
+  useEffect(() => {
+    resetRollRef.current = rollController.resetRoll;
+    clearRollErrorRef.current = () => rollController.setError("");
+    scheduleScrollHintUpdateRef.current = modeScroll.scheduleScrollHintUpdate;
+  }, [modeScroll.scheduleScrollHintUpdate, rollController]);
 
   if (!consent) {
     return <ConsentPage onConsentClick={() => setConsent(true)} />;

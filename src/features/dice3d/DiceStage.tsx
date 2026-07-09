@@ -711,7 +711,7 @@ export function DiceStage({
   rollingKey: number;
   focusResult?: boolean;
 }) {
-  const tableTexture = useMemo(makeTableTexture, []);
+  const tableTexture = useMemo(() => makeTableTexture(), []);
   const isTinyViewport = useMediaQuery("(max-width: 450px)");
   const canFocusResult = useMediaQuery("(max-width: 449px)");
   const isNarrowViewport = useMediaQuery("(max-width: 420px)");
