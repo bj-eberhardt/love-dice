@@ -120,3 +120,4 @@ docker compose up --build
 - `formatZodError` ist durch Unit-Tests abgedeckt: Custom-Issues, Pflichtfelder, sonstige Zod-Meldungen, mehrere/doppelte Fehler, leere ZodErrors, Error-Objekte und unbekannte Fehlerwerte.
 - `grammar.ts` ist durch Unit-Tests abgedeckt: Plural-Dativ-Ableitung, Whitespace-Normalisierung, explizite Dative, Fallbacks und immutables Auffüllen fehlender Dative.
 - `src/features/game/icons.tsx` nutzt differenziertere Lucide-Icons je IconKey, z. B. ShieldCheck für Zustimmung, AudioLines für Flüstern, WandSparkles für Wunsch und MapPin für überall.
+- npm-Dependencies aktualisiert: React/React-DOM 19.3.1, @types/react 19.3.0, @types/react-dom 19.3.0, @react-three/fiber 9.8.2, Vite 8.3.5, Vitest 4.1.12 und Zod 4.6.7. TypeScript 7 bleibt vorerst ausgeschlossen, weil typescript-eslint 8.65.0 nur TypeScript <6.1.0 unterstützt.
